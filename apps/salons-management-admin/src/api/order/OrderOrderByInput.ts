@@ -1,0 +1,33 @@
+import { SortOrder } from "../../util/SortOrder";
+
+export type OrderOrderByInput = {
+  amount?: SortOrder;
+  appointment_id?: SortOrder;
+  canceled?: SortOrder;
+  canceledReason?: SortOrder;
+  completed?: SortOrder;
+  completedAt?: SortOrder;
+  createdAt?: SortOrder;
+  depositAmount?: SortOrder;
+  discount?: SortOrder;
+  discountAmount?: SortOrder;
+  discount_id?: SortOrder;
+  id?: SortOrder;
+  loyaltyPointsEarned?: SortOrder;
+  loyaltyPointsUsed?: SortOrder;
+  orderImageId?: SortOrder;
+  orderNumber?: SortOrder;
+  order_type?: SortOrder;
+  payment_id?: SortOrder;
+  promocode_id?: SortOrder;
+  queue_id?: SortOrder;
+  salon_id?: SortOrder;
+  services?: SortOrder;
+  started?: SortOrder;
+  startedAt?: SortOrder;
+  status?: SortOrder;
+  totalAmount?: SortOrder;
+  updatedAt?: SortOrder;
+  employee_id?: SortOrder;
+  user_id?: SortOrder;
+};

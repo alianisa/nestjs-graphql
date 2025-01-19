@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+                 package userNotificationSetting;
+service UserNotificationSettingService {
+ rpc createUserNotificationSetting (UserNotificationSettingCreateInput) returns (UserNotificationSetting) {}
+rpc userNotificationSettings (findManyParams) returns (stream UserNotificationSetting) {}
+rpc userNotificationSetting (UserNotificationSettingWhereUniqueInput) returns (UserNotificationSetting) {}
+rpc updateUserNotificationSetting (UserNotificationSettingUpdateInput) returns (UserNotificationSetting) {}
+rpc deleteUserNotificationSetting (UserNotificationSettingWhereUniqueInput) returns (UserNotificationSetting) {} 
+ }
+message UserNotificationSettingCreateInput {
+bool appointmentReminders = 1;
+string createdAt = 2;
+bool emailEnabled = 3;
+string id = 4;
+bool promotionalNotifications = 5;
+bool pushEnabled = 6;
+bool smsEnabled = 7;
+bool statusUpdates = 8;
+string updatedAt = 9;
+};
+message UserNotificationSetting {
+bool appointmentReminders = 1;
+string createdAt = 2;
+bool emailEnabled = 3;
+string id = 4;
+bool promotionalNotifications = 5;
+bool pushEnabled = 6;
+bool smsEnabled = 7;
+bool statusUpdates = 8;
+string updatedAt = 9;
+};
+message UserNotificationSettingWhereUniqueInput {
+bool appointmentReminders = 1;
+string createdAt = 2;
+bool emailEnabled = 3;
+string id = 4;
+bool promotionalNotifications = 5;
+bool pushEnabled = 6;
+bool smsEnabled = 7;
+bool statusUpdates = 8;
+string updatedAt = 9;
+};
+message UserNotificationSettingUpdateInput {
+bool appointmentReminders = 1;
+string createdAt = 2;
+bool emailEnabled = 3;
+string id = 4;
+bool promotionalNotifications = 5;
+bool pushEnabled = 6;
+bool smsEnabled = 7;
+bool statusUpdates = 8;
+string updatedAt = 9;
+};
+message findManyParams {
+
+};

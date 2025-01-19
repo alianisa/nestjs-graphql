@@ -1,0 +1,32 @@
+import { SortOrder } from "../../util/SortOrder";
+
+export type UserProfileOrderByInput = {
+  avatarUrl?: SortOrder;
+  bio?: SortOrder;
+  createdAt?: SortOrder;
+  dateOfBirth?: SortOrder;
+  deletedAt?: SortOrder;
+  email?: SortOrder;
+  employeeDismissalAt?: SortOrder;
+  employeeEmploymentAt?: SortOrder;
+  firstName?: SortOrder;
+  fullName?: SortOrder;
+  fullRegistered?: SortOrder;
+  hiredDate?: SortOrder;
+  id?: SortOrder;
+  isAdmin?: SortOrder;
+  isBarber?: SortOrder;
+  isEmployee?: SortOrder;
+  jobTitle?: SortOrder;
+  lastName?: SortOrder;
+  location?: SortOrder;
+  loyaltyPoints?: SortOrder;
+  phone?: SortOrder;
+  roles?: SortOrder;
+  salon_id?: SortOrder;
+  updatedAt?: SortOrder;
+  gender?: SortOrder;
+  userNotificationSettingsId?: SortOrder;
+  username?: SortOrder;
+  website?: SortOrder;
+};

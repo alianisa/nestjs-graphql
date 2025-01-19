@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+                 package salonRating;
+service SalonRatingService {
+ rpc createSalonRating (SalonRatingCreateInput) returns (SalonRating) {}
+rpc salonRatings (findManyParams) returns (stream SalonRating) {}
+rpc salonRating (SalonRatingWhereUniqueInput) returns (SalonRating) {}
+rpc updateSalonRating (SalonRatingUpdateInput) returns (SalonRating) {}
+rpc deleteSalonRating (SalonRatingWhereUniqueInput) returns (SalonRating) {}
+rpc findManySalonRatings (SalonRatingWhereUniqueInput) returns (stream SalonRatingLike) {}
+rpc updateSalonRatings (SalonRatingLikeParams) returns (stream SalonRatingLike) {}
+rpc connectSalonRatings (SalonRatingLikeParams) returns (SalonRatingLike) {}
+rpc disconnectSalonRatings (SalonRatingLikeParams) returns (SalonRatingLike) {} 
+ }
+message SalonRatingCreateInput {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+repeated SalonRatingLike salonRatingLikes = 5;
+};
+message SalonRating {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+repeated SalonRatingLike salonRatingLikes = 5;
+};
+message SalonRatingWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+repeated SalonRatingLike salonRatingLikes = 5;
+};
+message SalonRatingUpdateInput {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+repeated SalonRatingLike salonRatingLikes = 5;
+};
+message findManyParams {
+
+};
+message SalonRatingLike {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message SalonRatingLikeWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message SalonRatingLikeParams {
+SalonRatingWhereUniqueInput salonRatingWhereUniqueInput = 1;
+SalonRatingLikeWhereUniqueInput salonratinglikeWhereUniqueInput = 2;
+};

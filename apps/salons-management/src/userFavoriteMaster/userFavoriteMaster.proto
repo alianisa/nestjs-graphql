@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+                 package userFavoriteMaster;
+service UserFavoriteMasterService {
+ rpc createUserFavoriteMaster (UserFavoriteMasterCreateInput) returns (UserFavoriteMaster) {}
+rpc userFavoriteMasters (findManyParams) returns (stream UserFavoriteMaster) {}
+rpc userFavoriteMaster (UserFavoriteMasterWhereUniqueInput) returns (UserFavoriteMaster) {}
+rpc updateUserFavoriteMaster (UserFavoriteMasterUpdateInput) returns (UserFavoriteMaster) {}
+rpc deleteUserFavoriteMaster (UserFavoriteMasterWhereUniqueInput) returns (UserFavoriteMaster) {} 
+ }
+message UserFavoriteMasterCreateInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteMaster {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteMasterWhereUniqueInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteMasterUpdateInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message findManyParams {
+
+};

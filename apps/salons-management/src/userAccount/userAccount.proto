@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+                 package userAccount;
+service UserAccountService {
+ rpc createUserAccount (UserAccountCreateInput) returns (UserAccount) {}
+rpc userAccounts (findManyParams) returns (stream UserAccount) {}
+rpc userAccount (UserAccountWhereUniqueInput) returns (UserAccount) {}
+rpc updateUserAccount (UserAccountUpdateInput) returns (UserAccount) {}
+rpc deleteUserAccount (UserAccountWhereUniqueInput) returns (UserAccount) {} 
+ }
+message UserAccountCreateInput {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message UserAccount {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message UserAccountWhereUniqueInput {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message UserAccountUpdateInput {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message findManyParams {
+
+};

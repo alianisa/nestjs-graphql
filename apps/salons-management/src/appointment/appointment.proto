@@ -1,0 +1,129 @@
+syntax = "proto3";
+
+                 package appointment;
+service AppointmentService {
+ rpc createAppointment (AppointmentCreateInput) returns (Appointment) {}
+rpc appointments (findManyParams) returns (stream Appointment) {}
+rpc appointment (AppointmentWhereUniqueInput) returns (Appointment) {}
+rpc updateAppointment (AppointmentUpdateInput) returns (Appointment) {}
+rpc deleteAppointment (AppointmentWhereUniqueInput) returns (Appointment) {}
+rpc findManyAppointments (AppointmentWhereUniqueInput) returns (stream EmployeeTask) {}
+rpc updateAppointments (EmployeeTaskParams) returns (stream EmployeeTask) {}
+rpc connectAppointments (EmployeeTaskParams) returns (EmployeeTask) {}
+rpc disconnectAppointments (EmployeeTaskParams) returns (EmployeeTask) {}
+rpc findManyAppointmentsOrdersAppointmentIdToappointments (AppointmentWhereUniqueInput) returns (stream Order) {}
+rpc updateAppointmentsOrdersAppointmentIdToappointments (OrderParams) returns (stream Order) {}
+rpc connectAppointmentsOrdersAppointmentIdToappointments (OrderParams) returns (Order) {}
+rpc disconnectAppointmentsOrdersAppointmentIdToappointments (OrderParams) returns (Order) {} 
+ }
+message AppointmentCreateInput {
+string appointmentDate = 1;
+string employeeId = 2;
+repeated EmployeeTask employeeTasks = 3;
+string id = 4;
+repeated Order ordersOrdersAppointmentIdToappointments = 5;
+};
+message Appointment {
+string appointmentDate = 1;
+string employeeId = 2;
+repeated EmployeeTask employeeTasks = 3;
+string id = 4;
+repeated Order ordersOrdersAppointmentIdToappointments = 5;
+};
+message AppointmentWhereUniqueInput {
+string appointmentDate = 1;
+string employeeId = 2;
+repeated EmployeeTask employeeTasks = 3;
+string id = 4;
+repeated Order ordersOrdersAppointmentIdToappointments = 5;
+};
+message AppointmentUpdateInput {
+string appointmentDate = 1;
+string employeeId = 2;
+repeated EmployeeTask employeeTasks = 3;
+string id = 4;
+repeated Order ordersOrdersAppointmentIdToappointments = 5;
+};
+message findManyParams {
+
+};
+message EmployeeTask {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message EmployeeTaskWhereUniqueInput {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message EmployeeTaskParams {
+AppointmentWhereUniqueInput appointmentWhereUniqueInput = 1;
+EmployeeTaskWhereUniqueInput employeetaskWhereUniqueInput = 2;
+};
+message Order {
+int32 amount = 1;
+bool canceled = 2;
+string canceledReason = 3;
+bool completed = 4;
+string completedAt = 5;
+string createdAt = 6;
+int32 depositAmount = 7;
+int32 discount = 8;
+int32 discountAmount = 9;
+string id = 10;
+int32 loyaltyPointsEarned = 11;
+int32 loyaltyPointsUsed = 12;
+string orderImageId = 13;
+string orderNumber = 14;
+repeated string order_type = 15;
+string services = 16;
+bool started = 17;
+string startedAt = 18;
+repeated string status = 19;
+int32 totalAmount = 20;
+string updatedAt = 21;
+};
+message OrderWhereUniqueInput {
+int32 amount = 1;
+bool canceled = 2;
+string canceledReason = 3;
+bool completed = 4;
+string completedAt = 5;
+string createdAt = 6;
+int32 depositAmount = 7;
+int32 discount = 8;
+int32 discountAmount = 9;
+string id = 10;
+int32 loyaltyPointsEarned = 11;
+int32 loyaltyPointsUsed = 12;
+string orderImageId = 13;
+string orderNumber = 14;
+repeated string order_type = 15;
+string services = 16;
+bool started = 17;
+string startedAt = 18;
+repeated string status = 19;
+int32 totalAmount = 20;
+string updatedAt = 21;
+};
+message OrderParams {
+AppointmentWhereUniqueInput appointmentWhereUniqueInput = 1;
+OrderWhereUniqueInput orderWhereUniqueInput = 2;
+};

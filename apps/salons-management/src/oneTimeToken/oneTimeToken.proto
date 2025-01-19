@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+                 package oneTimeToken;
+service OneTimeTokenService {
+ rpc createOneTimeToken (OneTimeTokenCreateInput) returns (OneTimeToken) {}
+rpc oneTimeTokens (findManyParams) returns (stream OneTimeToken) {}
+rpc oneTimeToken (OneTimeTokenWhereUniqueInput) returns (OneTimeToken) {}
+rpc updateOneTimeToken (OneTimeTokenUpdateInput) returns (OneTimeToken) {}
+rpc deleteOneTimeToken (OneTimeTokenWhereUniqueInput) returns (OneTimeToken) {} 
+ }
+message OneTimeTokenCreateInput {
+string createdAt = 1;
+string id = 2;
+string relatesTo = 3;
+string tokenHash = 4;
+repeated string token_type = 5;
+string updatedAt = 6;
+};
+message OneTimeToken {
+string createdAt = 1;
+string id = 2;
+string relatesTo = 3;
+string tokenHash = 4;
+repeated string token_type = 5;
+string updatedAt = 6;
+};
+message OneTimeTokenWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+string relatesTo = 3;
+string tokenHash = 4;
+repeated string token_type = 5;
+string updatedAt = 6;
+};
+message OneTimeTokenUpdateInput {
+string createdAt = 1;
+string id = 2;
+string relatesTo = 3;
+string tokenHash = 4;
+repeated string token_type = 5;
+string updatedAt = 6;
+};
+message findManyParams {
+
+};

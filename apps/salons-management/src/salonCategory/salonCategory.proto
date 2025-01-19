@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+                 package salonCategory;
+service SalonCategoryService {
+ rpc createSalonCategory (SalonCategoryCreateInput) returns (SalonCategory) {}
+rpc salonCategories (findManyParams) returns (stream SalonCategory) {}
+rpc salonCategory (SalonCategoryWhereUniqueInput) returns (SalonCategory) {}
+rpc updateSalonCategory (SalonCategoryUpdateInput) returns (SalonCategory) {}
+rpc deleteSalonCategory (SalonCategoryWhereUniqueInput) returns (SalonCategory) {} 
+ }
+message SalonCategoryCreateInput {
+string id = 1;
+string name = 2;
+};
+message SalonCategory {
+string id = 1;
+string name = 2;
+};
+message SalonCategoryWhereUniqueInput {
+string id = 1;
+string name = 2;
+};
+message SalonCategoryUpdateInput {
+string id = 1;
+string name = 2;
+};
+message findManyParams {
+
+};

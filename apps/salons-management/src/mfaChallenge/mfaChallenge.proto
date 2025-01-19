@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+                 package mfaChallenge;
+service MfaChallengeService {
+ rpc createMfaChallenge (MfaChallengeCreateInput) returns (MfaChallenge) {}
+rpc mfaChallenges (findManyParams) returns (stream MfaChallenge) {}
+rpc mfaChallenge (MfaChallengeWhereUniqueInput) returns (MfaChallenge) {}
+rpc updateMfaChallenge (MfaChallengeUpdateInput) returns (MfaChallenge) {}
+rpc deleteMfaChallenge (MfaChallengeWhereUniqueInput) returns (MfaChallenge) {} 
+ }
+message MfaChallengeCreateInput {
+string createdAt = 1;
+string id = 2;
+string ipAddress = 3;
+string otpCode = 4;
+string verifiedAt = 5;
+string webAuthnSessionData = 6;
+};
+message MfaChallenge {
+string createdAt = 1;
+string id = 2;
+string ipAddress = 3;
+string otpCode = 4;
+string verifiedAt = 5;
+string webAuthnSessionData = 6;
+};
+message MfaChallengeWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+string ipAddress = 3;
+string otpCode = 4;
+string verifiedAt = 5;
+string webAuthnSessionData = 6;
+};
+message MfaChallengeUpdateInput {
+string createdAt = 1;
+string id = 2;
+string ipAddress = 3;
+string otpCode = 4;
+string verifiedAt = 5;
+string webAuthnSessionData = 6;
+};
+message findManyParams {
+
+};

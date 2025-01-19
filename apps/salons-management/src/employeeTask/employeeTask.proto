@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+                 package employeeTask;
+service EmployeeTaskService {
+ rpc createEmployeeTask (EmployeeTaskCreateInput) returns (EmployeeTask) {}
+rpc employeeTasks (findManyParams) returns (stream EmployeeTask) {}
+rpc employeeTask (EmployeeTaskWhereUniqueInput) returns (EmployeeTask) {}
+rpc updateEmployeeTask (EmployeeTaskUpdateInput) returns (EmployeeTask) {}
+rpc deleteEmployeeTask (EmployeeTaskWhereUniqueInput) returns (EmployeeTask) {} 
+ }
+message EmployeeTaskCreateInput {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message EmployeeTask {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message EmployeeTaskWhereUniqueInput {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message EmployeeTaskUpdateInput {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message findManyParams {
+
+};
