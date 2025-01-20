@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { User } from "./User";
 import { UserCountArgs } from "./UserCountArgs";
 import { UserFindManyArgs } from "./UserFindManyArgs";
@@ -20,19 +26,22 @@ import { UserFindUniqueArgs } from "./UserFindUniqueArgs";
 import { CreateUserArgs } from "./CreateUserArgs";
 import { UpdateUserArgs } from "./UpdateUserArgs";
 import { DeleteUserArgs } from "./DeleteUserArgs";
-import { IdentityFindManyArgs } from "../../identity/base/IdentityFindManyArgs";
-import { Identity } from "../../identity/base/Identity";
-import { MfaFactorFindManyArgs } from "../../mfaFactor/base/MfaFactorFindManyArgs";
-import { MfaFactor } from "../../mfaFactor/base/MfaFactor";
-import { OneTimeTokenFindManyArgs } from "../../oneTimeToken/base/OneTimeTokenFindManyArgs";
-import { OneTimeToken } from "../../oneTimeToken/base/OneTimeToken";
-import { SessionFindManyArgs } from "../../session/base/SessionFindManyArgs";
-import { Session } from "../../session/base/Session";
+import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserService } from "../user.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => User)
 export class UserResolverBase {
-  constructor(protected readonly service: UserService) {}
+  constructor(
+    protected readonly service: UserService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "read",
+    possession: "any",
+  })
   async _usersMeta(
     @graphql.Args() args: UserCountArgs
   ): Promise<MetaQueryPayload> {
@@ -42,12 +51,24 @@ export class UserResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [User])
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "read",
+    possession: "any",
+  })
   async users(@graphql.Args() args: UserFindManyArgs): Promise<User[]> {
     return this.service.users(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => User, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "read",
+    possession: "own",
+  })
   async user(@graphql.Args() args: UserFindUniqueArgs): Promise<User | null> {
     const result = await this.service.user(args);
     if (result === null) {
@@ -56,20 +77,48 @@ export class UserResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => User)
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "create",
+    possession: "any",
+  })
   async createUser(@graphql.Args() args: CreateUserArgs): Promise<User> {
     return await this.service.createUser({
       ...args,
-      data: args.data,
+      data: {
+        ...args.data,
+
+        userProfiles: args.data.userProfiles
+          ? {
+              connect: args.data.userProfiles,
+            }
+          : undefined,
+      },
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => User)
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "update",
+    possession: "any",
+  })
   async updateUser(@graphql.Args() args: UpdateUserArgs): Promise<User | null> {
     try {
       return await this.service.updateUser({
         ...args,
-        data: args.data,
+        data: {
+          ...args.data,
+
+          userProfiles: args.data.userProfiles
+            ? {
+                connect: args.data.userProfiles,
+              }
+            : undefined,
+        },
       });
     } catch (error) {
       if (isRecordNotFoundError(error)) {
@@ -82,6 +131,11 @@ export class UserResolverBase {
   }
 
   @graphql.Mutation(() => User)
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUser(@graphql.Args() args: DeleteUserArgs): Promise<User | null> {
     try {
       return await this.service.deleteUser(args);
@@ -95,59 +149,24 @@ export class UserResolverBase {
     }
   }
 
-  @graphql.ResolveField(() => [Identity], { name: "identities" })
-  async findIdentities(
-    @graphql.Parent() parent: User,
-    @graphql.Args() args: IdentityFindManyArgs
-  ): Promise<Identity[]> {
-    const results = await this.service.findIdentities(parent.id, args);
+  @common.UseInterceptors(AclFilterResponseInterceptor)
+  @graphql.ResolveField(() => UserProfile, {
+    nullable: true,
+    name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
+  })
+  async getUserProfiles(
+    @graphql.Parent() parent: User
+  ): Promise<UserProfile | null> {
+    const result = await this.service.getUserProfiles(parent.id);
 
-    if (!results) {
-      return [];
+    if (!result) {
+      return null;
     }
-
-    return results;
-  }
-
-  @graphql.ResolveField(() => [MfaFactor], { name: "mfaFactors" })
-  async findMfaFactors(
-    @graphql.Parent() parent: User,
-    @graphql.Args() args: MfaFactorFindManyArgs
-  ): Promise<MfaFactor[]> {
-    const results = await this.service.findMfaFactors(parent.id, args);
-
-    if (!results) {
-      return [];
-    }
-
-    return results;
-  }
-
-  @graphql.ResolveField(() => [OneTimeToken], { name: "oneTimeTokens" })
-  async findOneTimeTokens(
-    @graphql.Parent() parent: User,
-    @graphql.Args() args: OneTimeTokenFindManyArgs
-  ): Promise<OneTimeToken[]> {
-    const results = await this.service.findOneTimeTokens(parent.id, args);
-
-    if (!results) {
-      return [];
-    }
-
-    return results;
-  }
-
-  @graphql.ResolveField(() => [Session], { name: "sessions" })
-  async findSessions(
-    @graphql.Parent() parent: User,
-    @graphql.Args() args: SessionFindManyArgs
-  ): Promise<Session[]> {
-    const results = await this.service.findSessions(parent.id, args);
-
-    if (!results) {
-      return [];
-    }
-
-    return results;
+    return result;
   }
 }

@@ -1,4 +1,5 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
+import { AuthModule } from "../auth/auth.module";
 import { MobilePaymentProviderModuleBase } from "./base/mobilePaymentProvider.module.base";
 import { MobilePaymentProviderService } from "./mobilePaymentProvider.service";
 import { MobilePaymentProviderController } from "./mobilePaymentProvider.controller";
@@ -6,7 +7,7 @@ import { MobilePaymentProviderGrpcController } from "./mobilePaymentProvider.grp
 import { MobilePaymentProviderResolver } from "./mobilePaymentProvider.resolver";
 
 @Module({
-  imports: [MobilePaymentProviderModuleBase],
+  imports: [MobilePaymentProviderModuleBase, forwardRef(() => AuthModule)],
   controllers: [
     MobilePaymentProviderController,
     MobilePaymentProviderGrpcController,

@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { LoyaltyTransaction } from "./LoyaltyTransaction";
 import { LoyaltyTransactionCountArgs } from "./LoyaltyTransactionCountArgs";
 import { LoyaltyTransactionFindManyArgs } from "./LoyaltyTransactionFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteLoyaltyTransactionArgs } from "./DeleteLoyaltyTransactionArgs";
 import { Order } from "../../order/base/Order";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { LoyaltyTransactionService } from "../loyaltyTransaction.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => LoyaltyTransaction)
 export class LoyaltyTransactionResolverBase {
-  constructor(protected readonly service: LoyaltyTransactionService) {}
+  constructor(
+    protected readonly service: LoyaltyTransactionService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "any",
+  })
   async _loyaltyTransactionsMeta(
     @graphql.Args() args: LoyaltyTransactionCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class LoyaltyTransactionResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [LoyaltyTransaction])
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "any",
+  })
   async loyaltyTransactions(
     @graphql.Args() args: LoyaltyTransactionFindManyArgs
   ): Promise<LoyaltyTransaction[]> {
     return this.service.loyaltyTransactions(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => LoyaltyTransaction, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "own",
+  })
   async loyaltyTransaction(
     @graphql.Args() args: LoyaltyTransactionFindUniqueArgs
   ): Promise<LoyaltyTransaction | null> {
@@ -54,7 +82,13 @@ export class LoyaltyTransactionResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => LoyaltyTransaction)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "create",
+    possession: "any",
+  })
   async createLoyaltyTransaction(
     @graphql.Args() args: CreateLoyaltyTransactionArgs
   ): Promise<LoyaltyTransaction> {
@@ -78,7 +112,13 @@ export class LoyaltyTransactionResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => LoyaltyTransaction)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "update",
+    possession: "any",
+  })
   async updateLoyaltyTransaction(
     @graphql.Args() args: UpdateLoyaltyTransactionArgs
   ): Promise<LoyaltyTransaction | null> {
@@ -112,6 +152,11 @@ export class LoyaltyTransactionResolverBase {
   }
 
   @graphql.Mutation(() => LoyaltyTransaction)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "delete",
+    possession: "any",
+  })
   async deleteLoyaltyTransaction(
     @graphql.Args() args: DeleteLoyaltyTransactionArgs
   ): Promise<LoyaltyTransaction | null> {
@@ -127,9 +172,15 @@ export class LoyaltyTransactionResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Order, {
     nullable: true,
     name: "orders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async getOrders(
     @graphql.Parent() parent: LoyaltyTransaction
@@ -142,9 +193,15 @@ export class LoyaltyTransactionResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: LoyaltyTransaction

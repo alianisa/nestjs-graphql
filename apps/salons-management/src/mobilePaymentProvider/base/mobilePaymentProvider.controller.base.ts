@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { MobilePaymentProviderService } from "../mobilePaymentProvider.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { MobilePaymentProviderCreateInput } from "./MobilePaymentProviderCreateInput";
 import { MobilePaymentProvider } from "./MobilePaymentProvider";
 import { MobilePaymentProviderFindManyArgs } from "./MobilePaymentProviderFindManyArgs";
@@ -26,10 +30,24 @@ import { PaymentFindManyArgs } from "../../payment/base/PaymentFindManyArgs";
 import { Payment } from "../../payment/base/Payment";
 import { PaymentWhereUniqueInput } from "../../payment/base/PaymentWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class MobilePaymentProviderControllerBase {
-  constructor(protected readonly service: MobilePaymentProviderService) {}
+  constructor(
+    protected readonly service: MobilePaymentProviderService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: MobilePaymentProvider })
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createMobilePaymentProvider(
     @common.Body() data: MobilePaymentProviderCreateInput
   ): Promise<MobilePaymentProvider> {
@@ -47,9 +65,18 @@ export class MobilePaymentProviderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [MobilePaymentProvider] })
   @ApiNestedQuery(MobilePaymentProviderFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async mobilePaymentProviders(
     @common.Req() request: Request
   ): Promise<MobilePaymentProvider[]> {
@@ -68,9 +95,18 @@ export class MobilePaymentProviderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: MobilePaymentProvider })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async mobilePaymentProvider(
     @common.Param() params: MobilePaymentProviderWhereUniqueInput
   ): Promise<MobilePaymentProvider | null> {
@@ -94,9 +130,18 @@ export class MobilePaymentProviderControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: MobilePaymentProvider })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateMobilePaymentProvider(
     @common.Param() params: MobilePaymentProviderWhereUniqueInput,
     @common.Body() data: MobilePaymentProviderUpdateInput
@@ -128,6 +173,14 @@ export class MobilePaymentProviderControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: MobilePaymentProvider })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteMobilePaymentProvider(
     @common.Param() params: MobilePaymentProviderWhereUniqueInput
   ): Promise<MobilePaymentProvider | null> {
@@ -154,8 +207,14 @@ export class MobilePaymentProviderControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/payments")
   @ApiNestedQuery(PaymentFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "read",
+    possession: "any",
+  })
   async findPayments(
     @common.Req() request: Request,
     @common.Param() params: MobilePaymentProviderWhereUniqueInput
@@ -197,6 +256,11 @@ export class MobilePaymentProviderControllerBase {
   }
 
   @common.Post("/:id/payments")
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "update",
+    possession: "any",
+  })
   async connectPayments(
     @common.Param() params: MobilePaymentProviderWhereUniqueInput,
     @common.Body() body: PaymentWhereUniqueInput[]
@@ -214,6 +278,11 @@ export class MobilePaymentProviderControllerBase {
   }
 
   @common.Patch("/:id/payments")
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "update",
+    possession: "any",
+  })
   async updatePayments(
     @common.Param() params: MobilePaymentProviderWhereUniqueInput,
     @common.Body() body: PaymentWhereUniqueInput[]
@@ -231,6 +300,11 @@ export class MobilePaymentProviderControllerBase {
   }
 
   @common.Delete("/:id/payments")
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "update",
+    possession: "any",
+  })
   async disconnectPayments(
     @common.Param() params: MobilePaymentProviderWhereUniqueInput,
     @common.Body() body: PaymentWhereUniqueInput[]

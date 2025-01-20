@@ -1880,7 +1880,6 @@ export class SalonGrpcControllerBase {
             location: true,
             loyaltyPoints: true,
             phone: true,
-            roles: true,
 
             salonsUserProfilesSalonIdTosalons: {
               select: {
@@ -1889,6 +1888,12 @@ export class SalonGrpcControllerBase {
             },
 
             updatedAt: true,
+
+            user: {
+              select: {
+                id: true,
+              },
+            },
 
             userGenders: {
               select: {
@@ -1902,7 +1907,6 @@ export class SalonGrpcControllerBase {
               },
             },
 
-            username: true,
             website: true,
           },
         }

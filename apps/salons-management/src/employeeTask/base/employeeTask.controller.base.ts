@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { EmployeeTaskService } from "../employeeTask.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { EmployeeTaskCreateInput } from "./EmployeeTaskCreateInput";
 import { EmployeeTask } from "./EmployeeTask";
 import { EmployeeTaskFindManyArgs } from "./EmployeeTaskFindManyArgs";
 import { EmployeeTaskWhereUniqueInput } from "./EmployeeTaskWhereUniqueInput";
 import { EmployeeTaskUpdateInput } from "./EmployeeTaskUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class EmployeeTaskControllerBase {
-  constructor(protected readonly service: EmployeeTaskService) {}
+  constructor(
+    protected readonly service: EmployeeTaskService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: EmployeeTask })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createEmployeeTask(
     @common.Body() data: EmployeeTaskCreateInput
   ): Promise<EmployeeTask> {
@@ -106,9 +124,18 @@ export class EmployeeTaskControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [EmployeeTask] })
   @ApiNestedQuery(EmployeeTaskFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeTasks(@common.Req() request: Request): Promise<EmployeeTask[]> {
     const args = plainToClass(EmployeeTaskFindManyArgs, request.query);
     return this.service.employeeTasks({
@@ -161,9 +188,18 @@ export class EmployeeTaskControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: EmployeeTask })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeTask(
     @common.Param() params: EmployeeTaskWhereUniqueInput
   ): Promise<EmployeeTask | null> {
@@ -223,9 +259,18 @@ export class EmployeeTaskControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: EmployeeTask })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateEmployeeTask(
     @common.Param() params: EmployeeTaskWhereUniqueInput,
     @common.Body() data: EmployeeTaskUpdateInput
@@ -319,6 +364,14 @@ export class EmployeeTaskControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: EmployeeTask })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteEmployeeTask(
     @common.Param() params: EmployeeTaskWhereUniqueInput
   ): Promise<EmployeeTask | null> {

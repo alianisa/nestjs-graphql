@@ -10,16 +10,11 @@ https://docs.amplication.com/how-to/custom-code
 ------------------------------------------------------------------------------
   */
 import { PrismaService } from "../../prisma/prisma.service";
-
 import {
   Prisma,
   User as PrismaUser,
-  Identity as PrismaIdentity,
-  MfaFactor as PrismaMfaFactor,
-  OneTimeToken as PrismaOneTimeToken,
-  Session as PrismaSession,
+  UserProfile as PrismaUserProfile,
 } from "@prisma/client";
-
 import { PasswordService } from "../../auth/password.service";
 import { transformStringFieldUpdateInput } from "../../prisma.util";
 
@@ -69,47 +64,11 @@ export class UserServiceBase {
     return this.prisma.user.delete(args);
   }
 
-  async findIdentities(
-    parentId: string,
-    args: Prisma.IdentityFindManyArgs
-  ): Promise<PrismaIdentity[]> {
+  async getUserProfiles(parentId: string): Promise<PrismaUserProfile | null> {
     return this.prisma.user
-      .findUniqueOrThrow({
+      .findUnique({
         where: { id: parentId },
       })
-      .identities(args);
-  }
-
-  async findMfaFactors(
-    parentId: string,
-    args: Prisma.MfaFactorFindManyArgs
-  ): Promise<PrismaMfaFactor[]> {
-    return this.prisma.user
-      .findUniqueOrThrow({
-        where: { id: parentId },
-      })
-      .mfaFactors(args);
-  }
-
-  async findOneTimeTokens(
-    parentId: string,
-    args: Prisma.OneTimeTokenFindManyArgs
-  ): Promise<PrismaOneTimeToken[]> {
-    return this.prisma.user
-      .findUniqueOrThrow({
-        where: { id: parentId },
-      })
-      .oneTimeTokens(args);
-  }
-
-  async findSessions(
-    parentId: string,
-    args: Prisma.SessionFindManyArgs
-  ): Promise<PrismaSession[]> {
-    return this.prisma.user
-      .findUniqueOrThrow({
-        where: { id: parentId },
-      })
-      .sessions(args);
+      .userProfiles();
   }
 }

@@ -23,6 +23,7 @@ import { DISCOUNT_TITLE_FIELD } from "../discount/DiscountTitle";
 import { PAYMENT_TITLE_FIELD } from "../payment/PaymentTitle";
 import { PROMOCODE_TITLE_FIELD } from "../promocode/PromocodeTitle";
 import { SALONRATING_TITLE_FIELD } from "../salonRating/SalonRatingTitle";
+import { USER_TITLE_FIELD } from "../user/UserTitle";
 import { USERGENDER_TITLE_FIELD } from "../userGender/UserGenderTitle";
 import { USERNOTIFICATIONSETTING_TITLE_FIELD } from "../userNotificationSetting/UserNotificationSettingTitle";
 
@@ -54,7 +55,6 @@ export const UserProfileShow = (props: ShowProps): React.ReactElement => {
         <TextField label="Location" source="location" />
         <TextField label="Loyalty Points" source="loyaltyPoints" />
         <TextField label="Phone" source="phone" />
-        <TextField label="Roles" source="roles" />
         <ReferenceField
           label="Salons User Profiles Salon Id Tosalons"
           source="salon.id"
@@ -63,6 +63,9 @@ export const UserProfileShow = (props: ShowProps): React.ReactElement => {
           <TextField source={SALON_TITLE_FIELD} />
         </ReferenceField>
         <TextField label="Updated At" source="updatedAt" />
+        <ReferenceField label="User" source="user.id" reference="User">
+          <TextField source={USER_TITLE_FIELD} />
+        </ReferenceField>
         <ReferenceField
           label="User Genders"
           source="usergender.id"
@@ -77,7 +80,6 @@ export const UserProfileShow = (props: ShowProps): React.ReactElement => {
         >
           <TextField source={USERNOTIFICATIONSETTING_TITLE_FIELD} />
         </ReferenceField>
-        <TextField label="Username" source="username" />
         <TextField label="Website" source="website" />
         <ReferenceManyField
           reference="Appointment"

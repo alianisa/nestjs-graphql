@@ -39,6 +39,7 @@ import {
   UserFavoriteMaster as PrismaUserFavoriteMaster,
   UserFavoriteSalon as PrismaUserFavoriteSalon,
   UserRating as PrismaUserRating,
+  User as PrismaUser,
   UserGender as PrismaUserGender,
   UserNotificationSetting as PrismaUserNotificationSetting,
 } from "@prisma/client";
@@ -460,6 +461,14 @@ export class UserProfileServiceBase {
         where: { id: parentId },
       })
       .salonsUserProfilesSalonIdTosalons();
+  }
+
+  async getUser(parentId: string): Promise<PrismaUser | null> {
+    return this.prisma.userProfile
+      .findUnique({
+        where: { id: parentId },
+      })
+      .user();
   }
 
   async getUserGenders(parentId: string): Promise<PrismaUserGender | null> {

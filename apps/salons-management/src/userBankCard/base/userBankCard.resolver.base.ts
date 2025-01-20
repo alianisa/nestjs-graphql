@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { UserBankCard } from "./UserBankCard";
 import { UserBankCardCountArgs } from "./UserBankCardCountArgs";
 import { UserBankCardFindManyArgs } from "./UserBankCardFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdateUserBankCardArgs } from "./UpdateUserBankCardArgs";
 import { DeleteUserBankCardArgs } from "./DeleteUserBankCardArgs";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserBankCardService } from "../userBankCard.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => UserBankCard)
 export class UserBankCardResolverBase {
-  constructor(protected readonly service: UserBankCardService) {}
+  constructor(
+    protected readonly service: UserBankCardService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "read",
+    possession: "any",
+  })
   async _userBankCardsMeta(
     @graphql.Args() args: UserBankCardCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,14 +51,26 @@ export class UserBankCardResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [UserBankCard])
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "read",
+    possession: "any",
+  })
   async userBankCards(
     @graphql.Args() args: UserBankCardFindManyArgs
   ): Promise<UserBankCard[]> {
     return this.service.userBankCards(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => UserBankCard, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "read",
+    possession: "own",
+  })
   async userBankCard(
     @graphql.Args() args: UserBankCardFindUniqueArgs
   ): Promise<UserBankCard | null> {
@@ -53,7 +81,13 @@ export class UserBankCardResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserBankCard)
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "create",
+    possession: "any",
+  })
   async createUserBankCard(
     @graphql.Args() args: CreateUserBankCardArgs
   ): Promise<UserBankCard> {
@@ -71,7 +105,13 @@ export class UserBankCardResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserBankCard)
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "update",
+    possession: "any",
+  })
   async updateUserBankCard(
     @graphql.Args() args: UpdateUserBankCardArgs
   ): Promise<UserBankCard | null> {
@@ -99,6 +139,11 @@ export class UserBankCardResolverBase {
   }
 
   @graphql.Mutation(() => UserBankCard)
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUserBankCard(
     @graphql.Args() args: DeleteUserBankCardArgs
   ): Promise<UserBankCard | null> {
@@ -114,9 +159,15 @@ export class UserBankCardResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: UserBankCard

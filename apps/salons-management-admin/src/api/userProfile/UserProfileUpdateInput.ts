@@ -6,7 +6,6 @@ import { EmployeeDailyStatUpdateManyWithoutUserProfilesInput } from "./EmployeeD
 import { EmployeeStatUpdateManyWithoutUserProfilesInput } from "./EmployeeStatUpdateManyWithoutUserProfilesInput";
 import { EmployeeTaskUpdateManyWithoutUserProfilesInput } from "./EmployeeTaskUpdateManyWithoutUserProfilesInput";
 import { EmployeeWorkScheduleUpdateManyWithoutUserProfilesInput } from "./EmployeeWorkScheduleUpdateManyWithoutUserProfilesInput";
-import { InputJsonValue } from "../../types";
 import { LoyaltyTransactionUpdateManyWithoutUserProfilesInput } from "./LoyaltyTransactionUpdateManyWithoutUserProfilesInput";
 import { NotificationUpdateManyWithoutUserProfilesInput } from "./NotificationUpdateManyWithoutUserProfilesInput";
 import { OrderUpdateManyWithoutUserProfilesInput } from "./OrderUpdateManyWithoutUserProfilesInput";
@@ -19,6 +18,7 @@ import { SalonUpdateManyWithoutUserProfilesInput } from "./SalonUpdateManyWithou
 import { SalonWhereUniqueInput } from "../salon/SalonWhereUniqueInput";
 import { ScheduleUpdateManyWithoutUserProfilesInput } from "./ScheduleUpdateManyWithoutUserProfilesInput";
 import { TimeSlotUpdateManyWithoutUserProfilesInput } from "./TimeSlotUpdateManyWithoutUserProfilesInput";
+import { UserWhereUniqueInput } from "../user/UserWhereUniqueInput";
 import { UserAccountUpdateManyWithoutUserProfilesInput } from "./UserAccountUpdateManyWithoutUserProfilesInput";
 import { UserAddressUpdateManyWithoutUserProfilesInput } from "./UserAddressUpdateManyWithoutUserProfilesInput";
 import { UserBankCardUpdateManyWithoutUserProfilesInput } from "./UserBankCardUpdateManyWithoutUserProfilesInput";
@@ -56,7 +56,7 @@ export type UserProfileUpdateInput = {
   isEmployee?: boolean | null;
   jobTitle?: string | null;
   lastName?: string | null;
-  location?: InputJsonValue;
+  location?: string | null;
   loyaltyPoints?: number | null;
   loyaltyTransactions?: LoyaltyTransactionUpdateManyWithoutUserProfilesInput;
   notifications?: NotificationUpdateManyWithoutUserProfilesInput;
@@ -66,7 +66,6 @@ export type UserProfileUpdateInput = {
   phone?: string | null;
   queuesQueuesEmployeeIdTouserProfiles?: QueueUpdateManyWithoutUserProfilesInput;
   queuesQueuesUserIdTouserProfiles?: QueueUpdateManyWithoutUserProfilesInput;
-  roles?: string;
   salonAccounts?: SalonAccountUpdateManyWithoutUserProfilesInput;
   salonRatingLikesSalonRatingLikesUserIdTouserProfiles?: SalonRatingLikeUpdateManyWithoutUserProfilesInput;
   salonRatingLikesSalonRatingLikesVoterIdTouserProfiles?: SalonRatingLikeUpdateManyWithoutUserProfilesInput;
@@ -78,6 +77,7 @@ export type UserProfileUpdateInput = {
   scheduleScheduleUserIdTouserProfiles?: ScheduleUpdateManyWithoutUserProfilesInput;
   timeSlots?: TimeSlotUpdateManyWithoutUserProfilesInput;
   updatedAt?: Date | null;
+  user?: UserWhereUniqueInput | null;
   userAccounts?: UserAccountUpdateManyWithoutUserProfilesInput;
   userAddresses?: UserAddressUpdateManyWithoutUserProfilesInput;
   userBankCards?: UserBankCardUpdateManyWithoutUserProfilesInput;
@@ -88,6 +88,5 @@ export type UserProfileUpdateInput = {
   userNotificationSettings?: UserNotificationSettingWhereUniqueInput | null;
   userRatingsUserRatingsOwnerTouserProfiles?: UserRatingUpdateManyWithoutUserProfilesInput;
   userRatingsUserRatingsUserIdTouserProfiles?: UserRatingUpdateManyWithoutUserProfilesInput;
-  username?: string | null;
   website?: string | null;
 };

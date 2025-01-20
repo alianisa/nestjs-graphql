@@ -16,109 +16,15 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ApiKeyService } from "../apiKey.service";
-import { ApiKeyCreateInput } from "./ApiKeyCreateInput";
-import { ApiKey } from "./ApiKey";
-import { ApiKeyFindManyArgs } from "./ApiKeyFindManyArgs";
-import { ApiKeyWhereUniqueInput } from "./ApiKeyWhereUniqueInput";
-import { ApiKeyUpdateInput } from "./ApiKeyUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ApiKeyControllerBase {
-  constructor(protected readonly service: ApiKeyService) {}
-  @common.Post()
-  @swagger.ApiCreatedResponse({ type: ApiKey })
-  async createApiKey(@common.Body() data: ApiKeyCreateInput): Promise<ApiKey> {
-    return await this.service.createApiKey({
-      data: data,
-      select: {
-        apiKey: true,
-        id: true,
-      },
-    });
-  }
-
-  @common.Get()
-  @swagger.ApiOkResponse({ type: [ApiKey] })
-  @ApiNestedQuery(ApiKeyFindManyArgs)
-  async apiKeys(@common.Req() request: Request): Promise<ApiKey[]> {
-    const args = plainToClass(ApiKeyFindManyArgs, request.query);
-    return this.service.apiKeys({
-      ...args,
-      select: {
-        apiKey: true,
-        id: true,
-      },
-    });
-  }
-
-  @common.Get("/:id")
-  @swagger.ApiOkResponse({ type: ApiKey })
-  @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  async apiKey(
-    @common.Param() params: ApiKeyWhereUniqueInput
-  ): Promise<ApiKey | null> {
-    const result = await this.service.apiKey({
-      where: params,
-      select: {
-        apiKey: true,
-        id: true,
-      },
-    });
-    if (result === null) {
-      throw new errors.NotFoundException(
-        `No resource was found for ${JSON.stringify(params)}`
-      );
-    }
-    return result;
-  }
-
-  @common.Patch("/:id")
-  @swagger.ApiOkResponse({ type: ApiKey })
-  @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  async updateApiKey(
-    @common.Param() params: ApiKeyWhereUniqueInput,
-    @common.Body() data: ApiKeyUpdateInput
-  ): Promise<ApiKey | null> {
-    try {
-      return await this.service.updateApiKey({
-        where: params,
-        data: data,
-        select: {
-          apiKey: true,
-          id: true,
-        },
-      });
-    } catch (error) {
-      if (isRecordNotFoundError(error)) {
-        throw new errors.NotFoundException(
-          `No resource was found for ${JSON.stringify(params)}`
-        );
-      }
-      throw error;
-    }
-  }
-
-  @common.Delete("/:id")
-  @swagger.ApiOkResponse({ type: ApiKey })
-  @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
-  async deleteApiKey(
-    @common.Param() params: ApiKeyWhereUniqueInput
-  ): Promise<ApiKey | null> {
-    try {
-      return await this.service.deleteApiKey({
-        where: params,
-        select: {
-          apiKey: true,
-          id: true,
-        },
-      });
-    } catch (error) {
-      if (isRecordNotFoundError(error)) {
-        throw new errors.NotFoundException(
-          `No resource was found for ${JSON.stringify(params)}`
-        );
-      }
-      throw error;
-    }
-  }
+  constructor(
+    protected readonly service: ApiKeyService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 }

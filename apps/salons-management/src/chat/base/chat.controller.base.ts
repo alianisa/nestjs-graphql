@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ChatService } from "../chat.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ChatCreateInput } from "./ChatCreateInput";
 import { Chat } from "./Chat";
 import { ChatFindManyArgs } from "./ChatFindManyArgs";
 import { ChatWhereUniqueInput } from "./ChatWhereUniqueInput";
 import { ChatUpdateInput } from "./ChatUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ChatControllerBase {
-  constructor(protected readonly service: ChatService) {}
+  constructor(
+    protected readonly service: ChatService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Chat })
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createChat(@common.Body() data: ChatCreateInput): Promise<Chat> {
     return await this.service.createChat({
       data: {
@@ -79,9 +97,18 @@ export class ChatControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Chat] })
   @ApiNestedQuery(ChatFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async chats(@common.Req() request: Request): Promise<Chat[]> {
     const args = plainToClass(ChatFindManyArgs, request.query);
     return this.service.chats({
@@ -112,9 +139,18 @@ export class ChatControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Chat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async chat(
     @common.Param() params: ChatWhereUniqueInput
   ): Promise<Chat | null> {
@@ -152,9 +188,18 @@ export class ChatControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Chat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateChat(
     @common.Param() params: ChatWhereUniqueInput,
     @common.Body() data: ChatUpdateInput
@@ -223,6 +268,14 @@ export class ChatControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Chat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteChat(
     @common.Param() params: ChatWhereUniqueInput
   ): Promise<Chat | null> {

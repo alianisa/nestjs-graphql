@@ -1,4 +1,5 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
+import { AuthModule } from "../auth/auth.module";
 import { SalonServiceCategoryModuleBase } from "./base/salonServiceCategory.module.base";
 import { SalonServiceCategoryService } from "./salonServiceCategory.service";
 import { SalonServiceCategoryController } from "./salonServiceCategory.controller";
@@ -6,7 +7,7 @@ import { SalonServiceCategoryGrpcController } from "./salonServiceCategory.grpc.
 import { SalonServiceCategoryResolver } from "./salonServiceCategory.resolver";
 
 @Module({
-  imports: [SalonServiceCategoryModuleBase],
+  imports: [SalonServiceCategoryModuleBase, forwardRef(() => AuthModule)],
   controllers: [
     SalonServiceCategoryController,
     SalonServiceCategoryGrpcController,

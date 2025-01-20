@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { QueueService } from "../queue.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { QueueCreateInput } from "./QueueCreateInput";
 import { Queue } from "./Queue";
 import { QueueFindManyArgs } from "./QueueFindManyArgs";
@@ -29,10 +33,24 @@ import { OrderFindManyArgs } from "../../order/base/OrderFindManyArgs";
 import { Order } from "../../order/base/Order";
 import { OrderWhereUniqueInput } from "../../order/base/OrderWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class QueueControllerBase {
-  constructor(protected readonly service: QueueService) {}
+  constructor(
+    protected readonly service: QueueService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Queue })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createQueue(@common.Body() data: QueueCreateInput): Promise<Queue> {
     return await this.service.createQueue({
       data: {
@@ -102,9 +120,18 @@ export class QueueControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Queue] })
   @ApiNestedQuery(QueueFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async queues(@common.Req() request: Request): Promise<Queue[]> {
     const args = plainToClass(QueueFindManyArgs, request.query);
     return this.service.queues({
@@ -147,9 +174,18 @@ export class QueueControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Queue })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async queue(
     @common.Param() params: QueueWhereUniqueInput
   ): Promise<Queue | null> {
@@ -199,9 +235,18 @@ export class QueueControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Queue })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateQueue(
     @common.Param() params: QueueWhereUniqueInput,
     @common.Body() data: QueueUpdateInput
@@ -287,6 +332,14 @@ export class QueueControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Queue })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteQueue(
     @common.Param() params: QueueWhereUniqueInput
   ): Promise<Queue | null> {
@@ -339,8 +392,14 @@ export class QueueControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/employeeTasks")
   @ApiNestedQuery(EmployeeTaskFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "any",
+  })
   async findEmployeeTasks(
     @common.Req() request: Request,
     @common.Param() params: QueueWhereUniqueInput
@@ -403,6 +462,11 @@ export class QueueControllerBase {
   }
 
   @common.Post("/:id/employeeTasks")
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
   async connectEmployeeTasks(
     @common.Param() params: QueueWhereUniqueInput,
     @common.Body() body: EmployeeTaskWhereUniqueInput[]
@@ -420,6 +484,11 @@ export class QueueControllerBase {
   }
 
   @common.Patch("/:id/employeeTasks")
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
   async updateEmployeeTasks(
     @common.Param() params: QueueWhereUniqueInput,
     @common.Body() body: EmployeeTaskWhereUniqueInput[]
@@ -437,6 +506,11 @@ export class QueueControllerBase {
   }
 
   @common.Delete("/:id/employeeTasks")
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
   async disconnectEmployeeTasks(
     @common.Param() params: QueueWhereUniqueInput,
     @common.Body() body: EmployeeTaskWhereUniqueInput[]
@@ -453,8 +527,14 @@ export class QueueControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/ordersOrdersQueueIdToqueues")
   @ApiNestedQuery(OrderFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async findOrdersOrdersQueueIdToqueues(
     @common.Req() request: Request,
     @common.Param() params: QueueWhereUniqueInput
@@ -549,6 +629,11 @@ export class QueueControllerBase {
   }
 
   @common.Post("/:id/ordersOrdersQueueIdToqueues")
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
   async connectOrdersOrdersQueueIdToqueues(
     @common.Param() params: QueueWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -566,6 +651,11 @@ export class QueueControllerBase {
   }
 
   @common.Patch("/:id/ordersOrdersQueueIdToqueues")
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
   async updateOrdersOrdersQueueIdToqueues(
     @common.Param() params: QueueWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -583,6 +673,11 @@ export class QueueControllerBase {
   }
 
   @common.Delete("/:id/ordersOrdersQueueIdToqueues")
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
   async disconnectOrdersOrdersQueueIdToqueues(
     @common.Param() params: QueueWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]

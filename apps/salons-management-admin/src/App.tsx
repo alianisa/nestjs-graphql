@@ -5,70 +5,6 @@ import { theme } from "./theme/theme";
 import Login from "./Login";
 import "./App.scss";
 import Dashboard from "./pages/Dashboard";
-import { AuditLogEntryList } from "./auditLogEntry/AuditLogEntryList";
-import { AuditLogEntryCreate } from "./auditLogEntry/AuditLogEntryCreate";
-import { AuditLogEntryEdit } from "./auditLogEntry/AuditLogEntryEdit";
-import { AuditLogEntryShow } from "./auditLogEntry/AuditLogEntryShow";
-import { FlowStateList } from "./flowState/FlowStateList";
-import { FlowStateCreate } from "./flowState/FlowStateCreate";
-import { FlowStateEdit } from "./flowState/FlowStateEdit";
-import { FlowStateShow } from "./flowState/FlowStateShow";
-import { IdentityList } from "./identity/IdentityList";
-import { IdentityCreate } from "./identity/IdentityCreate";
-import { IdentityEdit } from "./identity/IdentityEdit";
-import { IdentityShow } from "./identity/IdentityShow";
-import { InstanceList } from "./instance/InstanceList";
-import { InstanceCreate } from "./instance/InstanceCreate";
-import { InstanceEdit } from "./instance/InstanceEdit";
-import { InstanceShow } from "./instance/InstanceShow";
-import { MfaAmrClaimList } from "./mfaAmrClaim/MfaAmrClaimList";
-import { MfaAmrClaimCreate } from "./mfaAmrClaim/MfaAmrClaimCreate";
-import { MfaAmrClaimEdit } from "./mfaAmrClaim/MfaAmrClaimEdit";
-import { MfaAmrClaimShow } from "./mfaAmrClaim/MfaAmrClaimShow";
-import { MfaChallengeList } from "./mfaChallenge/MfaChallengeList";
-import { MfaChallengeCreate } from "./mfaChallenge/MfaChallengeCreate";
-import { MfaChallengeEdit } from "./mfaChallenge/MfaChallengeEdit";
-import { MfaChallengeShow } from "./mfaChallenge/MfaChallengeShow";
-import { MfaFactorList } from "./mfaFactor/MfaFactorList";
-import { MfaFactorCreate } from "./mfaFactor/MfaFactorCreate";
-import { MfaFactorEdit } from "./mfaFactor/MfaFactorEdit";
-import { MfaFactorShow } from "./mfaFactor/MfaFactorShow";
-import { OneTimeTokenList } from "./oneTimeToken/OneTimeTokenList";
-import { OneTimeTokenCreate } from "./oneTimeToken/OneTimeTokenCreate";
-import { OneTimeTokenEdit } from "./oneTimeToken/OneTimeTokenEdit";
-import { OneTimeTokenShow } from "./oneTimeToken/OneTimeTokenShow";
-import { RefreshTokenList } from "./refreshToken/RefreshTokenList";
-import { RefreshTokenCreate } from "./refreshToken/RefreshTokenCreate";
-import { RefreshTokenEdit } from "./refreshToken/RefreshTokenEdit";
-import { RefreshTokenShow } from "./refreshToken/RefreshTokenShow";
-import { SamlProviderList } from "./samlProvider/SamlProviderList";
-import { SamlProviderCreate } from "./samlProvider/SamlProviderCreate";
-import { SamlProviderEdit } from "./samlProvider/SamlProviderEdit";
-import { SamlProviderShow } from "./samlProvider/SamlProviderShow";
-import { SamlRelayStateList } from "./samlRelayState/SamlRelayStateList";
-import { SamlRelayStateCreate } from "./samlRelayState/SamlRelayStateCreate";
-import { SamlRelayStateEdit } from "./samlRelayState/SamlRelayStateEdit";
-import { SamlRelayStateShow } from "./samlRelayState/SamlRelayStateShow";
-import { SchemaMigrationList } from "./schemaMigration/SchemaMigrationList";
-import { SchemaMigrationCreate } from "./schemaMigration/SchemaMigrationCreate";
-import { SchemaMigrationEdit } from "./schemaMigration/SchemaMigrationEdit";
-import { SchemaMigrationShow } from "./schemaMigration/SchemaMigrationShow";
-import { SessionList } from "./session/SessionList";
-import { SessionCreate } from "./session/SessionCreate";
-import { SessionEdit } from "./session/SessionEdit";
-import { SessionShow } from "./session/SessionShow";
-import { SsoDomainList } from "./ssoDomain/SsoDomainList";
-import { SsoDomainCreate } from "./ssoDomain/SsoDomainCreate";
-import { SsoDomainEdit } from "./ssoDomain/SsoDomainEdit";
-import { SsoDomainShow } from "./ssoDomain/SsoDomainShow";
-import { SsoProviderList } from "./ssoProvider/SsoProviderList";
-import { SsoProviderCreate } from "./ssoProvider/SsoProviderCreate";
-import { SsoProviderEdit } from "./ssoProvider/SsoProviderEdit";
-import { SsoProviderShow } from "./ssoProvider/SsoProviderShow";
-import { UserList } from "./user/UserList";
-import { UserCreate } from "./user/UserCreate";
-import { UserEdit } from "./user/UserEdit";
-import { UserShow } from "./user/UserShow";
 import { ApiKeyList } from "./apiKey/ApiKeyList";
 import { ApiKeyCreate } from "./apiKey/ApiKeyCreate";
 import { ApiKeyEdit } from "./apiKey/ApiKeyEdit";
@@ -117,10 +53,6 @@ import { EmployeeWorkScheduleList } from "./employeeWorkSchedule/EmployeeWorkSch
 import { EmployeeWorkScheduleCreate } from "./employeeWorkSchedule/EmployeeWorkScheduleCreate";
 import { EmployeeWorkScheduleEdit } from "./employeeWorkSchedule/EmployeeWorkScheduleEdit";
 import { EmployeeWorkScheduleShow } from "./employeeWorkSchedule/EmployeeWorkScheduleShow";
-import { ErrorLogList } from "./errorLog/ErrorLogList";
-import { ErrorLogCreate } from "./errorLog/ErrorLogCreate";
-import { ErrorLogEdit } from "./errorLog/ErrorLogEdit";
-import { ErrorLogShow } from "./errorLog/ErrorLogShow";
 import { LoyaltyProgramList } from "./loyaltyProgram/LoyaltyProgramList";
 import { LoyaltyProgramCreate } from "./loyaltyProgram/LoyaltyProgramCreate";
 import { LoyaltyProgramEdit } from "./loyaltyProgram/LoyaltyProgramEdit";
@@ -193,18 +125,10 @@ import { SalonList } from "./salon/SalonList";
 import { SalonCreate } from "./salon/SalonCreate";
 import { SalonEdit } from "./salon/SalonEdit";
 import { SalonShow } from "./salon/SalonShow";
-import { SalonstestList } from "./salonstest/SalonstestList";
-import { SalonstestCreate } from "./salonstest/SalonstestCreate";
-import { SalonstestEdit } from "./salonstest/SalonstestEdit";
-import { SalonstestShow } from "./salonstest/SalonstestShow";
 import { ScheduleList } from "./schedule/ScheduleList";
 import { ScheduleCreate } from "./schedule/ScheduleCreate";
 import { ScheduleEdit } from "./schedule/ScheduleEdit";
 import { ScheduleShow } from "./schedule/ScheduleShow";
-import { TemplateList } from "./template/TemplateList";
-import { TemplateCreate } from "./template/TemplateCreate";
-import { TemplateEdit } from "./template/TemplateEdit";
-import { TemplateShow } from "./template/TemplateShow";
 import { TimeSlotList } from "./timeSlot/TimeSlotList";
 import { TimeSlotCreate } from "./timeSlot/TimeSlotCreate";
 import { TimeSlotEdit } from "./timeSlot/TimeSlotEdit";
@@ -261,6 +185,10 @@ import { WebhookList } from "./webhook/WebhookList";
 import { WebhookCreate } from "./webhook/WebhookCreate";
 import { WebhookEdit } from "./webhook/WebhookEdit";
 import { WebhookShow } from "./webhook/WebhookShow";
+import { UserList } from "./user/UserList";
+import { UserCreate } from "./user/UserCreate";
+import { UserEdit } from "./user/UserEdit";
+import { UserShow } from "./user/UserShow";
 import { jwtAuthProvider } from "./auth-provider/ra-auth-jwt";
 
 const App = (): React.ReactElement => {
@@ -274,118 +202,6 @@ const App = (): React.ReactElement => {
         dashboard={Dashboard}
         loginPage={Login}
       >
-        <Resource
-          name="AuditLogEntry"
-          list={AuditLogEntryList}
-          edit={AuditLogEntryEdit}
-          create={AuditLogEntryCreate}
-          show={AuditLogEntryShow}
-        />
-        <Resource
-          name="FlowState"
-          list={FlowStateList}
-          edit={FlowStateEdit}
-          create={FlowStateCreate}
-          show={FlowStateShow}
-        />
-        <Resource
-          name="Identity"
-          list={IdentityList}
-          edit={IdentityEdit}
-          create={IdentityCreate}
-          show={IdentityShow}
-        />
-        <Resource
-          name="Instance"
-          list={InstanceList}
-          edit={InstanceEdit}
-          create={InstanceCreate}
-          show={InstanceShow}
-        />
-        <Resource
-          name="MfaAmrClaim"
-          list={MfaAmrClaimList}
-          edit={MfaAmrClaimEdit}
-          create={MfaAmrClaimCreate}
-          show={MfaAmrClaimShow}
-        />
-        <Resource
-          name="MfaChallenge"
-          list={MfaChallengeList}
-          edit={MfaChallengeEdit}
-          create={MfaChallengeCreate}
-          show={MfaChallengeShow}
-        />
-        <Resource
-          name="MfaFactor"
-          list={MfaFactorList}
-          edit={MfaFactorEdit}
-          create={MfaFactorCreate}
-          show={MfaFactorShow}
-        />
-        <Resource
-          name="OneTimeToken"
-          list={OneTimeTokenList}
-          edit={OneTimeTokenEdit}
-          create={OneTimeTokenCreate}
-          show={OneTimeTokenShow}
-        />
-        <Resource
-          name="RefreshToken"
-          list={RefreshTokenList}
-          edit={RefreshTokenEdit}
-          create={RefreshTokenCreate}
-          show={RefreshTokenShow}
-        />
-        <Resource
-          name="SamlProvider"
-          list={SamlProviderList}
-          edit={SamlProviderEdit}
-          create={SamlProviderCreate}
-          show={SamlProviderShow}
-        />
-        <Resource
-          name="SamlRelayState"
-          list={SamlRelayStateList}
-          edit={SamlRelayStateEdit}
-          create={SamlRelayStateCreate}
-          show={SamlRelayStateShow}
-        />
-        <Resource
-          name="SchemaMigration"
-          list={SchemaMigrationList}
-          edit={SchemaMigrationEdit}
-          create={SchemaMigrationCreate}
-          show={SchemaMigrationShow}
-        />
-        <Resource
-          name="Session"
-          list={SessionList}
-          edit={SessionEdit}
-          create={SessionCreate}
-          show={SessionShow}
-        />
-        <Resource
-          name="SsoDomain"
-          list={SsoDomainList}
-          edit={SsoDomainEdit}
-          create={SsoDomainCreate}
-          show={SsoDomainShow}
-        />
-        <Resource
-          name="SsoProvider"
-          list={SsoProviderList}
-          edit={SsoProviderEdit}
-          create={SsoProviderCreate}
-          show={SsoProviderShow}
-        />
-        <Resource
-          name="User"
-          list={UserList}
-          edit={UserEdit}
-          create={UserCreate}
-          show={UserShow}
-        />
         <Resource
           name="ApiKey"
           list={ApiKeyList}
@@ -469,13 +285,6 @@ const App = (): React.ReactElement => {
           edit={EmployeeWorkScheduleEdit}
           create={EmployeeWorkScheduleCreate}
           show={EmployeeWorkScheduleShow}
-        />
-        <Resource
-          name="ErrorLog"
-          list={ErrorLogList}
-          edit={ErrorLogEdit}
-          create={ErrorLogCreate}
-          show={ErrorLogShow}
         />
         <Resource
           name="LoyaltyProgram"
@@ -604,25 +413,11 @@ const App = (): React.ReactElement => {
           show={SalonShow}
         />
         <Resource
-          name="Salonstest"
-          list={SalonstestList}
-          edit={SalonstestEdit}
-          create={SalonstestCreate}
-          show={SalonstestShow}
-        />
-        <Resource
           name="Schedule"
           list={ScheduleList}
           edit={ScheduleEdit}
           create={ScheduleCreate}
           show={ScheduleShow}
-        />
-        <Resource
-          name="Template"
-          list={TemplateList}
-          edit={TemplateEdit}
-          create={TemplateCreate}
-          show={TemplateShow}
         />
         <Resource
           name="TimeSlot"
@@ -721,6 +516,13 @@ const App = (): React.ReactElement => {
           edit={WebhookEdit}
           create={WebhookCreate}
           show={WebhookShow}
+        />
+        <Resource
+          name="User"
+          list={UserList}
+          edit={UserEdit}
+          create={UserCreate}
+          show={UserShow}
         />
       </Admin>
     </div>

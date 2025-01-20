@@ -36,20 +36,7 @@ const FIND_ONE_RESULT = {
   id: "exampleId",
 };
 
-const service = {
-  createApiKey() {
-    return CREATE_RESULT;
-  },
-  apiKeys: () => FIND_MANY_RESULT,
-  apiKey: ({ where }: { where: { id: string } }) => {
-    switch (where.id) {
-      case existingId:
-        return FIND_ONE_RESULT;
-      case nonExistingId:
-        return null;
-    }
-  },
-};
+const service = {};
 
 const basicAuthGuard = {
   canActivate: (context: ExecutionContext) => {
@@ -109,57 +96,6 @@ describe("ApiKey", () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
-  });
-
-  test("POST /apiKeys", async () => {
-    await request(app.getHttpServer())
-      .post("/apiKeys")
-      .send(CREATE_INPUT)
-      .expect(HttpStatus.CREATED)
-      .expect(CREATE_RESULT);
-  });
-
-  test("GET /apiKeys", async () => {
-    await request(app.getHttpServer())
-      .get("/apiKeys")
-      .expect(HttpStatus.OK)
-      .expect([FIND_MANY_RESULT[0]]);
-  });
-
-  test("GET /apiKeys/:id non existing", async () => {
-    await request(app.getHttpServer())
-      .get(`${"/apiKeys"}/${nonExistingId}`)
-      .expect(HttpStatus.NOT_FOUND)
-      .expect({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: `No resource was found for {"${"id"}":"${nonExistingId}"}`,
-        error: "Not Found",
-      });
-  });
-
-  test("GET /apiKeys/:id existing", async () => {
-    await request(app.getHttpServer())
-      .get(`${"/apiKeys"}/${existingId}`)
-      .expect(HttpStatus.OK)
-      .expect(FIND_ONE_RESULT);
-  });
-
-  test("POST /apiKeys existing resource", async () => {
-    const agent = request(app.getHttpServer());
-    await agent
-      .post("/apiKeys")
-      .send(CREATE_INPUT)
-      .expect(HttpStatus.CREATED)
-      .expect(CREATE_RESULT)
-      .then(function () {
-        agent
-          .post("/apiKeys")
-          .send(CREATE_INPUT)
-          .expect(HttpStatus.CONFLICT)
-          .expect({
-            statusCode: HttpStatus.CONFLICT,
-          });
-      });
   });
 
   afterAll(async () => {

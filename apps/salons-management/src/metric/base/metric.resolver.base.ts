@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Metric } from "./Metric";
 import { MetricCountArgs } from "./MetricCountArgs";
 import { MetricFindManyArgs } from "./MetricFindManyArgs";
@@ -21,10 +27,20 @@ import { CreateMetricArgs } from "./CreateMetricArgs";
 import { UpdateMetricArgs } from "./UpdateMetricArgs";
 import { DeleteMetricArgs } from "./DeleteMetricArgs";
 import { MetricService } from "../metric.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Metric)
 export class MetricResolverBase {
-  constructor(protected readonly service: MetricService) {}
+  constructor(
+    protected readonly service: MetricService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "read",
+    possession: "any",
+  })
   async _metricsMeta(
     @graphql.Args() args: MetricCountArgs
   ): Promise<MetaQueryPayload> {
@@ -34,12 +50,24 @@ export class MetricResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Metric])
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "read",
+    possession: "any",
+  })
   async metrics(@graphql.Args() args: MetricFindManyArgs): Promise<Metric[]> {
     return this.service.metrics(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Metric, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "read",
+    possession: "own",
+  })
   async metric(
     @graphql.Args() args: MetricFindUniqueArgs
   ): Promise<Metric | null> {
@@ -50,7 +78,13 @@ export class MetricResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Metric)
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "create",
+    possession: "any",
+  })
   async createMetric(@graphql.Args() args: CreateMetricArgs): Promise<Metric> {
     return await this.service.createMetric({
       ...args,
@@ -58,7 +92,13 @@ export class MetricResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Metric)
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "update",
+    possession: "any",
+  })
   async updateMetric(
     @graphql.Args() args: UpdateMetricArgs
   ): Promise<Metric | null> {
@@ -78,6 +118,11 @@ export class MetricResolverBase {
   }
 
   @graphql.Mutation(() => Metric)
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "delete",
+    possession: "any",
+  })
   async deleteMetric(
     @graphql.Args() args: DeleteMetricArgs
   ): Promise<Metric | null> {

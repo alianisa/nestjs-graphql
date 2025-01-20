@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { UserGenderService } from "../userGender.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { UserGenderCreateInput } from "./UserGenderCreateInput";
 import { UserGender } from "./UserGender";
 import { UserGenderFindManyArgs } from "./UserGenderFindManyArgs";
@@ -26,10 +30,24 @@ import { UserProfileFindManyArgs } from "../../userProfile/base/UserProfileFindM
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserProfileWhereUniqueInput } from "../../userProfile/base/UserProfileWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserGenderControllerBase {
-  constructor(protected readonly service: UserGenderService) {}
+  constructor(
+    protected readonly service: UserGenderService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: UserGender })
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createUserGender(
     @common.Body() data: UserGenderCreateInput
   ): Promise<UserGender> {
@@ -42,9 +60,18 @@ export class UserGenderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [UserGender] })
   @ApiNestedQuery(UserGenderFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userGenders(@common.Req() request: Request): Promise<UserGender[]> {
     const args = plainToClass(UserGenderFindManyArgs, request.query);
     return this.service.userGenders({
@@ -56,9 +83,18 @@ export class UserGenderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: UserGender })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userGender(
     @common.Param() params: UserGenderWhereUniqueInput
   ): Promise<UserGender | null> {
@@ -77,9 +113,18 @@ export class UserGenderControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: UserGender })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateUserGender(
     @common.Param() params: UserGenderWhereUniqueInput,
     @common.Body() data: UserGenderUpdateInput
@@ -106,6 +151,14 @@ export class UserGenderControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: UserGender })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteUserGender(
     @common.Param() params: UserGenderWhereUniqueInput
   ): Promise<UserGender | null> {
@@ -127,8 +180,14 @@ export class UserGenderControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/userProfiles")
   @ApiNestedQuery(UserProfileFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
+  })
   async findUserProfiles(
     @common.Req() request: Request,
     @common.Param() params: UserGenderWhereUniqueInput
@@ -158,7 +217,6 @@ export class UserGenderControllerBase {
         location: true,
         loyaltyPoints: true,
         phone: true,
-        roles: true,
 
         salonsUserProfilesSalonIdTosalons: {
           select: {
@@ -167,6 +225,12 @@ export class UserGenderControllerBase {
         },
 
         updatedAt: true,
+
+        user: {
+          select: {
+            id: true,
+          },
+        },
 
         userGenders: {
           select: {
@@ -180,7 +244,6 @@ export class UserGenderControllerBase {
           },
         },
 
-        username: true,
         website: true,
       },
     });
@@ -193,6 +256,11 @@ export class UserGenderControllerBase {
   }
 
   @common.Post("/:id/userProfiles")
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "update",
+    possession: "any",
+  })
   async connectUserProfiles(
     @common.Param() params: UserGenderWhereUniqueInput,
     @common.Body() body: UserProfileWhereUniqueInput[]
@@ -210,6 +278,11 @@ export class UserGenderControllerBase {
   }
 
   @common.Patch("/:id/userProfiles")
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "update",
+    possession: "any",
+  })
   async updateUserProfiles(
     @common.Param() params: UserGenderWhereUniqueInput,
     @common.Body() body: UserProfileWhereUniqueInput[]
@@ -227,6 +300,11 @@ export class UserGenderControllerBase {
   }
 
   @common.Delete("/:id/userProfiles")
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "update",
+    possession: "any",
+  })
   async disconnectUserProfiles(
     @common.Param() params: UserGenderWhereUniqueInput,
     @common.Body() body: UserProfileWhereUniqueInput[]

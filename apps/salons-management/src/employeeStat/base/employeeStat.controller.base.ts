@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { EmployeeStatService } from "../employeeStat.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { EmployeeStatCreateInput } from "./EmployeeStatCreateInput";
 import { EmployeeStat } from "./EmployeeStat";
 import { EmployeeStatFindManyArgs } from "./EmployeeStatFindManyArgs";
 import { EmployeeStatWhereUniqueInput } from "./EmployeeStatWhereUniqueInput";
 import { EmployeeStatUpdateInput } from "./EmployeeStatUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class EmployeeStatControllerBase {
-  constructor(protected readonly service: EmployeeStatService) {}
+  constructor(
+    protected readonly service: EmployeeStatService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: EmployeeStat })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createEmployeeStat(
     @common.Body() data: EmployeeStatCreateInput
   ): Promise<EmployeeStat> {
@@ -126,9 +144,18 @@ export class EmployeeStatControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [EmployeeStat] })
   @ApiNestedQuery(EmployeeStatFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeStats(@common.Req() request: Request): Promise<EmployeeStat[]> {
     const args = plainToClass(EmployeeStatFindManyArgs, request.query);
     return this.service.employeeStats({
@@ -217,9 +244,18 @@ export class EmployeeStatControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: EmployeeStat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeStat(
     @common.Param() params: EmployeeStatWhereUniqueInput
   ): Promise<EmployeeStat | null> {
@@ -315,9 +351,18 @@ export class EmployeeStatControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: EmployeeStat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateEmployeeStat(
     @common.Param() params: EmployeeStatWhereUniqueInput,
     @common.Body() data: EmployeeStatUpdateInput
@@ -431,6 +476,14 @@ export class EmployeeStatControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: EmployeeStat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteEmployeeStat(
     @common.Param() params: EmployeeStatWhereUniqueInput
   ): Promise<EmployeeStat | null> {

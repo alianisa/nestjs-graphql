@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Appointment } from "./Appointment";
 import { AppointmentCountArgs } from "./AppointmentCountArgs";
 import { AppointmentFindManyArgs } from "./AppointmentFindManyArgs";
@@ -27,10 +33,20 @@ import { Order } from "../../order/base/Order";
 import { TimeSlot } from "../../timeSlot/base/TimeSlot";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { AppointmentService } from "../appointment.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Appointment)
 export class AppointmentResolverBase {
-  constructor(protected readonly service: AppointmentService) {}
+  constructor(
+    protected readonly service: AppointmentService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
+  })
   async _appointmentsMeta(
     @graphql.Args() args: AppointmentCountArgs
   ): Promise<MetaQueryPayload> {
@@ -40,14 +56,26 @@ export class AppointmentResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Appointment])
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
+  })
   async appointments(
     @graphql.Args() args: AppointmentFindManyArgs
   ): Promise<Appointment[]> {
     return this.service.appointments(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Appointment, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "own",
+  })
   async appointment(
     @graphql.Args() args: AppointmentFindUniqueArgs
   ): Promise<Appointment | null> {
@@ -58,7 +86,13 @@ export class AppointmentResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Appointment)
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "create",
+    possession: "any",
+  })
   async createAppointment(
     @graphql.Args() args: CreateAppointmentArgs
   ): Promise<Appointment> {
@@ -85,7 +119,13 @@ export class AppointmentResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Appointment)
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "update",
+    possession: "any",
+  })
   async updateAppointment(
     @graphql.Args() args: UpdateAppointmentArgs
   ): Promise<Appointment | null> {
@@ -122,6 +162,11 @@ export class AppointmentResolverBase {
   }
 
   @graphql.Mutation(() => Appointment)
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "delete",
+    possession: "any",
+  })
   async deleteAppointment(
     @graphql.Args() args: DeleteAppointmentArgs
   ): Promise<Appointment | null> {
@@ -137,7 +182,13 @@ export class AppointmentResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [EmployeeTask], { name: "employeeTasks" })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "any",
+  })
   async findEmployeeTasks(
     @graphql.Parent() parent: Appointment,
     @graphql.Args() args: EmployeeTaskFindManyArgs
@@ -151,8 +202,14 @@ export class AppointmentResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Order], {
     name: "ordersOrdersAppointmentIdToappointments",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async findOrdersOrdersAppointmentIdToappointments(
     @graphql.Parent() parent: Appointment,
@@ -171,9 +228,15 @@ export class AppointmentResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Order, {
     nullable: true,
     name: "ordersAppointmentsOrderIdToorders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async getOrdersAppointmentsOrderIdToorders(
     @graphql.Parent() parent: Appointment
@@ -188,9 +251,15 @@ export class AppointmentResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => TimeSlot, {
     nullable: true,
     name: "timeSlots",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "read",
+    possession: "any",
   })
   async getTimeSlots(
     @graphql.Parent() parent: Appointment
@@ -203,9 +272,15 @@ export class AppointmentResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: Appointment

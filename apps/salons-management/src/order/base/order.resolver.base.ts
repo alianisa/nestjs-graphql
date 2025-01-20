@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Order } from "./Order";
 import { OrderCountArgs } from "./OrderCountArgs";
 import { OrderFindManyArgs } from "./OrderFindManyArgs";
@@ -42,10 +48,20 @@ import { Promocode } from "../../promocode/base/Promocode";
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { OrderService } from "../order.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Order)
 export class OrderResolverBase {
-  constructor(protected readonly service: OrderService) {}
+  constructor(
+    protected readonly service: OrderService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async _ordersMeta(
     @graphql.Args() args: OrderCountArgs
   ): Promise<MetaQueryPayload> {
@@ -55,12 +71,24 @@ export class OrderResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Order])
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async orders(@graphql.Args() args: OrderFindManyArgs): Promise<Order[]> {
     return this.service.orders(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Order, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "own",
+  })
   async order(
     @graphql.Args() args: OrderFindUniqueArgs
   ): Promise<Order | null> {
@@ -71,7 +99,13 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Order)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "create",
+    possession: "any",
+  })
   async createOrder(@graphql.Args() args: CreateOrderArgs): Promise<Order> {
     return await this.service.createOrder({
       ...args,
@@ -124,7 +158,13 @@ export class OrderResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Order)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateOrder(
     @graphql.Args() args: UpdateOrderArgs
   ): Promise<Order | null> {
@@ -190,6 +230,11 @@ export class OrderResolverBase {
   }
 
   @graphql.Mutation(() => Order)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "delete",
+    possession: "any",
+  })
   async deleteOrder(
     @graphql.Args() args: DeleteOrderArgs
   ): Promise<Order | null> {
@@ -205,8 +250,14 @@ export class OrderResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Appointment], {
     name: "appointmentsAppointmentsOrderIdToorders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
   })
   async findAppointmentsAppointmentsOrderIdToorders(
     @graphql.Parent() parent: Order,
@@ -225,7 +276,13 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Deposit], { name: "deposits" })
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "read",
+    possession: "any",
+  })
   async findDeposits(
     @graphql.Parent() parent: Order,
     @graphql.Args() args: DepositFindManyArgs
@@ -239,7 +296,13 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [EmployeeTask], { name: "employeeTasks" })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "any",
+  })
   async findEmployeeTasks(
     @graphql.Parent() parent: Order,
     @graphql.Args() args: EmployeeTaskFindManyArgs
@@ -253,8 +316,14 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [LoyaltyTransaction], {
     name: "loyaltyTransactions",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "any",
   })
   async findLoyaltyTransactions(
     @graphql.Parent() parent: Order,
@@ -269,7 +338,13 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [OrderImage], { name: "orderImages" })
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "read",
+    possession: "any",
+  })
   async findOrderImages(
     @graphql.Parent() parent: Order,
     @graphql.Args() args: OrderImageFindManyArgs
@@ -283,7 +358,13 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Queue], { name: "queuesQueuesOrderIdToorders" })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
+  })
   async findQueuesQueuesOrderIdToorders(
     @graphql.Parent() parent: Order,
     @graphql.Args() args: QueueFindManyArgs
@@ -300,7 +381,13 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Transaction], { name: "transactions" })
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "any",
+  })
   async findTransactions(
     @graphql.Parent() parent: Order,
     @graphql.Args() args: TransactionFindManyArgs
@@ -314,7 +401,13 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserRating], { name: "userRatings" })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "any",
+  })
   async findUserRatings(
     @graphql.Parent() parent: Order,
     @graphql.Args() args: UserRatingFindManyArgs
@@ -328,9 +421,15 @@ export class OrderResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Appointment, {
     nullable: true,
     name: "appointmentsOrdersAppointmentIdToappointments",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
   })
   async getAppointmentsOrdersAppointmentIdToappointments(
     @graphql.Parent() parent: Order
@@ -346,9 +445,15 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Discount, {
     nullable: true,
     name: "discounts",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "read",
+    possession: "any",
   })
   async getDiscounts(
     @graphql.Parent() parent: Order
@@ -361,9 +466,15 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Payment, {
     nullable: true,
     name: "payments",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "read",
+    possession: "any",
   })
   async getPayments(@graphql.Parent() parent: Order): Promise<Payment | null> {
     const result = await this.service.getPayments(parent.id);
@@ -374,9 +485,15 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Promocode, {
     nullable: true,
     name: "promocodes",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "read",
+    possession: "any",
   })
   async getPromocodes(
     @graphql.Parent() parent: Order
@@ -389,9 +506,15 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Queue, {
     nullable: true,
     name: "queuesOrdersQueueIdToqueues",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
   })
   async getQueuesOrdersQueueIdToqueues(
     @graphql.Parent() parent: Order
@@ -404,9 +527,15 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(@graphql.Parent() parent: Order): Promise<Salon | null> {
     const result = await this.service.getSalons(parent.id);
@@ -417,9 +546,15 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesOrdersEmployeeIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesOrdersEmployeeIdTouserProfiles(
     @graphql.Parent() parent: Order
@@ -435,9 +570,15 @@ export class OrderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesOrdersUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesOrdersUserIdTouserProfiles(
     @graphql.Parent() parent: Order

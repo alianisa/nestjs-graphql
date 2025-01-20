@@ -33,6 +33,7 @@ import { SalonRatingTitle } from "../salonRating/SalonRatingTitle";
 import { SalonTitle } from "../salon/SalonTitle";
 import { ScheduleTitle } from "../schedule/ScheduleTitle";
 import { TimeSlotTitle } from "../timeSlot/TimeSlotTitle";
+import { UserTitle } from "../user/UserTitle";
 import { UserAccountTitle } from "../userAccount/UserAccountTitle";
 import { UserAddressTitle } from "../userAddress/UserAddressTitle";
 import { UserBankCardTitle } from "../userBankCard/UserBankCardTitle";
@@ -154,7 +155,7 @@ export const UserProfileEdit = (props: EditProps): React.ReactElement => {
         <BooleanInput label="Is Employee" source="isEmployee" />
         <TextInput label="Job Title" source="jobTitle" />
         <TextInput label="Last Name" source="lastName" />
-        <div />
+        <TextInput label="Location" source="location" />
         <NumberInput step={1} label="Loyalty Points" source="loyaltyPoints" />
         <ReferenceArrayInput
           source="loyaltyTransactions"
@@ -221,7 +222,6 @@ export const UserProfileEdit = (props: EditProps): React.ReactElement => {
             format={(value: any) => value && value.map((v: any) => v.id)}
           />
         </ReferenceArrayInput>
-        <TextInput label="Roles" source="roles" />
         <ReferenceArrayInput source="salonAccounts" reference="SalonAccount">
           <SelectArrayInput
             optionText={SalonAccountTitle}
@@ -314,6 +314,9 @@ export const UserProfileEdit = (props: EditProps): React.ReactElement => {
           />
         </ReferenceArrayInput>
         <DateTimeInput label="Updated At" source="updatedAt" />
+        <ReferenceInput source="user.id" reference="User" label="User">
+          <SelectInput optionText={UserTitle} />
+        </ReferenceInput>
         <ReferenceArrayInput source="userAccounts" reference="UserAccount">
           <SelectArrayInput
             optionText={UserAccountTitle}
@@ -399,7 +402,6 @@ export const UserProfileEdit = (props: EditProps): React.ReactElement => {
             format={(value: any) => value && value.map((v: any) => v.id)}
           />
         </ReferenceArrayInput>
-        <TextInput label="Username" source="username" />
         <TextInput label="Website" source="website" />
       </SimpleForm>
     </Edit>

@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { VerificationCode } from "./VerificationCode";
 import { VerificationCodeCountArgs } from "./VerificationCodeCountArgs";
 import { VerificationCodeFindManyArgs } from "./VerificationCodeFindManyArgs";
@@ -21,10 +27,20 @@ import { CreateVerificationCodeArgs } from "./CreateVerificationCodeArgs";
 import { UpdateVerificationCodeArgs } from "./UpdateVerificationCodeArgs";
 import { DeleteVerificationCodeArgs } from "./DeleteVerificationCodeArgs";
 import { VerificationCodeService } from "../verificationCode.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => VerificationCode)
 export class VerificationCodeResolverBase {
-  constructor(protected readonly service: VerificationCodeService) {}
+  constructor(
+    protected readonly service: VerificationCodeService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "read",
+    possession: "any",
+  })
   async _verificationCodesMeta(
     @graphql.Args() args: VerificationCodeCountArgs
   ): Promise<MetaQueryPayload> {
@@ -34,14 +50,26 @@ export class VerificationCodeResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [VerificationCode])
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "read",
+    possession: "any",
+  })
   async verificationCodes(
     @graphql.Args() args: VerificationCodeFindManyArgs
   ): Promise<VerificationCode[]> {
     return this.service.verificationCodes(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => VerificationCode, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "read",
+    possession: "own",
+  })
   async verificationCode(
     @graphql.Args() args: VerificationCodeFindUniqueArgs
   ): Promise<VerificationCode | null> {
@@ -52,7 +80,13 @@ export class VerificationCodeResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => VerificationCode)
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "create",
+    possession: "any",
+  })
   async createVerificationCode(
     @graphql.Args() args: CreateVerificationCodeArgs
   ): Promise<VerificationCode> {
@@ -62,7 +96,13 @@ export class VerificationCodeResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => VerificationCode)
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "update",
+    possession: "any",
+  })
   async updateVerificationCode(
     @graphql.Args() args: UpdateVerificationCodeArgs
   ): Promise<VerificationCode | null> {
@@ -82,6 +122,11 @@ export class VerificationCodeResolverBase {
   }
 
   @graphql.Mutation(() => VerificationCode)
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "delete",
+    possession: "any",
+  })
   async deleteVerificationCode(
     @graphql.Args() args: DeleteVerificationCodeArgs
   ): Promise<VerificationCode | null> {

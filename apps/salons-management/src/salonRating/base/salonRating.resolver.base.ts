@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { SalonRating } from "./SalonRating";
 import { SalonRatingCountArgs } from "./SalonRatingCountArgs";
 import { SalonRatingFindManyArgs } from "./SalonRatingFindManyArgs";
@@ -25,10 +31,20 @@ import { SalonRatingLike } from "../../salonRatingLike/base/SalonRatingLike";
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { SalonRatingService } from "../salonRating.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => SalonRating)
 export class SalonRatingResolverBase {
-  constructor(protected readonly service: SalonRatingService) {}
+  constructor(
+    protected readonly service: SalonRatingService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "read",
+    possession: "any",
+  })
   async _salonRatingsMeta(
     @graphql.Args() args: SalonRatingCountArgs
   ): Promise<MetaQueryPayload> {
@@ -38,14 +54,26 @@ export class SalonRatingResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [SalonRating])
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "read",
+    possession: "any",
+  })
   async salonRatings(
     @graphql.Args() args: SalonRatingFindManyArgs
   ): Promise<SalonRating[]> {
     return this.service.salonRatings(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => SalonRating, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "read",
+    possession: "own",
+  })
   async salonRating(
     @graphql.Args() args: SalonRatingFindUniqueArgs
   ): Promise<SalonRating | null> {
@@ -56,7 +84,13 @@ export class SalonRatingResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => SalonRating)
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "create",
+    possession: "any",
+  })
   async createSalonRating(
     @graphql.Args() args: CreateSalonRatingArgs
   ): Promise<SalonRating> {
@@ -86,7 +120,13 @@ export class SalonRatingResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => SalonRating)
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "update",
+    possession: "any",
+  })
   async updateSalonRating(
     @graphql.Args() args: UpdateSalonRatingArgs
   ): Promise<SalonRating | null> {
@@ -127,6 +167,11 @@ export class SalonRatingResolverBase {
   }
 
   @graphql.Mutation(() => SalonRating)
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "delete",
+    possession: "any",
+  })
   async deleteSalonRating(
     @graphql.Args() args: DeleteSalonRatingArgs
   ): Promise<SalonRating | null> {
@@ -142,7 +187,13 @@ export class SalonRatingResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [SalonRatingLike], { name: "salonRatingLikes" })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "read",
+    possession: "any",
+  })
   async findSalonRatingLikes(
     @graphql.Parent() parent: SalonRating,
     @graphql.Args() args: SalonRatingLikeFindManyArgs
@@ -156,9 +207,15 @@ export class SalonRatingResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(
     @graphql.Parent() parent: SalonRating
@@ -171,9 +228,15 @@ export class SalonRatingResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesSalonRatingsUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesSalonRatingsUserIdTouserProfiles(
     @graphql.Parent() parent: SalonRating
@@ -189,9 +252,15 @@ export class SalonRatingResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesSalonRatingsVoterIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesSalonRatingsVoterIdTouserProfiles(
     @graphql.Parent() parent: SalonRating

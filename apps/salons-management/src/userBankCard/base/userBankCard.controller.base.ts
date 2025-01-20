@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { UserBankCardService } from "../userBankCard.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { UserBankCardCreateInput } from "./UserBankCardCreateInput";
 import { UserBankCard } from "./UserBankCard";
 import { UserBankCardFindManyArgs } from "./UserBankCardFindManyArgs";
 import { UserBankCardWhereUniqueInput } from "./UserBankCardWhereUniqueInput";
 import { UserBankCardUpdateInput } from "./UserBankCardUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserBankCardControllerBase {
-  constructor(protected readonly service: UserBankCardService) {}
+  constructor(
+    protected readonly service: UserBankCardService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: UserBankCard })
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createUserBankCard(
     @common.Body() data: UserBankCardCreateInput
   ): Promise<UserBankCard> {
@@ -61,9 +79,18 @@ export class UserBankCardControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [UserBankCard] })
   @ApiNestedQuery(UserBankCardFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userBankCards(@common.Req() request: Request): Promise<UserBankCard[]> {
     const args = plainToClass(UserBankCardFindManyArgs, request.query);
     return this.service.userBankCards({
@@ -89,9 +116,18 @@ export class UserBankCardControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: UserBankCard })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userBankCard(
     @common.Param() params: UserBankCardWhereUniqueInput
   ): Promise<UserBankCard | null> {
@@ -124,9 +160,18 @@ export class UserBankCardControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: UserBankCard })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateUserBankCard(
     @common.Param() params: UserBankCardWhereUniqueInput,
     @common.Body() data: UserBankCardUpdateInput
@@ -175,6 +220,14 @@ export class UserBankCardControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: UserBankCard })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteUserBankCard(
     @common.Param() params: UserBankCardWhereUniqueInput
   ): Promise<UserBankCard | null> {

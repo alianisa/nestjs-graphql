@@ -25,7 +25,6 @@ import { EmployeeTaskListRelationFilter } from "../../employeeTask/base/Employee
 import { EmployeeWorkScheduleListRelationFilter } from "../../employeeWorkSchedule/base/EmployeeWorkScheduleListRelationFilter";
 import { BooleanNullableFilter } from "../../util/BooleanNullableFilter";
 import { StringFilter } from "../../util/StringFilter";
-import { JsonFilter } from "../../util/JsonFilter";
 import { IntNullableFilter } from "../../util/IntNullableFilter";
 import { LoyaltyTransactionListRelationFilter } from "../../loyaltyTransaction/base/LoyaltyTransactionListRelationFilter";
 import { NotificationListRelationFilter } from "../../notification/base/NotificationListRelationFilter";
@@ -39,6 +38,7 @@ import { SalonListRelationFilter } from "../../salon/base/SalonListRelationFilte
 import { SalonWhereUniqueInput } from "../../salon/base/SalonWhereUniqueInput";
 import { ScheduleListRelationFilter } from "../../schedule/base/ScheduleListRelationFilter";
 import { TimeSlotListRelationFilter } from "../../timeSlot/base/TimeSlotListRelationFilter";
+import { UserWhereUniqueInput } from "../../user/base/UserWhereUniqueInput";
 import { UserAccountListRelationFilter } from "../../userAccount/base/UserAccountListRelationFilter";
 import { UserAddressListRelationFilter } from "../../userAddress/base/UserAddressListRelationFilter";
 import { UserBankCardListRelationFilter } from "../../userBankCard/base/UserBankCardListRelationFilter";
@@ -370,17 +370,6 @@ class UserProfileWhereInput {
 
   @ApiProperty({
     required: false,
-    type: JsonFilter,
-  })
-  @Type(() => JsonFilter)
-  @IsOptional()
-  @Field(() => JsonFilter, {
-    nullable: true,
-  })
-  location?: JsonFilter;
-
-  @ApiProperty({
-    required: false,
     type: IntNullableFilter,
   })
   @Type(() => IntNullableFilter)
@@ -484,17 +473,6 @@ class UserProfileWhereInput {
     nullable: true,
   })
   queuesQueuesUserIdTouserProfiles?: QueueListRelationFilter;
-
-  @ApiProperty({
-    required: false,
-    type: StringFilter,
-  })
-  @Type(() => StringFilter)
-  @IsOptional()
-  @Field(() => StringFilter, {
-    nullable: true,
-  })
-  roles?: StringFilter;
 
   @ApiProperty({
     required: false,
@@ -629,6 +607,18 @@ class UserProfileWhereInput {
 
   @ApiProperty({
     required: false,
+    type: () => UserWhereUniqueInput,
+  })
+  @ValidateNested()
+  @Type(() => UserWhereUniqueInput)
+  @IsOptional()
+  @Field(() => UserWhereUniqueInput, {
+    nullable: true,
+  })
+  user?: UserWhereUniqueInput;
+
+  @ApiProperty({
+    required: false,
     type: () => UserAccountListRelationFilter,
   })
   @ValidateNested()
@@ -746,17 +736,6 @@ class UserProfileWhereInput {
     nullable: true,
   })
   userRatingsUserRatingsUserIdTouserProfiles?: UserRatingListRelationFilter;
-
-  @ApiProperty({
-    required: false,
-    type: StringNullableFilter,
-  })
-  @Type(() => StringNullableFilter)
-  @IsOptional()
-  @Field(() => StringNullableFilter, {
-    nullable: true,
-  })
-  username?: StringNullableFilter;
 
   @ApiProperty({
     required: false,

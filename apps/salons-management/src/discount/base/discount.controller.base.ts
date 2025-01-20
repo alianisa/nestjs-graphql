@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { DiscountService } from "../discount.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { DiscountCreateInput } from "./DiscountCreateInput";
 import { Discount } from "./Discount";
 import { DiscountFindManyArgs } from "./DiscountFindManyArgs";
@@ -29,10 +33,24 @@ import { PromocodeFindManyArgs } from "../../promocode/base/PromocodeFindManyArg
 import { Promocode } from "../../promocode/base/Promocode";
 import { PromocodeWhereUniqueInput } from "../../promocode/base/PromocodeWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class DiscountControllerBase {
-  constructor(protected readonly service: DiscountService) {}
+  constructor(
+    protected readonly service: DiscountService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Discount })
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createDiscount(
     @common.Body() data: DiscountCreateInput
   ): Promise<Discount> {
@@ -58,9 +76,18 @@ export class DiscountControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Discount] })
   @ApiNestedQuery(DiscountFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async discounts(@common.Req() request: Request): Promise<Discount[]> {
     const args = plainToClass(DiscountFindManyArgs, request.query);
     return this.service.discounts({
@@ -85,9 +112,18 @@ export class DiscountControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Discount })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async discount(
     @common.Param() params: DiscountWhereUniqueInput
   ): Promise<Discount | null> {
@@ -119,9 +155,18 @@ export class DiscountControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Discount })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateDiscount(
     @common.Param() params: DiscountWhereUniqueInput,
     @common.Body() data: DiscountUpdateInput
@@ -161,6 +206,14 @@ export class DiscountControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Discount })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteDiscount(
     @common.Param() params: DiscountWhereUniqueInput
   ): Promise<Discount | null> {
@@ -195,8 +248,14 @@ export class DiscountControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/orders")
   @ApiNestedQuery(OrderFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async findOrders(
     @common.Req() request: Request,
     @common.Param() params: DiscountWhereUniqueInput
@@ -288,6 +347,11 @@ export class DiscountControllerBase {
   }
 
   @common.Post("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "update",
+    possession: "any",
+  })
   async connectOrders(
     @common.Param() params: DiscountWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -305,6 +369,11 @@ export class DiscountControllerBase {
   }
 
   @common.Patch("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "update",
+    possession: "any",
+  })
   async updateOrders(
     @common.Param() params: DiscountWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -322,6 +391,11 @@ export class DiscountControllerBase {
   }
 
   @common.Delete("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "update",
+    possession: "any",
+  })
   async disconnectOrders(
     @common.Param() params: DiscountWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -338,8 +412,14 @@ export class DiscountControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/promocodes")
   @ApiNestedQuery(PromocodeFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "read",
+    possession: "any",
+  })
   async findPromocodes(
     @common.Req() request: Request,
     @common.Param() params: DiscountWhereUniqueInput
@@ -376,6 +456,11 @@ export class DiscountControllerBase {
   }
 
   @common.Post("/:id/promocodes")
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "update",
+    possession: "any",
+  })
   async connectPromocodes(
     @common.Param() params: DiscountWhereUniqueInput,
     @common.Body() body: PromocodeWhereUniqueInput[]
@@ -393,6 +478,11 @@ export class DiscountControllerBase {
   }
 
   @common.Patch("/:id/promocodes")
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "update",
+    possession: "any",
+  })
   async updatePromocodes(
     @common.Param() params: DiscountWhereUniqueInput,
     @common.Body() body: PromocodeWhereUniqueInput[]
@@ -410,6 +500,11 @@ export class DiscountControllerBase {
   }
 
   @common.Delete("/:id/promocodes")
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "update",
+    possession: "any",
+  })
   async disconnectPromocodes(
     @common.Param() params: DiscountWhereUniqueInput,
     @common.Body() body: PromocodeWhereUniqueInput[]

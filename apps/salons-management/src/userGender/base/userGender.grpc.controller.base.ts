@@ -166,7 +166,6 @@ export class UserGenderGrpcControllerBase {
         location: true,
         loyaltyPoints: true,
         phone: true,
-        roles: true,
 
         salonsUserProfilesSalonIdTosalons: {
           select: {
@@ -175,6 +174,12 @@ export class UserGenderGrpcControllerBase {
         },
 
         updatedAt: true,
+
+        user: {
+          select: {
+            id: true,
+          },
+        },
 
         userGenders: {
           select: {
@@ -188,7 +193,6 @@ export class UserGenderGrpcControllerBase {
           },
         },
 
-        username: true,
         website: true,
       },
     });

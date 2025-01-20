@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { UserFavoriteSalon } from "./UserFavoriteSalon";
 import { UserFavoriteSalonCountArgs } from "./UserFavoriteSalonCountArgs";
 import { UserFavoriteSalonFindManyArgs } from "./UserFavoriteSalonFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteUserFavoriteSalonArgs } from "./DeleteUserFavoriteSalonArgs";
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserFavoriteSalonService } from "../userFavoriteSalon.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => UserFavoriteSalon)
 export class UserFavoriteSalonResolverBase {
-  constructor(protected readonly service: UserFavoriteSalonService) {}
+  constructor(
+    protected readonly service: UserFavoriteSalonService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "read",
+    possession: "any",
+  })
   async _userFavoriteSalonsMeta(
     @graphql.Args() args: UserFavoriteSalonCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class UserFavoriteSalonResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [UserFavoriteSalon])
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "read",
+    possession: "any",
+  })
   async userFavoriteSalons(
     @graphql.Args() args: UserFavoriteSalonFindManyArgs
   ): Promise<UserFavoriteSalon[]> {
     return this.service.userFavoriteSalons(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => UserFavoriteSalon, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "read",
+    possession: "own",
+  })
   async userFavoriteSalon(
     @graphql.Args() args: UserFavoriteSalonFindUniqueArgs
   ): Promise<UserFavoriteSalon | null> {
@@ -54,7 +82,13 @@ export class UserFavoriteSalonResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserFavoriteSalon)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "create",
+    possession: "any",
+  })
   async createUserFavoriteSalon(
     @graphql.Args() args: CreateUserFavoriteSalonArgs
   ): Promise<UserFavoriteSalon> {
@@ -76,7 +110,13 @@ export class UserFavoriteSalonResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserFavoriteSalon)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "update",
+    possession: "any",
+  })
   async updateUserFavoriteSalon(
     @graphql.Args() args: UpdateUserFavoriteSalonArgs
   ): Promise<UserFavoriteSalon | null> {
@@ -108,6 +148,11 @@ export class UserFavoriteSalonResolverBase {
   }
 
   @graphql.Mutation(() => UserFavoriteSalon)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUserFavoriteSalon(
     @graphql.Args() args: DeleteUserFavoriteSalonArgs
   ): Promise<UserFavoriteSalon | null> {
@@ -123,9 +168,15 @@ export class UserFavoriteSalonResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(
     @graphql.Parent() parent: UserFavoriteSalon
@@ -138,9 +189,15 @@ export class UserFavoriteSalonResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: UserFavoriteSalon

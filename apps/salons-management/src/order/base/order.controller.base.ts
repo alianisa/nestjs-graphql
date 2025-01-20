@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { OrderService } from "../order.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { OrderCreateInput } from "./OrderCreateInput";
 import { Order } from "./Order";
 import { OrderFindManyArgs } from "./OrderFindManyArgs";
@@ -47,10 +51,24 @@ import { UserRatingFindManyArgs } from "../../userRating/base/UserRatingFindMany
 import { UserRating } from "../../userRating/base/UserRating";
 import { UserRatingWhereUniqueInput } from "../../userRating/base/UserRatingWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class OrderControllerBase {
-  constructor(protected readonly service: OrderService) {}
+  constructor(
+    protected readonly service: OrderService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Order })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createOrder(@common.Body() data: OrderCreateInput): Promise<Order> {
     return await this.service.createOrder({
       data: {
@@ -176,9 +194,18 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Order] })
   @ApiNestedQuery(OrderFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async orders(@common.Req() request: Request): Promise<Order[]> {
     const args = plainToClass(OrderFindManyArgs, request.query);
     return this.service.orders({
@@ -260,9 +287,18 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Order })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async order(
     @common.Param() params: OrderWhereUniqueInput
   ): Promise<Order | null> {
@@ -351,9 +387,18 @@ export class OrderControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Order })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateOrder(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() data: OrderUpdateInput
@@ -495,6 +540,14 @@ export class OrderControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Order })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteOrder(
     @common.Param() params: OrderWhereUniqueInput
   ): Promise<Order | null> {
@@ -586,8 +639,14 @@ export class OrderControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/appointmentsAppointmentsOrderIdToorders")
   @ApiNestedQuery(AppointmentFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
+  })
   async findAppointmentsAppointmentsOrderIdToorders(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -632,6 +691,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/appointmentsAppointmentsOrderIdToorders")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectAppointmentsAppointmentsOrderIdToorders(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: AppointmentWhereUniqueInput[]
@@ -649,6 +713,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/appointmentsAppointmentsOrderIdToorders")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateAppointmentsAppointmentsOrderIdToorders(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: AppointmentWhereUniqueInput[]
@@ -666,6 +735,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/appointmentsAppointmentsOrderIdToorders")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectAppointmentsAppointmentsOrderIdToorders(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: AppointmentWhereUniqueInput[]
@@ -682,8 +756,14 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/deposits")
   @ApiNestedQuery(DepositFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "read",
+    possession: "any",
+  })
   async findDeposits(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -718,6 +798,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/deposits")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectDeposits(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: DepositWhereUniqueInput[]
@@ -735,6 +820,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/deposits")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateDeposits(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: DepositWhereUniqueInput[]
@@ -752,6 +842,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/deposits")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectDeposits(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: DepositWhereUniqueInput[]
@@ -768,8 +863,14 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/employeeTasks")
   @ApiNestedQuery(EmployeeTaskFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "any",
+  })
   async findEmployeeTasks(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -832,6 +933,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/employeeTasks")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectEmployeeTasks(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: EmployeeTaskWhereUniqueInput[]
@@ -849,6 +955,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/employeeTasks")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateEmployeeTasks(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: EmployeeTaskWhereUniqueInput[]
@@ -866,6 +977,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/employeeTasks")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectEmployeeTasks(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: EmployeeTaskWhereUniqueInput[]
@@ -882,8 +998,14 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/loyaltyTransactions")
   @ApiNestedQuery(LoyaltyTransactionFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "any",
+  })
   async findLoyaltyTransactions(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -922,6 +1044,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/loyaltyTransactions")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectLoyaltyTransactions(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: LoyaltyTransactionWhereUniqueInput[]
@@ -939,6 +1066,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/loyaltyTransactions")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateLoyaltyTransactions(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: LoyaltyTransactionWhereUniqueInput[]
@@ -956,6 +1088,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/loyaltyTransactions")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectLoyaltyTransactions(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: LoyaltyTransactionWhereUniqueInput[]
@@ -972,8 +1109,14 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/orderImages")
   @ApiNestedQuery(OrderImageFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "read",
+    possession: "any",
+  })
   async findOrderImages(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -1002,6 +1145,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/orderImages")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectOrderImages(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: OrderImageWhereUniqueInput[]
@@ -1019,6 +1167,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/orderImages")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateOrderImages(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: OrderImageWhereUniqueInput[]
@@ -1036,6 +1189,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/orderImages")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectOrderImages(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: OrderImageWhereUniqueInput[]
@@ -1052,8 +1210,14 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/queuesQueuesOrderIdToorders")
   @ApiNestedQuery(QueueFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
+  })
   async findQueuesQueuesOrderIdToorders(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -1109,6 +1273,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/queuesQueuesOrderIdToorders")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectQueuesQueuesOrderIdToorders(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: QueueWhereUniqueInput[]
@@ -1126,6 +1295,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/queuesQueuesOrderIdToorders")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateQueuesQueuesOrderIdToorders(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: QueueWhereUniqueInput[]
@@ -1143,6 +1317,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/queuesQueuesOrderIdToorders")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectQueuesQueuesOrderIdToorders(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: QueueWhereUniqueInput[]
@@ -1159,8 +1338,14 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/transactions")
   @ApiNestedQuery(TransactionFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "any",
+  })
   async findTransactions(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -1199,6 +1384,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/transactions")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectTransactions(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: TransactionWhereUniqueInput[]
@@ -1216,6 +1406,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/transactions")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateTransactions(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: TransactionWhereUniqueInput[]
@@ -1233,6 +1428,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/transactions")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectTransactions(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: TransactionWhereUniqueInput[]
@@ -1249,8 +1449,14 @@ export class OrderControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/userRatings")
   @ApiNestedQuery(UserRatingFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "any",
+  })
   async findUserRatings(
     @common.Req() request: Request,
     @common.Param() params: OrderWhereUniqueInput
@@ -1293,6 +1499,11 @@ export class OrderControllerBase {
   }
 
   @common.Post("/:id/userRatings")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async connectUserRatings(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: UserRatingWhereUniqueInput[]
@@ -1310,6 +1521,11 @@ export class OrderControllerBase {
   }
 
   @common.Patch("/:id/userRatings")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async updateUserRatings(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: UserRatingWhereUniqueInput[]
@@ -1327,6 +1543,11 @@ export class OrderControllerBase {
   }
 
   @common.Delete("/:id/userRatings")
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "update",
+    possession: "any",
+  })
   async disconnectUserRatings(
     @common.Param() params: OrderWhereUniqueInput,
     @common.Body() body: UserRatingWhereUniqueInput[]

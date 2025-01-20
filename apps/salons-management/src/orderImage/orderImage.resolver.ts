@@ -1,11 +1,20 @@
 import * as graphql from "@nestjs/graphql";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
 import { OrderImageResolverBase } from "./base/orderImage.resolver.base";
 import { OrderImage } from "./base/OrderImage";
 import { OrderImageService } from "./orderImage.service";
 
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => OrderImage)
 export class OrderImageResolver extends OrderImageResolverBase {
-  constructor(protected readonly service: OrderImageService) {
-    super(service);
+  constructor(
+    protected readonly service: OrderImageService,
+    @nestAccessControl.InjectRolesBuilder()
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {
+    super(service, rolesBuilder);
   }
 }

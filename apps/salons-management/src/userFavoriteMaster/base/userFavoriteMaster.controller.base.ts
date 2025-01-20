@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { UserFavoriteMasterService } from "../userFavoriteMaster.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { UserFavoriteMasterCreateInput } from "./UserFavoriteMasterCreateInput";
 import { UserFavoriteMaster } from "./UserFavoriteMaster";
 import { UserFavoriteMasterFindManyArgs } from "./UserFavoriteMasterFindManyArgs";
 import { UserFavoriteMasterWhereUniqueInput } from "./UserFavoriteMasterWhereUniqueInput";
 import { UserFavoriteMasterUpdateInput } from "./UserFavoriteMasterUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserFavoriteMasterControllerBase {
-  constructor(protected readonly service: UserFavoriteMasterService) {}
+  constructor(
+    protected readonly service: UserFavoriteMasterService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: UserFavoriteMaster })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createUserFavoriteMaster(
     @common.Body() data: UserFavoriteMasterCreateInput
   ): Promise<UserFavoriteMaster> {
@@ -66,9 +84,18 @@ export class UserFavoriteMasterControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [UserFavoriteMaster] })
   @ApiNestedQuery(UserFavoriteMasterFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userFavoriteMasters(
     @common.Req() request: Request
   ): Promise<UserFavoriteMaster[]> {
@@ -95,9 +122,18 @@ export class UserFavoriteMasterControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: UserFavoriteMaster })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userFavoriteMaster(
     @common.Param() params: UserFavoriteMasterWhereUniqueInput
   ): Promise<UserFavoriteMaster | null> {
@@ -129,9 +165,18 @@ export class UserFavoriteMasterControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: UserFavoriteMaster })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateUserFavoriteMaster(
     @common.Param() params: UserFavoriteMasterWhereUniqueInput,
     @common.Body() data: UserFavoriteMasterUpdateInput
@@ -185,6 +230,14 @@ export class UserFavoriteMasterControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: UserFavoriteMaster })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteUserFavoriteMaster(
     @common.Param() params: UserFavoriteMasterWhereUniqueInput
   ): Promise<UserFavoriteMaster | null> {

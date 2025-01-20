@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { TimeSlotService } from "../timeSlot.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { TimeSlotCreateInput } from "./TimeSlotCreateInput";
 import { TimeSlot } from "./TimeSlot";
 import { TimeSlotFindManyArgs } from "./TimeSlotFindManyArgs";
@@ -26,10 +30,24 @@ import { AppointmentFindManyArgs } from "../../appointment/base/AppointmentFindM
 import { Appointment } from "../../appointment/base/Appointment";
 import { AppointmentWhereUniqueInput } from "../../appointment/base/AppointmentWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class TimeSlotControllerBase {
-  constructor(protected readonly service: TimeSlotService) {}
+  constructor(
+    protected readonly service: TimeSlotService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: TimeSlot })
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createTimeSlot(
     @common.Body() data: TimeSlotCreateInput
   ): Promise<TimeSlot> {
@@ -75,9 +93,18 @@ export class TimeSlotControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [TimeSlot] })
   @ApiNestedQuery(TimeSlotFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async timeSlots(@common.Req() request: Request): Promise<TimeSlot[]> {
     const args = plainToClass(TimeSlotFindManyArgs, request.query);
     return this.service.timeSlots({
@@ -108,9 +135,18 @@ export class TimeSlotControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: TimeSlot })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async timeSlot(
     @common.Param() params: TimeSlotWhereUniqueInput
   ): Promise<TimeSlot | null> {
@@ -148,9 +184,18 @@ export class TimeSlotControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: TimeSlot })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateTimeSlot(
     @common.Param() params: TimeSlotWhereUniqueInput,
     @common.Body() data: TimeSlotUpdateInput
@@ -210,6 +255,14 @@ export class TimeSlotControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: TimeSlot })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteTimeSlot(
     @common.Param() params: TimeSlotWhereUniqueInput
   ): Promise<TimeSlot | null> {
@@ -250,8 +303,14 @@ export class TimeSlotControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/appointments")
   @ApiNestedQuery(AppointmentFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
+  })
   async findAppointments(
     @common.Req() request: Request,
     @common.Param() params: TimeSlotWhereUniqueInput
@@ -292,6 +351,11 @@ export class TimeSlotControllerBase {
   }
 
   @common.Post("/:id/appointments")
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "update",
+    possession: "any",
+  })
   async connectAppointments(
     @common.Param() params: TimeSlotWhereUniqueInput,
     @common.Body() body: AppointmentWhereUniqueInput[]
@@ -309,6 +373,11 @@ export class TimeSlotControllerBase {
   }
 
   @common.Patch("/:id/appointments")
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "update",
+    possession: "any",
+  })
   async updateAppointments(
     @common.Param() params: TimeSlotWhereUniqueInput,
     @common.Body() body: AppointmentWhereUniqueInput[]
@@ -326,6 +395,11 @@ export class TimeSlotControllerBase {
   }
 
   @common.Delete("/:id/appointments")
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "update",
+    possession: "any",
+  })
   async disconnectAppointments(
     @common.Param() params: TimeSlotWhereUniqueInput,
     @common.Body() body: AppointmentWhereUniqueInput[]

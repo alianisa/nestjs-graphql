@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { SalonRatingService } from "../salonRating.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { SalonRatingCreateInput } from "./SalonRatingCreateInput";
 import { SalonRating } from "./SalonRating";
 import { SalonRatingFindManyArgs } from "./SalonRatingFindManyArgs";
@@ -26,10 +30,24 @@ import { SalonRatingLikeFindManyArgs } from "../../salonRatingLike/base/SalonRat
 import { SalonRatingLike } from "../../salonRatingLike/base/SalonRatingLike";
 import { SalonRatingLikeWhereUniqueInput } from "../../salonRatingLike/base/SalonRatingLikeWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class SalonRatingControllerBase {
-  constructor(protected readonly service: SalonRatingService) {}
+  constructor(
+    protected readonly service: SalonRatingService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: SalonRating })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createSalonRating(
     @common.Body() data: SalonRatingCreateInput
   ): Promise<SalonRating> {
@@ -82,9 +100,18 @@ export class SalonRatingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [SalonRating] })
   @ApiNestedQuery(SalonRatingFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonRatings(@common.Req() request: Request): Promise<SalonRating[]> {
     const args = plainToClass(SalonRatingFindManyArgs, request.query);
     return this.service.salonRatings({
@@ -116,9 +143,18 @@ export class SalonRatingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: SalonRating })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonRating(
     @common.Param() params: SalonRatingWhereUniqueInput
   ): Promise<SalonRating | null> {
@@ -157,9 +193,18 @@ export class SalonRatingControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: SalonRating })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateSalonRating(
     @common.Param() params: SalonRatingWhereUniqueInput,
     @common.Body() data: SalonRatingUpdateInput
@@ -226,6 +271,14 @@ export class SalonRatingControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: SalonRating })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteSalonRating(
     @common.Param() params: SalonRatingWhereUniqueInput
   ): Promise<SalonRating | null> {
@@ -267,8 +320,14 @@ export class SalonRatingControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/salonRatingLikes")
   @ApiNestedQuery(SalonRatingLikeFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "read",
+    possession: "any",
+  })
   async findSalonRatingLikes(
     @common.Req() request: Request,
     @common.Param() params: SalonRatingWhereUniqueInput
@@ -315,6 +374,11 @@ export class SalonRatingControllerBase {
   }
 
   @common.Post("/:id/salonRatingLikes")
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "update",
+    possession: "any",
+  })
   async connectSalonRatingLikes(
     @common.Param() params: SalonRatingWhereUniqueInput,
     @common.Body() body: SalonRatingLikeWhereUniqueInput[]
@@ -332,6 +396,11 @@ export class SalonRatingControllerBase {
   }
 
   @common.Patch("/:id/salonRatingLikes")
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "update",
+    possession: "any",
+  })
   async updateSalonRatingLikes(
     @common.Param() params: SalonRatingWhereUniqueInput,
     @common.Body() body: SalonRatingLikeWhereUniqueInput[]
@@ -349,6 +418,11 @@ export class SalonRatingControllerBase {
   }
 
   @common.Delete("/:id/salonRatingLikes")
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "update",
+    possession: "any",
+  })
   async disconnectSalonRatingLikes(
     @common.Param() params: SalonRatingWhereUniqueInput,
     @common.Body() body: SalonRatingLikeWhereUniqueInput[]

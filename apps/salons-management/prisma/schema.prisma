@@ -7,299 +7,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model AuditLogEntry {
-  createdAt  DateTime? @map("created_at") @db.Timestamptz(6)
-  id         String    @id @default(cuid()) @db.Uuid
-  instanceId String?   @map("instance_id") @db.Uuid
-  ipAddress  String    @default("") @map("ip_address") @db.VarChar(64)
-  payload    Json?     @db.Json
-
-  @@index([instanceId], map: "audit_logs_instance_id_idx")
-  @@map("audit_log_entries")
-  @@schema("auth")
-}
-
-model FlowState {
-  authCode              String                           @map("auth_code")
-  authCodeIssuedAt      DateTime?                        @map("auth_code_issued_at") @db.Timestamptz(6)
-  authenticationMethod  String                           @map("authentication_method")
-  codeChallenge         String                           @map("code_challenge")
-  code_challenge_method EnumFlowStateCodeChallengeMethod
-  createdAt             DateTime?                        @map("created_at") @db.Timestamptz(6)
-  id                    String                           @id @default(cuid()) @db.Uuid
-  providerAccessToken   String?                          @map("provider_access_token")
-  providerRefreshToken  String?                          @map("provider_refresh_token")
-  providerType          String                           @map("provider_type")
-  samlRelayStates       SamlRelayState[]
-  updatedAt             DateTime?                        @map("updated_at") @db.Timestamptz(6)
-  userId                String?                          @map("user_id") @db.Uuid
-
-  @@index([createdAt(sort: Desc)])
-  @@index([authCode], map: "idx_auth_code")
-  @@index([userId, authenticationMethod], map: "idx_user_id_auth_method")
-  @@map("flow_state")
-  @@schema("auth")
-}
-
-model Identity {
-  createdAt    DateTime? @map("created_at") @db.Timestamptz(6)
-  email        String?   @default(dbgenerated("lower((identity_data ->> 'email'::text))"))
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  identityData Json      @map("identity_data")
-  lastSignInAt DateTime? @map("last_sign_in_at") @db.Timestamptz(6)
-  provider     String
-  providerId   String    @map("provider_id")
-  updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
-  users        User      @relation(fields: [user_id], references: [id])
-  user_id      String
-
-  @@unique([providerId, provider], map: "identities_provider_id_provider_unique")
-  @@index([email])
-  @@index([user_id])
-  @@map("identities")
-  @@schema("auth")
-}
-
-model Instance {
-  createdAt     DateTime? @map("created_at") @db.Timestamptz(6)
-  id            String    @id @default(cuid()) @db.Uuid
-  rawBaseConfig String?   @map("raw_base_config")
-  updatedAt     DateTime? @map("updated_at") @db.Timestamptz(6)
-  uuid          String?   @db.Uuid
-
-  @@map("instances")
-  @@schema("auth")
-}
-
-model MfaAmrClaim {
-  authenticationMethod String   @map("authentication_method")
-  createdAt            DateTime @map("created_at") @db.Timestamptz(6)
-  id                   String   @id(map: "amr_id_pk") @default(cuid()) @db.Uuid
-  sessions             Session  @relation(fields: [session_id], references: [id])
-  session_id           String
-  updatedAt            DateTime @map("updated_at") @db.Timestamptz(6)
-
-  @@unique([session_id, authenticationMethod], map: "mfa_amr_claims_session_id_authentication_method_pkey")
-  @@map("mfa_amr_claims")
-  @@schema("auth")
-}
-
-model MfaChallenge {
-  createdAt           DateTime  @map("created_at") @db.Timestamptz(6)
-  id                  String    @id @default(cuid()) @db.Uuid
-  ipAddress           String    @map("ip_address") @db.Inet
-  mfaFactors          MfaFactor @relation(fields: [factor_id], references: [id])
-  factor_id           String
-  otpCode             String?   @map("otp_code")
-  verifiedAt          DateTime? @map("verified_at") @db.Timestamptz(6)
-  webAuthnSessionData Json?     @map("web_authn_session_data")
-
-  @@index([createdAt(sort: Desc)], map: "mfa_challenge_created_at_idx")
-  @@map("mfa_challenges")
-  @@schema("auth")
-}
-
-model MfaFactor {
-  createdAt          DateTime                @map("created_at") @db.Timestamptz(6)
-  factor_type        EnumMfaFactorFactorType
-  friendlyName       String?                 @map("friendly_name")
-  id                 String                  @id @default(cuid()) @db.Uuid
-  lastChallengedAt   DateTime?               @unique @map("last_challenged_at") @db.Timestamptz(6)
-  mfaChallenges      MfaChallenge[]
-  phone              String?
-  secret             String?
-  status             EnumMfaFactorStatus
-  updatedAt          DateTime                @map("updated_at") @db.Timestamptz(6)
-  users              User                    @relation(fields: [user_id], references: [id])
-  user_id            String
-  webAuthnAaguid     String?                 @map("web_authn_aaguid") @db.Uuid
-  webAuthnCredential Json?                   @map("web_authn_credential")
-
-  @@unique([user_id, phone], map: "unique_phone_factor_per_user")
-  @@index([user_id, createdAt], map: "factor_id_created_at_idx")
-  @@index([user_id])
-  @@map("mfa_factors")
-  @@schema("auth")
-}
-
-model OneTimeToken {
-  createdAt  DateTime                  @default(now()) @map("created_at") @db.Timestamp(6)
-  id         String                    @id @default(cuid()) @db.Uuid
-  relatesTo  String                    @map("relates_to")
-  tokenHash  String                    @map("token_hash")
-  token_type EnumOneTimeTokenTokenType
-  updatedAt  DateTime                  @default(now()) @map("updated_at") @db.Timestamp(6)
-  users      User                      @relation(fields: [user_id], references: [id])
-  user_id    String
-
-  @@unique([user_id, token_type])
-  @@index([relatesTo], map: "one_time_tokens_relates_to_hash_idx", type: Hash)
-  @@index([tokenHash], map: "one_time_tokens_token_hash_hash_idx", type: Hash)
-  @@map("one_time_tokens")
-  @@schema("auth")
-}
-
-model RefreshToken {
-  createdAt  DateTime? @map("created_at") @db.Timestamptz(6)
-  id         BigInt    @id @default(autoincrement())
-  instanceId String?   @map("instance_id") @db.Uuid
-  parent     String?   @db.VarChar(255)
-  revoked    Boolean?
-  sessions   Session?  @relation(fields: [session_id], references: [id])
-  session_id String?
-  token      String?   @unique @db.VarChar(255)
-  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
-  userId     String?   @map("user_id") @db.VarChar(255)
-
-  @@index([instanceId])
-  @@index([instanceId, userId])
-  @@index([parent])
-  @@index([session_id, revoked])
-  @@index([updatedAt(sort: Desc)])
-  @@map("refresh_tokens")
-  @@schema("auth")
-}
-
-model SamlProvider {
-  attributeMapping Json?       @map("attribute_mapping")
-  createdAt        DateTime?   @map("created_at") @db.Timestamptz(6)
-  entityId         String      @unique @map("entity_id")
-  id               String      @id @default(cuid()) @db.Uuid
-  metadataUrl      String?     @map("metadata_url")
-  metadataXml      String      @map("metadata_xml")
-  nameIdFormat     String?     @map("name_id_format")
-  ssoProviders     SsoProvider @relation(fields: [sso_provider_id], references: [id])
-  sso_provider_id  String
-  updatedAt        DateTime?   @map("updated_at") @db.Timestamptz(6)
-
-  @@index([sso_provider_id])
-  @@map("saml_providers")
-  @@schema("auth")
-}
-
-model SamlRelayState {
-  createdAt       DateTime?   @map("created_at") @db.Timestamptz(6)
-  flowState       FlowState?  @relation(fields: [flow_state_id], references: [id])
-  flow_state_id   String?
-  forEmail        String?     @map("for_email")
-  id              String      @id @default(cuid()) @db.Uuid
-  redirectTo      String?     @map("redirect_to")
-  requestId       String      @map("request_id")
-  ssoProviders    SsoProvider @relation(fields: [sso_provider_id], references: [id])
-  sso_provider_id String
-  updatedAt       DateTime?   @map("updated_at") @db.Timestamptz(6)
-
-  @@index([createdAt(sort: Desc)])
-  @@index([forEmail])
-  @@index([sso_provider_id])
-  @@map("saml_relay_states")
-  @@schema("auth")
-}
-
-model SchemaMigration {
-  id String @id @default(cuid()) @map("version") @db.VarChar(255)
-
-  @@map("schema_migrations")
-  @@schema("auth")
-}
-
-model Session {
-  aal           EnumSessionAal?
-  createdAt     DateTime?       @map("created_at") @db.Timestamptz(6)
-  factorId      String?         @map("factor_id") @db.Uuid
-  id            String          @id @default(cuid()) @db.Uuid
-  ip            String?         @db.Inet
-  mfaAmrClaims  MfaAmrClaim[]
-  notAfter      DateTime?       @map("not_after") @db.Timestamptz(6)
-  refreshTokens RefreshToken[]
-  refreshedAt   DateTime?       @map("refreshed_at") @db.Timestamp(6)
-  tag           String?
-  updatedAt     DateTime?       @map("updated_at") @db.Timestamptz(6)
-  userAgent     String?         @map("user_agent")
-  users         User            @relation(fields: [user_id], references: [id])
-  user_id       String
-
-  @@index([notAfter(sort: Desc)])
-  @@index([user_id])
-  @@index([user_id, createdAt], map: "user_id_created_at_idx")
-  @@map("sessions")
-  @@schema("auth")
-}
-
-model SsoDomain {
-  createdAt       DateTime?   @map("created_at") @db.Timestamptz(6)
-  domain          String
-  id              String      @id @default(cuid()) @db.Uuid
-  ssoProviders    SsoProvider @relation(fields: [sso_provider_id], references: [id])
-  sso_provider_id String
-  updatedAt       DateTime?   @map("updated_at") @db.Timestamptz(6)
-
-  @@index([sso_provider_id])
-  @@map("sso_domains")
-  @@schema("auth")
-}
-
-model SsoProvider {
-  createdAt       DateTime?        @map("created_at") @db.Timestamptz(6)
-  id              String           @id @default(cuid()) @db.Uuid
-  resourceId      String?          @map("resource_id")
-  samlProviders   SamlProvider[]
-  samlRelayStates SamlRelayState[]
-  ssoDomains      SsoDomain[]
-  updatedAt       DateTime?        @map("updated_at") @db.Timestamptz(6)
-
-  @@map("sso_providers")
-  @@schema("auth")
-}
-
-model User {
-  aud                      String?        @db.VarChar(255)
-  bannedUntil              DateTime?      @map("banned_until") @db.Timestamptz(6)
-  confirmationSentAt       DateTime?      @map("confirmation_sent_at") @db.Timestamptz(6)
-  confirmationToken        String?        @map("confirmation_token") @db.VarChar(255)
-  confirmedAt              DateTime?      @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @map("confirmed_at") @db.Timestamptz(6)
-  createdAt                DateTime?      @map("created_at") @db.Timestamptz(6)
-  deletedAt                DateTime?      @map("deleted_at") @db.Timestamptz(6)
-  email                    String?        @db.VarChar(255)
-  emailChange              String?        @map("email_change") @db.VarChar(255)
-  emailChangeConfirmStatus Int?           @default(0) @map("email_change_confirm_status") @db.SmallInt
-  emailChangeSentAt        DateTime?      @map("email_change_sent_at") @db.Timestamptz(6)
-  emailChangeTokenCurrent  String?        @default("") @map("email_change_token_current") @db.VarChar(255)
-  emailChangeTokenNew      String?        @map("email_change_token_new") @db.VarChar(255)
-  emailConfirmedAt         DateTime?      @map("email_confirmed_at") @db.Timestamptz(6)
-  id                       String         @id @default(cuid()) @db.Uuid
-  identities               Identity[]
-  instanceId               String?        @map("instance_id") @db.Uuid
-  invitedAt                DateTime?      @map("invited_at") @db.Timestamptz(6)
-  isAnonymous              Boolean        @default(false) @map("is_anonymous")
-  isSsoUser                Boolean        @default(false) @map("is_sso_user")
-  isSuperAdmin             Boolean?       @map("is_super_admin")
-  lastSignInAt             DateTime?      @map("last_sign_in_at") @db.Timestamptz(6)
-  mfaFactors               MfaFactor[]
-  oneTimeTokens            OneTimeToken[]
-  password                 String?        @map("encrypted_password") @db.VarChar(255)
-  phone                    String?        @unique
-  phoneChange              String?        @default("") @map("phone_change")
-  phoneChangeSentAt        DateTime?      @map("phone_change_sent_at") @db.Timestamptz(6)
-  phoneChangeToken         String?        @default("") @map("phone_change_token") @db.VarChar(255)
-  phoneConfirmedAt         DateTime?      @map("phone_confirmed_at") @db.Timestamptz(6)
-  rawAppMetaData           Json?          @map("raw_app_meta_data")
-  rawUserMetaData          Json?          @map("raw_user_meta_data")
-  reauthenticationSentAt   DateTime?      @map("reauthentication_sent_at") @db.Timestamptz(6)
-  reauthenticationToken    String?        @default("") @map("reauthentication_token") @db.VarChar(255)
-  recoverySentAt           DateTime?      @map("recovery_sent_at") @db.Timestamptz(6)
-  recoveryToken            String?        @map("recovery_token") @db.VarChar(255)
-  roles                    Json
-  sessions                 Session[]
-  updatedAt                DateTime?      @map("updated_at") @db.Timestamptz(6)
-  username                 String?        @unique
-
-  @@index([instanceId])
-  @@index([isAnonymous])
-  @@map("users")
-  @@schema("auth")
-}
-
 model ApiKey {
   apiKey String @map("api_key")
   id     String @id @default(cuid()) @map("service")
@@ -603,21 +310,6 @@ model EmployeeWorkSchedule {
 
   @@unique([employee_id, salon_id, day_of_week], map: "unique_employee_salon_day")
   @@map("employee_work_schedules")
-  @@schema("public")
-}
-
-model ErrorLog {
-  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  errorContext String?   @map("error_context")
-  errorDetail  String?   @map("error_detail")
-  errorHint    String?   @map("error_hint")
-  errorMessage String?   @map("error_message")
-  functionName String    @map("function_name")
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  @@index([createdAt], map: "idx_error_log_created_at")
-  @@index([functionName], map: "idx_error_log_function_name")
-  @@map("error_log")
   @@schema("public")
 }
 
@@ -968,39 +660,6 @@ model Salon {
   @@schema("public")
 }
 
-model Salonstest {
-  address       String
-  categories    String
-  coordinates   Json?    @db.JsonB
-  createdAt     DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at") @db.Timestamptz(6)
-  description   String?
-  district      String?
-  email         String?
-  features      String
-  googlePlaceId String?  @map("google_place_id")
-  id            String   @id @unique @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
-  importedFrom  String?  @map("imported_from")
-  metro         Json
-  name          String
-  phones        String
-  photos        Json
-  photosCount   Int?     @map("photos_count")
-  priceCategory String?  @map("price_category")
-  rating        Json?
-  socialLinks   Json?    @map("social_links")
-  status        String?
-  updatedAt     DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("updated_at") @db.Timestamptz(6)
-  website       String?
-  workingHours  Json?    @map("working_hours")
-
-  @@index([googlePlaceId], map: "idx_salonstest_google_place_id")
-  @@index([district])
-  @@index([rating], type: Gin)
-  @@index([updatedAt])
-  @@map("salonstest")
-  @@schema("public")
-}
-
 model Schedule {
   appointmentDate                            DateTime    @map("appointment_date") @db.Date
   appointmentTime                            DateTime    @map("appointment_time") @db.Time(6)
@@ -1012,22 +671,6 @@ model Schedule {
 
   @@unique([barber_id, appointmentDate, appointmentTime], map: "unique_appointment")
   @@map("schedule")
-  @@schema("public")
-}
-
-model Template {
-  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
-  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  isActive  Boolean          @default(true) @map("is_active")
-  locale    String           @default("ru") @db.VarChar(5)
-  metadata  Json?
-  name      String           @db.VarChar(100)
-  template  String
-  type      EnumTemplateType
-  updatedAt DateTime         @default(now()) @map("updated_at") @db.Timestamptz(6)
-  variables String           @default("[object Object]")
-
-  @@map("templates")
   @@schema("public")
 }
 
@@ -1220,7 +863,7 @@ model UserProfile {
   isEmployee                                                   Boolean?                 @default(false) @map("is_employee")
   jobTitle                                                     String?                  @map("job_title")
   lastName                                                     String?                  @map("last_name")
-  location                                                     Json?                    @db.JsonB
+  location                                                     String?
   loyaltyPoints                                                Int?                     @default(0) @map("loyalty_points")
   loyaltyTransactions                                          LoyaltyTransaction[]
   notifications                                                Notification[]
@@ -1230,7 +873,6 @@ model UserProfile {
   phone                                                        String?
   queuesQueuesEmployeeIdTouserProfiles                         Queue[]                  @relation(name: "queuesQueuesEmployeeIdTouserProfiles")
   queuesQueuesUserIdTouserProfiles                             Queue[]                  @relation(name: "queuesQueuesUserIdTouserProfiles")
-  roles                                                        String
   salonAccounts                                                SalonAccount[]
   salonRatingLikesSalonRatingLikesUserIdTouserProfiles         SalonRatingLike[]        @relation(name: "salonRatingLikesSalonRatingLikesUserIdTouserProfiles")
   salonRatingLikesSalonRatingLikesVoterIdTouserProfiles        SalonRatingLike[]        @relation(name: "salonRatingLikesSalonRatingLikesVoterIdTouserProfiles")
@@ -1243,6 +885,7 @@ model UserProfile {
   scheduleScheduleUserIdTouserProfiles                         Schedule[]               @relation(name: "scheduleScheduleUserIdTouserProfiles")
   timeSlots                                                    TimeSlot[]
   updatedAt                                                    DateTime?                @map("updated_at") @db.Timestamptz(6)
+  user                                                         User?
   userAccounts                                                 UserAccount[]
   userAddresses                                                UserAddress[]
   userBankCards                                                UserBankCard[]
@@ -1254,7 +897,6 @@ model UserProfile {
   userNotificationSettings                                     UserNotificationSetting?
   userRatingsUserRatingsOwnerTouserProfiles                    UserRating[]             @relation(name: "userProfilesUserRatingsOwnerTouserProfiles")
   userRatingsUserRatingsUserIdTouserProfiles                   UserRating[]             @relation(name: "userProfilesUserRatingsUserIdTouserProfiles")
-  username                                                     String?                  @unique
   website                                                      String?
 
   @@map("user_profiles")
@@ -1317,35 +959,18 @@ model Webhook {
   @@schema("public")
 }
 
-enum EnumFlowStateCodeChallengeMethod {
-  s256
-  plain
-}
-
-enum EnumMfaFactorFactorType {
-  totp
-  webauthn
-  phone
-}
-
-enum EnumMfaFactorStatus {
-  unverified
-  verified
-}
-
-enum EnumOneTimeTokenTokenType {
-  confirmation_token
-  reauthentication_token
-  recovery_token
-  email_change_token_new
-  email_change_token_current
-  phone_change_token
-}
-
-enum EnumSessionAal {
-  aal1
-  aal2
-  aal3
+model User {
+  createdAt      DateTime     @default(now())
+  email          String?      @unique
+  firstName      String?
+  id             String       @id @default(cuid())
+  lastName       String?
+  password       String
+  roles          Json
+  updatedAt      DateTime     @updatedAt
+  userProfiles   UserProfile? @relation(fields: [userProfilesId], references: [id])
+  userProfilesId String?      @unique
+  username       String       @unique
 }
 
 enum EnumAttendanceAction {
@@ -1411,11 +1036,6 @@ enum EnumPaymentStatus {
   Failed
   Cancelled
   Refunded
-}
-
-enum EnumTemplateType {
-  sms
-  call
 }
 
 enum EnumVerificationCodeStatus {

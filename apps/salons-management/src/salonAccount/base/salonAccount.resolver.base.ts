@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { SalonAccount } from "./SalonAccount";
 import { SalonAccountCountArgs } from "./SalonAccountCountArgs";
 import { SalonAccountFindManyArgs } from "./SalonAccountFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteSalonAccountArgs } from "./DeleteSalonAccountArgs";
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { SalonAccountService } from "../salonAccount.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => SalonAccount)
 export class SalonAccountResolverBase {
-  constructor(protected readonly service: SalonAccountService) {}
+  constructor(
+    protected readonly service: SalonAccountService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "read",
+    possession: "any",
+  })
   async _salonAccountsMeta(
     @graphql.Args() args: SalonAccountCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class SalonAccountResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [SalonAccount])
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "read",
+    possession: "any",
+  })
   async salonAccounts(
     @graphql.Args() args: SalonAccountFindManyArgs
   ): Promise<SalonAccount[]> {
     return this.service.salonAccounts(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => SalonAccount, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "read",
+    possession: "own",
+  })
   async salonAccount(
     @graphql.Args() args: SalonAccountFindUniqueArgs
   ): Promise<SalonAccount | null> {
@@ -54,7 +82,13 @@ export class SalonAccountResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => SalonAccount)
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "create",
+    possession: "any",
+  })
   async createSalonAccount(
     @graphql.Args() args: CreateSalonAccountArgs
   ): Promise<SalonAccount> {
@@ -78,7 +112,13 @@ export class SalonAccountResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => SalonAccount)
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "update",
+    possession: "any",
+  })
   async updateSalonAccount(
     @graphql.Args() args: UpdateSalonAccountArgs
   ): Promise<SalonAccount | null> {
@@ -112,6 +152,11 @@ export class SalonAccountResolverBase {
   }
 
   @graphql.Mutation(() => SalonAccount)
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "delete",
+    possession: "any",
+  })
   async deleteSalonAccount(
     @graphql.Args() args: DeleteSalonAccountArgs
   ): Promise<SalonAccount | null> {
@@ -127,9 +172,15 @@ export class SalonAccountResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(
     @graphql.Parent() parent: SalonAccount
@@ -142,9 +193,15 @@ export class SalonAccountResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: SalonAccount

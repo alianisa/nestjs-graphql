@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Promocode } from "./Promocode";
 import { PromocodeCountArgs } from "./PromocodeCountArgs";
 import { PromocodeFindManyArgs } from "./PromocodeFindManyArgs";
@@ -24,10 +30,20 @@ import { OrderFindManyArgs } from "../../order/base/OrderFindManyArgs";
 import { Order } from "../../order/base/Order";
 import { Discount } from "../../discount/base/Discount";
 import { PromocodeService } from "../promocode.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Promocode)
 export class PromocodeResolverBase {
-  constructor(protected readonly service: PromocodeService) {}
+  constructor(
+    protected readonly service: PromocodeService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "read",
+    possession: "any",
+  })
   async _promocodesMeta(
     @graphql.Args() args: PromocodeCountArgs
   ): Promise<MetaQueryPayload> {
@@ -37,14 +53,26 @@ export class PromocodeResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Promocode])
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "read",
+    possession: "any",
+  })
   async promocodes(
     @graphql.Args() args: PromocodeFindManyArgs
   ): Promise<Promocode[]> {
     return this.service.promocodes(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Promocode, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "read",
+    possession: "own",
+  })
   async promocode(
     @graphql.Args() args: PromocodeFindUniqueArgs
   ): Promise<Promocode | null> {
@@ -55,7 +83,13 @@ export class PromocodeResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Promocode)
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "create",
+    possession: "any",
+  })
   async createPromocode(
     @graphql.Args() args: CreatePromocodeArgs
   ): Promise<Promocode> {
@@ -73,7 +107,13 @@ export class PromocodeResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Promocode)
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "update",
+    possession: "any",
+  })
   async updatePromocode(
     @graphql.Args() args: UpdatePromocodeArgs
   ): Promise<Promocode | null> {
@@ -101,6 +141,11 @@ export class PromocodeResolverBase {
   }
 
   @graphql.Mutation(() => Promocode)
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "delete",
+    possession: "any",
+  })
   async deletePromocode(
     @graphql.Args() args: DeletePromocodeArgs
   ): Promise<Promocode | null> {
@@ -116,7 +161,13 @@ export class PromocodeResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Order], { name: "orders" })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async findOrders(
     @graphql.Parent() parent: Promocode,
     @graphql.Args() args: OrderFindManyArgs
@@ -130,9 +181,15 @@ export class PromocodeResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Discount, {
     nullable: true,
     name: "discounts",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Discount",
+    action: "read",
+    possession: "any",
   })
   async getDiscounts(
     @graphql.Parent() parent: Promocode

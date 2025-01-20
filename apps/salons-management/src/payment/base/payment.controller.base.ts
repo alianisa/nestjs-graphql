@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { PaymentService } from "../payment.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { PaymentCreateInput } from "./PaymentCreateInput";
 import { Payment } from "./Payment";
 import { PaymentFindManyArgs } from "./PaymentFindManyArgs";
@@ -32,10 +36,24 @@ import { TransactionFindManyArgs } from "../../transaction/base/TransactionFindM
 import { Transaction } from "../../transaction/base/Transaction";
 import { TransactionWhereUniqueInput } from "../../transaction/base/TransactionWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class PaymentControllerBase {
-  constructor(protected readonly service: PaymentService) {}
+  constructor(
+    protected readonly service: PaymentService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Payment })
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createPayment(
     @common.Body() data: PaymentCreateInput
   ): Promise<Payment> {
@@ -76,9 +94,18 @@ export class PaymentControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Payment] })
   @ApiNestedQuery(PaymentFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async payments(@common.Req() request: Request): Promise<Payment[]> {
     const args = plainToClass(PaymentFindManyArgs, request.query);
     return this.service.payments({
@@ -110,9 +137,18 @@ export class PaymentControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Payment })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async payment(
     @common.Param() params: PaymentWhereUniqueInput
   ): Promise<Payment | null> {
@@ -151,9 +187,18 @@ export class PaymentControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Payment })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updatePayment(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() data: PaymentUpdateInput
@@ -208,6 +253,14 @@ export class PaymentControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Payment })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deletePayment(
     @common.Param() params: PaymentWhereUniqueInput
   ): Promise<Payment | null> {
@@ -249,8 +302,14 @@ export class PaymentControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/deposits")
   @ApiNestedQuery(DepositFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "read",
+    possession: "any",
+  })
   async findDeposits(
     @common.Req() request: Request,
     @common.Param() params: PaymentWhereUniqueInput
@@ -285,6 +344,11 @@ export class PaymentControllerBase {
   }
 
   @common.Post("/:id/deposits")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async connectDeposits(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: DepositWhereUniqueInput[]
@@ -302,6 +366,11 @@ export class PaymentControllerBase {
   }
 
   @common.Patch("/:id/deposits")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async updateDeposits(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: DepositWhereUniqueInput[]
@@ -319,6 +388,11 @@ export class PaymentControllerBase {
   }
 
   @common.Delete("/:id/deposits")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async disconnectDeposits(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: DepositWhereUniqueInput[]
@@ -335,8 +409,14 @@ export class PaymentControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/orders")
   @ApiNestedQuery(OrderFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async findOrders(
     @common.Req() request: Request,
     @common.Param() params: PaymentWhereUniqueInput
@@ -428,6 +508,11 @@ export class PaymentControllerBase {
   }
 
   @common.Post("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async connectOrders(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -445,6 +530,11 @@ export class PaymentControllerBase {
   }
 
   @common.Patch("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async updateOrders(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -462,6 +552,11 @@ export class PaymentControllerBase {
   }
 
   @common.Delete("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async disconnectOrders(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -478,8 +573,14 @@ export class PaymentControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/transactions")
   @ApiNestedQuery(TransactionFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "any",
+  })
   async findTransactions(
     @common.Req() request: Request,
     @common.Param() params: PaymentWhereUniqueInput
@@ -518,6 +619,11 @@ export class PaymentControllerBase {
   }
 
   @common.Post("/:id/transactions")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async connectTransactions(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: TransactionWhereUniqueInput[]
@@ -535,6 +641,11 @@ export class PaymentControllerBase {
   }
 
   @common.Patch("/:id/transactions")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async updateTransactions(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: TransactionWhereUniqueInput[]
@@ -552,6 +663,11 @@ export class PaymentControllerBase {
   }
 
   @common.Delete("/:id/transactions")
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "update",
+    possession: "any",
+  })
   async disconnectTransactions(
     @common.Param() params: PaymentWhereUniqueInput,
     @common.Body() body: TransactionWhereUniqueInput[]

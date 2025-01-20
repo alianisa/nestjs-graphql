@@ -32,9 +32,6 @@ import { EmployeeDailyStatUpdateManyWithoutUserProfilesInput } from "./EmployeeD
 import { EmployeeStatUpdateManyWithoutUserProfilesInput } from "./EmployeeStatUpdateManyWithoutUserProfilesInput";
 import { EmployeeTaskUpdateManyWithoutUserProfilesInput } from "./EmployeeTaskUpdateManyWithoutUserProfilesInput";
 import { EmployeeWorkScheduleUpdateManyWithoutUserProfilesInput } from "./EmployeeWorkScheduleUpdateManyWithoutUserProfilesInput";
-import { IsJSONValue } from "../../validators";
-import { GraphQLJSON } from "graphql-type-json";
-import { InputJsonValue } from "../../types";
 import { LoyaltyTransactionUpdateManyWithoutUserProfilesInput } from "./LoyaltyTransactionUpdateManyWithoutUserProfilesInput";
 import { NotificationUpdateManyWithoutUserProfilesInput } from "./NotificationUpdateManyWithoutUserProfilesInput";
 import { OrderUpdateManyWithoutUserProfilesInput } from "./OrderUpdateManyWithoutUserProfilesInput";
@@ -47,6 +44,7 @@ import { SalonUpdateManyWithoutUserProfilesInput } from "./SalonUpdateManyWithou
 import { SalonWhereUniqueInput } from "../../salon/base/SalonWhereUniqueInput";
 import { ScheduleUpdateManyWithoutUserProfilesInput } from "./ScheduleUpdateManyWithoutUserProfilesInput";
 import { TimeSlotUpdateManyWithoutUserProfilesInput } from "./TimeSlotUpdateManyWithoutUserProfilesInput";
+import { UserWhereUniqueInput } from "../../user/base/UserWhereUniqueInput";
 import { UserAccountUpdateManyWithoutUserProfilesInput } from "./UserAccountUpdateManyWithoutUserProfilesInput";
 import { UserAddressUpdateManyWithoutUserProfilesInput } from "./UserAddressUpdateManyWithoutUserProfilesInput";
 import { UserBankCardUpdateManyWithoutUserProfilesInput } from "./UserBankCardUpdateManyWithoutUserProfilesInput";
@@ -374,13 +372,14 @@ class UserProfileUpdateInput {
 
   @ApiProperty({
     required: false,
+    type: String,
   })
-  @IsJSONValue()
+  @IsString()
   @IsOptional()
-  @Field(() => GraphQLJSON, {
+  @Field(() => String, {
     nullable: true,
   })
-  location?: InputJsonValue;
+  location?: string | null;
 
   @ApiProperty({
     required: false,
@@ -489,18 +488,6 @@ class UserProfileUpdateInput {
     nullable: true,
   })
   queuesQueuesUserIdTouserProfiles?: QueueUpdateManyWithoutUserProfilesInput;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  roles?: string;
 
   @ApiProperty({
     required: false,
@@ -635,6 +622,18 @@ class UserProfileUpdateInput {
 
   @ApiProperty({
     required: false,
+    type: () => UserWhereUniqueInput,
+  })
+  @ValidateNested()
+  @Type(() => UserWhereUniqueInput)
+  @IsOptional()
+  @Field(() => UserWhereUniqueInput, {
+    nullable: true,
+  })
+  user?: UserWhereUniqueInput | null;
+
+  @ApiProperty({
+    required: false,
     type: () => UserAccountUpdateManyWithoutUserProfilesInput,
   })
   @ValidateNested()
@@ -752,18 +751,6 @@ class UserProfileUpdateInput {
     nullable: true,
   })
   userRatingsUserRatingsUserIdTouserProfiles?: UserRatingUpdateManyWithoutUserProfilesInput;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  username?: string | null;
 
   @ApiProperty({
     required: false,

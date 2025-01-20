@@ -11,26 +11,17 @@ https://docs.amplication.com/how-to/custom-code
   */
 import { InputType, Field } from "@nestjs/graphql";
 import { ApiProperty } from "@nestjs/swagger";
-
 import {
   IsString,
-  MaxLength,
   IsOptional,
-  IsDate,
-  IsInt,
-  Max,
+  MaxLength,
   ValidateNested,
-  IsBoolean,
 } from "class-validator";
-
-import { Type } from "class-transformer";
-import { IdentityUpdateManyWithoutUsersInput } from "./IdentityUpdateManyWithoutUsersInput";
-import { MfaFactorUpdateManyWithoutUsersInput } from "./MfaFactorUpdateManyWithoutUsersInput";
-import { OneTimeTokenUpdateManyWithoutUsersInput } from "./OneTimeTokenUpdateManyWithoutUsersInput";
 import { IsJSONValue } from "../../validators";
 import { GraphQLJSON } from "graphql-type-json";
 import { InputJsonValue } from "../../types";
-import { SessionUpdateManyWithoutUsersInput } from "./SessionUpdateManyWithoutUsersInput";
+import { UserProfileWhereUniqueInput } from "../../userProfile/base/UserProfileWhereUniqueInput";
+import { Type } from "class-transformer";
 
 @InputType()
 class UserUpdateInput {
@@ -39,86 +30,6 @@ class UserUpdateInput {
     type: String,
   })
   @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  aud?: string | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  bannedUntil?: Date | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  confirmationSentAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  confirmationToken?: string | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  confirmedAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  createdAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  deletedAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
   @IsOptional()
   @Field(() => String, {
     nullable: true,
@@ -135,30 +46,7 @@ class UserUpdateInput {
   @Field(() => String, {
     nullable: true,
   })
-  emailChange?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: Number,
-  })
-  @IsInt()
-  @Max(99999999999)
-  @IsOptional()
-  @Field(() => Number, {
-    nullable: true,
-  })
-  emailChangeConfirmStatus?: number | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  emailChangeSentAt?: Date | null;
+  firstName?: string | null;
 
   @ApiProperty({
     required: false,
@@ -170,133 +58,7 @@ class UserUpdateInput {
   @Field(() => String, {
     nullable: true,
   })
-  emailChangeTokenCurrent?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  emailChangeTokenNew?: string | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  emailConfirmedAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: () => IdentityUpdateManyWithoutUsersInput,
-  })
-  @ValidateNested()
-  @Type(() => IdentityUpdateManyWithoutUsersInput)
-  @IsOptional()
-  @Field(() => IdentityUpdateManyWithoutUsersInput, {
-    nullable: true,
-  })
-  identities?: IdentityUpdateManyWithoutUsersInput;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  instanceId?: string | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  invitedAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: Boolean,
-  })
-  @IsBoolean()
-  @IsOptional()
-  @Field(() => Boolean, {
-    nullable: true,
-  })
-  isAnonymous?: boolean;
-
-  @ApiProperty({
-    required: false,
-    type: Boolean,
-  })
-  @IsBoolean()
-  @IsOptional()
-  @Field(() => Boolean, {
-    nullable: true,
-  })
-  isSsoUser?: boolean;
-
-  @ApiProperty({
-    required: false,
-    type: Boolean,
-  })
-  @IsBoolean()
-  @IsOptional()
-  @Field(() => Boolean, {
-    nullable: true,
-  })
-  isSuperAdmin?: boolean | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  lastSignInAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: () => MfaFactorUpdateManyWithoutUsersInput,
-  })
-  @ValidateNested()
-  @Type(() => MfaFactorUpdateManyWithoutUsersInput)
-  @IsOptional()
-  @Field(() => MfaFactorUpdateManyWithoutUsersInput, {
-    nullable: true,
-  })
-  mfaFactors?: MfaFactorUpdateManyWithoutUsersInput;
-
-  @ApiProperty({
-    required: false,
-    type: () => OneTimeTokenUpdateManyWithoutUsersInput,
-  })
-  @ValidateNested()
-  @Type(() => OneTimeTokenUpdateManyWithoutUsersInput)
-  @IsOptional()
-  @Field(() => OneTimeTokenUpdateManyWithoutUsersInput, {
-    nullable: true,
-  })
-  oneTimeTokens?: OneTimeTokenUpdateManyWithoutUsersInput;
+  lastName?: string | null;
 
   @ApiProperty({
     required: false,
@@ -307,131 +69,7 @@ class UserUpdateInput {
   @Field(() => String, {
     nullable: true,
   })
-  password?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  phone?: string | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  phoneChange?: string | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  phoneChangeSentAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  phoneChangeToken?: string | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  phoneConfirmedAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsJSONValue()
-  @IsOptional()
-  @Field(() => GraphQLJSON, {
-    nullable: true,
-  })
-  rawAppMetaData?: InputJsonValue;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsJSONValue()
-  @IsOptional()
-  @Field(() => GraphQLJSON, {
-    nullable: true,
-  })
-  rawUserMetaData?: InputJsonValue;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  reauthenticationSentAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  reauthenticationToken?: string | null;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  recoverySentAt?: Date | null;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  recoveryToken?: string | null;
+  password?: string;
 
   @ApiProperty({
     required: false,
@@ -445,26 +83,15 @@ class UserUpdateInput {
 
   @ApiProperty({
     required: false,
-    type: () => SessionUpdateManyWithoutUsersInput,
+    type: () => UserProfileWhereUniqueInput,
   })
   @ValidateNested()
-  @Type(() => SessionUpdateManyWithoutUsersInput)
+  @Type(() => UserProfileWhereUniqueInput)
   @IsOptional()
-  @Field(() => SessionUpdateManyWithoutUsersInput, {
+  @Field(() => UserProfileWhereUniqueInput, {
     nullable: true,
   })
-  sessions?: SessionUpdateManyWithoutUsersInput;
-
-  @ApiProperty({
-    required: false,
-  })
-  @IsDate()
-  @Type(() => Date)
-  @IsOptional()
-  @Field(() => Date, {
-    nullable: true,
-  })
-  updatedAt?: Date | null;
+  userProfiles?: UserProfileWhereUniqueInput | null;
 
   @ApiProperty({
     required: false,
@@ -475,7 +102,7 @@ class UserUpdateInput {
   @Field(() => String, {
     nullable: true,
   })
-  username?: string | null;
+  username?: string;
 }
 
 export { UserUpdateInput as UserUpdateInput };

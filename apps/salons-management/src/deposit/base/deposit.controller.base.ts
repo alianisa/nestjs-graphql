@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { DepositService } from "../deposit.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { DepositCreateInput } from "./DepositCreateInput";
 import { Deposit } from "./Deposit";
 import { DepositFindManyArgs } from "./DepositFindManyArgs";
 import { DepositWhereUniqueInput } from "./DepositWhereUniqueInput";
 import { DepositUpdateInput } from "./DepositUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class DepositControllerBase {
-  constructor(protected readonly service: DepositService) {}
+  constructor(
+    protected readonly service: DepositService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Deposit })
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createDeposit(
     @common.Body() data: DepositCreateInput
   ): Promise<Deposit> {
@@ -66,9 +84,18 @@ export class DepositControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Deposit] })
   @ApiNestedQuery(DepositFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deposits(@common.Req() request: Request): Promise<Deposit[]> {
     const args = plainToClass(DepositFindManyArgs, request.query);
     return this.service.deposits({
@@ -93,9 +120,18 @@ export class DepositControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Deposit })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deposit(
     @common.Param() params: DepositWhereUniqueInput
   ): Promise<Deposit | null> {
@@ -127,9 +163,18 @@ export class DepositControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Deposit })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateDeposit(
     @common.Param() params: DepositWhereUniqueInput,
     @common.Body() data: DepositUpdateInput
@@ -183,6 +228,14 @@ export class DepositControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Deposit })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Deposit",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteDeposit(
     @common.Param() params: DepositWhereUniqueInput
   ): Promise<Deposit | null> {

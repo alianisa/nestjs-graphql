@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { UserRating } from "./UserRating";
 import { UserRatingCountArgs } from "./UserRatingCountArgs";
 import { UserRatingFindManyArgs } from "./UserRatingFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteUserRatingArgs } from "./DeleteUserRatingArgs";
 import { Order } from "../../order/base/Order";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserRatingService } from "../userRating.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => UserRating)
 export class UserRatingResolverBase {
-  constructor(protected readonly service: UserRatingService) {}
+  constructor(
+    protected readonly service: UserRatingService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "any",
+  })
   async _userRatingsMeta(
     @graphql.Args() args: UserRatingCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class UserRatingResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [UserRating])
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "any",
+  })
   async userRatings(
     @graphql.Args() args: UserRatingFindManyArgs
   ): Promise<UserRating[]> {
     return this.service.userRatings(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => UserRating, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "own",
+  })
   async userRating(
     @graphql.Args() args: UserRatingFindUniqueArgs
   ): Promise<UserRating | null> {
@@ -54,7 +82,13 @@ export class UserRatingResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserRating)
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "create",
+    possession: "any",
+  })
   async createUserRating(
     @graphql.Args() args: CreateUserRatingArgs
   ): Promise<UserRating> {
@@ -80,7 +114,13 @@ export class UserRatingResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserRating)
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "update",
+    possession: "any",
+  })
   async updateUserRating(
     @graphql.Args() args: UpdateUserRatingArgs
   ): Promise<UserRating | null> {
@@ -116,6 +156,11 @@ export class UserRatingResolverBase {
   }
 
   @graphql.Mutation(() => UserRating)
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUserRating(
     @graphql.Args() args: DeleteUserRatingArgs
   ): Promise<UserRating | null> {
@@ -131,9 +176,15 @@ export class UserRatingResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Order, {
     nullable: true,
     name: "orders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async getOrders(@graphql.Parent() parent: UserRating): Promise<Order | null> {
     const result = await this.service.getOrders(parent.id);
@@ -144,9 +195,15 @@ export class UserRatingResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesUserRatingsOwnerTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesUserRatingsOwnerTouserProfiles(
     @graphql.Parent() parent: UserRating
@@ -162,9 +219,15 @@ export class UserRatingResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesUserRatingsUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesUserRatingsUserIdTouserProfiles(
     @graphql.Parent() parent: UserRating

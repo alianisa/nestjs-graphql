@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { SalonAccountService } from "../salonAccount.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { SalonAccountCreateInput } from "./SalonAccountCreateInput";
 import { SalonAccount } from "./SalonAccount";
 import { SalonAccountFindManyArgs } from "./SalonAccountFindManyArgs";
 import { SalonAccountWhereUniqueInput } from "./SalonAccountWhereUniqueInput";
 import { SalonAccountUpdateInput } from "./SalonAccountUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class SalonAccountControllerBase {
-  constructor(protected readonly service: SalonAccountService) {}
+  constructor(
+    protected readonly service: SalonAccountService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: SalonAccount })
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createSalonAccount(
     @common.Body() data: SalonAccountCreateInput
   ): Promise<SalonAccount> {
@@ -71,9 +89,18 @@ export class SalonAccountControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [SalonAccount] })
   @ApiNestedQuery(SalonAccountFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonAccounts(@common.Req() request: Request): Promise<SalonAccount[]> {
     const args = plainToClass(SalonAccountFindManyArgs, request.query);
     return this.service.salonAccounts({
@@ -103,9 +130,18 @@ export class SalonAccountControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: SalonAccount })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonAccount(
     @common.Param() params: SalonAccountWhereUniqueInput
   ): Promise<SalonAccount | null> {
@@ -142,9 +178,18 @@ export class SalonAccountControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: SalonAccount })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateSalonAccount(
     @common.Param() params: SalonAccountWhereUniqueInput,
     @common.Body() data: SalonAccountUpdateInput
@@ -203,6 +248,14 @@ export class SalonAccountControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: SalonAccount })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteSalonAccount(
     @common.Param() params: SalonAccountWhereUniqueInput
   ): Promise<SalonAccount | null> {

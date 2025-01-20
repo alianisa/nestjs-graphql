@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { UserNotificationSettingService } from "../userNotificationSetting.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { UserNotificationSettingCreateInput } from "./UserNotificationSettingCreateInput";
 import { UserNotificationSetting } from "./UserNotificationSetting";
 import { UserNotificationSettingFindManyArgs } from "./UserNotificationSettingFindManyArgs";
 import { UserNotificationSettingWhereUniqueInput } from "./UserNotificationSettingWhereUniqueInput";
 import { UserNotificationSettingUpdateInput } from "./UserNotificationSettingUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserNotificationSettingControllerBase {
-  constructor(protected readonly service: UserNotificationSettingService) {}
+  constructor(
+    protected readonly service: UserNotificationSettingService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: UserNotificationSetting })
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createUserNotificationSetting(
     @common.Body() data: UserNotificationSettingCreateInput
   ): Promise<UserNotificationSetting> {
@@ -58,9 +76,18 @@ export class UserNotificationSettingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [UserNotificationSetting] })
   @ApiNestedQuery(UserNotificationSettingFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userNotificationSettings(
     @common.Req() request: Request
   ): Promise<UserNotificationSetting[]> {
@@ -90,9 +117,18 @@ export class UserNotificationSettingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: UserNotificationSetting })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userNotificationSetting(
     @common.Param() params: UserNotificationSettingWhereUniqueInput
   ): Promise<UserNotificationSetting | null> {
@@ -124,9 +160,18 @@ export class UserNotificationSettingControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: UserNotificationSetting })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateUserNotificationSetting(
     @common.Param() params: UserNotificationSettingWhereUniqueInput,
     @common.Body() data: UserNotificationSettingUpdateInput
@@ -172,6 +217,14 @@ export class UserNotificationSettingControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: UserNotificationSetting })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteUserNotificationSetting(
     @common.Param() params: UserNotificationSettingWhereUniqueInput
   ): Promise<UserNotificationSetting | null> {

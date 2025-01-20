@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { OrderImage } from "./OrderImage";
 import { OrderImageCountArgs } from "./OrderImageCountArgs";
 import { OrderImageFindManyArgs } from "./OrderImageFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdateOrderImageArgs } from "./UpdateOrderImageArgs";
 import { DeleteOrderImageArgs } from "./DeleteOrderImageArgs";
 import { Order } from "../../order/base/Order";
 import { OrderImageService } from "../orderImage.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => OrderImage)
 export class OrderImageResolverBase {
-  constructor(protected readonly service: OrderImageService) {}
+  constructor(
+    protected readonly service: OrderImageService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "read",
+    possession: "any",
+  })
   async _orderImagesMeta(
     @graphql.Args() args: OrderImageCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,14 +51,26 @@ export class OrderImageResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [OrderImage])
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "read",
+    possession: "any",
+  })
   async orderImages(
     @graphql.Args() args: OrderImageFindManyArgs
   ): Promise<OrderImage[]> {
     return this.service.orderImages(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => OrderImage, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "read",
+    possession: "own",
+  })
   async orderImage(
     @graphql.Args() args: OrderImageFindUniqueArgs
   ): Promise<OrderImage | null> {
@@ -53,7 +81,13 @@ export class OrderImageResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => OrderImage)
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "create",
+    possession: "any",
+  })
   async createOrderImage(
     @graphql.Args() args: CreateOrderImageArgs
   ): Promise<OrderImage> {
@@ -69,7 +103,13 @@ export class OrderImageResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => OrderImage)
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "update",
+    possession: "any",
+  })
   async updateOrderImage(
     @graphql.Args() args: UpdateOrderImageArgs
   ): Promise<OrderImage | null> {
@@ -95,6 +135,11 @@ export class OrderImageResolverBase {
   }
 
   @graphql.Mutation(() => OrderImage)
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "delete",
+    possession: "any",
+  })
   async deleteOrderImage(
     @graphql.Args() args: DeleteOrderImageArgs
   ): Promise<OrderImage | null> {
@@ -110,9 +155,15 @@ export class OrderImageResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Order, {
     nullable: true,
     name: "orders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async getOrders(@graphql.Parent() parent: OrderImage): Promise<Order | null> {
     const result = await this.service.getOrders(parent.id);

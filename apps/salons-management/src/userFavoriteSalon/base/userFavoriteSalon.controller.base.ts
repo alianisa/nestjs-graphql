@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { UserFavoriteSalonService } from "../userFavoriteSalon.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { UserFavoriteSalonCreateInput } from "./UserFavoriteSalonCreateInput";
 import { UserFavoriteSalon } from "./UserFavoriteSalon";
 import { UserFavoriteSalonFindManyArgs } from "./UserFavoriteSalonFindManyArgs";
 import { UserFavoriteSalonWhereUniqueInput } from "./UserFavoriteSalonWhereUniqueInput";
 import { UserFavoriteSalonUpdateInput } from "./UserFavoriteSalonUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserFavoriteSalonControllerBase {
-  constructor(protected readonly service: UserFavoriteSalonService) {}
+  constructor(
+    protected readonly service: UserFavoriteSalonService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: UserFavoriteSalon })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createUserFavoriteSalon(
     @common.Body() data: UserFavoriteSalonCreateInput
   ): Promise<UserFavoriteSalon> {
@@ -64,9 +82,18 @@ export class UserFavoriteSalonControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [UserFavoriteSalon] })
   @ApiNestedQuery(UserFavoriteSalonFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userFavoriteSalons(
     @common.Req() request: Request
   ): Promise<UserFavoriteSalon[]> {
@@ -93,9 +120,18 @@ export class UserFavoriteSalonControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: UserFavoriteSalon })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userFavoriteSalon(
     @common.Param() params: UserFavoriteSalonWhereUniqueInput
   ): Promise<UserFavoriteSalon | null> {
@@ -127,9 +163,18 @@ export class UserFavoriteSalonControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: UserFavoriteSalon })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateUserFavoriteSalon(
     @common.Param() params: UserFavoriteSalonWhereUniqueInput,
     @common.Body() data: UserFavoriteSalonUpdateInput
@@ -181,6 +226,14 @@ export class UserFavoriteSalonControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: UserFavoriteSalon })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteUserFavoriteSalon(
     @common.Param() params: UserFavoriteSalonWhereUniqueInput
   ): Promise<UserFavoriteSalon | null> {

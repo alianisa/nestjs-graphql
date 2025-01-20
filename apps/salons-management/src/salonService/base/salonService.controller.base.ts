@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { SalonServiceService } from "../salonService.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { SalonServiceCreateInput } from "./SalonServiceCreateInput";
 import { SalonService } from "./SalonService";
 import { SalonServiceFindManyArgs } from "./SalonServiceFindManyArgs";
 import { SalonServiceWhereUniqueInput } from "./SalonServiceWhereUniqueInput";
 import { SalonServiceUpdateInput } from "./SalonServiceUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class SalonServiceControllerBase {
-  constructor(protected readonly service: SalonServiceService) {}
+  constructor(
+    protected readonly service: SalonServiceService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: SalonService })
+  @nestAccessControl.UseRoles({
+    resource: "SalonService",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createSalonService(
     @common.Body() data: SalonServiceCreateInput
   ): Promise<SalonService> {
@@ -69,9 +87,18 @@ export class SalonServiceControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [SalonService] })
   @ApiNestedQuery(SalonServiceFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "SalonService",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonServices(@common.Req() request: Request): Promise<SalonService[]> {
     const args = plainToClass(SalonServiceFindManyArgs, request.query);
     return this.service.salonServices({
@@ -99,9 +126,18 @@ export class SalonServiceControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: SalonService })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonService",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonService(
     @common.Param() params: SalonServiceWhereUniqueInput
   ): Promise<SalonService | null> {
@@ -136,9 +172,18 @@ export class SalonServiceControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: SalonService })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonService",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateSalonService(
     @common.Param() params: SalonServiceWhereUniqueInput,
     @common.Body() data: SalonServiceUpdateInput
@@ -195,6 +240,14 @@ export class SalonServiceControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: SalonService })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonService",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteSalonService(
     @common.Param() params: SalonServiceWhereUniqueInput
   ): Promise<SalonService | null> {

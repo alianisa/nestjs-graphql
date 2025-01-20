@@ -6,7 +6,6 @@ import { EmployeeDailyStat } from "../employeeDailyStat/EmployeeDailyStat";
 import { EmployeeStat } from "../employeeStat/EmployeeStat";
 import { EmployeeTask } from "../employeeTask/EmployeeTask";
 import { EmployeeWorkSchedule } from "../employeeWorkSchedule/EmployeeWorkSchedule";
-import { JsonValue } from "type-fest";
 import { LoyaltyTransaction } from "../loyaltyTransaction/LoyaltyTransaction";
 import { Notification } from "../notification/Notification";
 import { Order } from "../order/Order";
@@ -18,6 +17,7 @@ import { SalonRating } from "../salonRating/SalonRating";
 import { Salon } from "../salon/Salon";
 import { Schedule } from "../schedule/Schedule";
 import { TimeSlot } from "../timeSlot/TimeSlot";
+import { User } from "../user/User";
 import { UserAccount } from "../userAccount/UserAccount";
 import { UserAddress } from "../userAddress/UserAddress";
 import { UserBankCard } from "../userBankCard/UserBankCard";
@@ -56,7 +56,7 @@ export type UserProfile = {
   isEmployee: boolean | null;
   jobTitle: string | null;
   lastName: string | null;
-  location: JsonValue;
+  location: string | null;
   loyaltyPoints: number | null;
   loyaltyTransactions?: Array<LoyaltyTransaction>;
   notifications?: Array<Notification>;
@@ -66,7 +66,6 @@ export type UserProfile = {
   phone: string | null;
   queuesQueuesEmployeeIdTouserProfiles?: Array<Queue>;
   queuesQueuesUserIdTouserProfiles?: Array<Queue>;
-  roles: string;
   salonAccounts?: Array<SalonAccount>;
   salonRatingLikesSalonRatingLikesUserIdTouserProfiles?: Array<SalonRatingLike>;
   salonRatingLikesSalonRatingLikesVoterIdTouserProfiles?: Array<SalonRatingLike>;
@@ -78,6 +77,7 @@ export type UserProfile = {
   scheduleScheduleUserIdTouserProfiles?: Array<Schedule>;
   timeSlots?: Array<TimeSlot>;
   updatedAt: Date | null;
+  user?: User | null;
   userAccounts?: Array<UserAccount>;
   userAddresses?: Array<UserAddress>;
   userBankCards?: Array<UserBankCard>;
@@ -88,6 +88,5 @@ export type UserProfile = {
   userNotificationSettings?: UserNotificationSetting | null;
   userRatingsUserRatingsOwnerTouserProfiles?: Array<UserRating>;
   userRatingsUserRatingsUserIdTouserProfiles?: Array<UserRating>;
-  username: string | null;
   website: string | null;
 };

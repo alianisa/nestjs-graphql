@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Queue } from "./Queue";
 import { QueueCountArgs } from "./QueueCountArgs";
 import { QueueFindManyArgs } from "./QueueFindManyArgs";
@@ -27,10 +33,20 @@ import { Order } from "../../order/base/Order";
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { QueueService } from "../queue.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Queue)
 export class QueueResolverBase {
-  constructor(protected readonly service: QueueService) {}
+  constructor(
+    protected readonly service: QueueService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
+  })
   async _queuesMeta(
     @graphql.Args() args: QueueCountArgs
   ): Promise<MetaQueryPayload> {
@@ -40,12 +56,24 @@ export class QueueResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Queue])
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
+  })
   async queues(@graphql.Args() args: QueueFindManyArgs): Promise<Queue[]> {
     return this.service.queues(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Queue, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "own",
+  })
   async queue(
     @graphql.Args() args: QueueFindUniqueArgs
   ): Promise<Queue | null> {
@@ -56,7 +84,13 @@ export class QueueResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Queue)
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "create",
+    possession: "any",
+  })
   async createQueue(@graphql.Args() args: CreateQueueArgs): Promise<Queue> {
     return await this.service.createQueue({
       ...args,
@@ -92,7 +126,13 @@ export class QueueResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Queue)
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "update",
+    possession: "any",
+  })
   async updateQueue(
     @graphql.Args() args: UpdateQueueArgs
   ): Promise<Queue | null> {
@@ -140,6 +180,11 @@ export class QueueResolverBase {
   }
 
   @graphql.Mutation(() => Queue)
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "delete",
+    possession: "any",
+  })
   async deleteQueue(
     @graphql.Args() args: DeleteQueueArgs
   ): Promise<Queue | null> {
@@ -155,7 +200,13 @@ export class QueueResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [EmployeeTask], { name: "employeeTasks" })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "any",
+  })
   async findEmployeeTasks(
     @graphql.Parent() parent: Queue,
     @graphql.Args() args: EmployeeTaskFindManyArgs
@@ -169,7 +220,13 @@ export class QueueResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Order], { name: "ordersOrdersQueueIdToqueues" })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async findOrdersOrdersQueueIdToqueues(
     @graphql.Parent() parent: Queue,
     @graphql.Args() args: OrderFindManyArgs
@@ -186,9 +243,15 @@ export class QueueResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Order, {
     nullable: true,
     name: "ordersQueuesOrderIdToorders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async getOrdersQueuesOrderIdToorders(
     @graphql.Parent() parent: Queue
@@ -201,9 +264,15 @@ export class QueueResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(@graphql.Parent() parent: Queue): Promise<Salon | null> {
     const result = await this.service.getSalons(parent.id);
@@ -214,9 +283,15 @@ export class QueueResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesQueuesEmployeeIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesQueuesEmployeeIdTouserProfiles(
     @graphql.Parent() parent: Queue
@@ -232,9 +307,15 @@ export class QueueResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesQueuesUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesQueuesUserIdTouserProfiles(
     @graphql.Parent() parent: Queue

@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { UserGender } from "./UserGender";
 import { UserGenderCountArgs } from "./UserGenderCountArgs";
 import { UserGenderFindManyArgs } from "./UserGenderFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteUserGenderArgs } from "./DeleteUserGenderArgs";
 import { UserProfileFindManyArgs } from "../../userProfile/base/UserProfileFindManyArgs";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserGenderService } from "../userGender.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => UserGender)
 export class UserGenderResolverBase {
-  constructor(protected readonly service: UserGenderService) {}
+  constructor(
+    protected readonly service: UserGenderService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "read",
+    possession: "any",
+  })
   async _userGendersMeta(
     @graphql.Args() args: UserGenderCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class UserGenderResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [UserGender])
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "read",
+    possession: "any",
+  })
   async userGenders(
     @graphql.Args() args: UserGenderFindManyArgs
   ): Promise<UserGender[]> {
     return this.service.userGenders(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => UserGender, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "read",
+    possession: "own",
+  })
   async userGender(
     @graphql.Args() args: UserGenderFindUniqueArgs
   ): Promise<UserGender | null> {
@@ -54,7 +82,13 @@ export class UserGenderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserGender)
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "create",
+    possession: "any",
+  })
   async createUserGender(
     @graphql.Args() args: CreateUserGenderArgs
   ): Promise<UserGender> {
@@ -64,7 +98,13 @@ export class UserGenderResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserGender)
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "update",
+    possession: "any",
+  })
   async updateUserGender(
     @graphql.Args() args: UpdateUserGenderArgs
   ): Promise<UserGender | null> {
@@ -84,6 +124,11 @@ export class UserGenderResolverBase {
   }
 
   @graphql.Mutation(() => UserGender)
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUserGender(
     @graphql.Args() args: DeleteUserGenderArgs
   ): Promise<UserGender | null> {
@@ -99,7 +144,13 @@ export class UserGenderResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserProfile], { name: "userProfiles" })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
+  })
   async findUserProfiles(
     @graphql.Parent() parent: UserGender,
     @graphql.Args() args: UserProfileFindManyArgs

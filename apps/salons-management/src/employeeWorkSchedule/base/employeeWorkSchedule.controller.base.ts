@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { EmployeeWorkScheduleService } from "../employeeWorkSchedule.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { EmployeeWorkScheduleCreateInput } from "./EmployeeWorkScheduleCreateInput";
 import { EmployeeWorkSchedule } from "./EmployeeWorkSchedule";
 import { EmployeeWorkScheduleFindManyArgs } from "./EmployeeWorkScheduleFindManyArgs";
 import { EmployeeWorkScheduleWhereUniqueInput } from "./EmployeeWorkScheduleWhereUniqueInput";
 import { EmployeeWorkScheduleUpdateInput } from "./EmployeeWorkScheduleUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class EmployeeWorkScheduleControllerBase {
-  constructor(protected readonly service: EmployeeWorkScheduleService) {}
+  constructor(
+    protected readonly service: EmployeeWorkScheduleService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: EmployeeWorkSchedule })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createEmployeeWorkSchedule(
     @common.Body() data: EmployeeWorkScheduleCreateInput
   ): Promise<EmployeeWorkSchedule> {
@@ -66,9 +84,18 @@ export class EmployeeWorkScheduleControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [EmployeeWorkSchedule] })
   @ApiNestedQuery(EmployeeWorkScheduleFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeWorkSchedules(
     @common.Req() request: Request
   ): Promise<EmployeeWorkSchedule[]> {
@@ -99,9 +126,18 @@ export class EmployeeWorkScheduleControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: EmployeeWorkSchedule })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeWorkSchedule(
     @common.Param() params: EmployeeWorkScheduleWhereUniqueInput
   ): Promise<EmployeeWorkSchedule | null> {
@@ -137,9 +173,18 @@ export class EmployeeWorkScheduleControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: EmployeeWorkSchedule })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateEmployeeWorkSchedule(
     @common.Param() params: EmployeeWorkScheduleWhereUniqueInput,
     @common.Body() data: EmployeeWorkScheduleUpdateInput
@@ -193,6 +238,14 @@ export class EmployeeWorkScheduleControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: EmployeeWorkSchedule })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteEmployeeWorkSchedule(
     @common.Param() params: EmployeeWorkScheduleWhereUniqueInput
   ): Promise<EmployeeWorkSchedule | null> {

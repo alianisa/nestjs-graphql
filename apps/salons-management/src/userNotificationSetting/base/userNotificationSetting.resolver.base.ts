@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { UserNotificationSetting } from "./UserNotificationSetting";
 import { UserNotificationSettingCountArgs } from "./UserNotificationSettingCountArgs";
 import { UserNotificationSettingFindManyArgs } from "./UserNotificationSettingFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdateUserNotificationSettingArgs } from "./UpdateUserNotificationSetti
 import { DeleteUserNotificationSettingArgs } from "./DeleteUserNotificationSettingArgs";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserNotificationSettingService } from "../userNotificationSetting.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => UserNotificationSetting)
 export class UserNotificationSettingResolverBase {
-  constructor(protected readonly service: UserNotificationSettingService) {}
+  constructor(
+    protected readonly service: UserNotificationSettingService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "read",
+    possession: "any",
+  })
   async _userNotificationSettingsMeta(
     @graphql.Args() args: UserNotificationSettingCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,14 +51,26 @@ export class UserNotificationSettingResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [UserNotificationSetting])
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "read",
+    possession: "any",
+  })
   async userNotificationSettings(
     @graphql.Args() args: UserNotificationSettingFindManyArgs
   ): Promise<UserNotificationSetting[]> {
     return this.service.userNotificationSettings(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => UserNotificationSetting, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "read",
+    possession: "own",
+  })
   async userNotificationSetting(
     @graphql.Args() args: UserNotificationSettingFindUniqueArgs
   ): Promise<UserNotificationSetting | null> {
@@ -53,7 +81,13 @@ export class UserNotificationSettingResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserNotificationSetting)
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "create",
+    possession: "any",
+  })
   async createUserNotificationSetting(
     @graphql.Args() args: CreateUserNotificationSettingArgs
   ): Promise<UserNotificationSetting> {
@@ -69,7 +103,13 @@ export class UserNotificationSettingResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserNotificationSetting)
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "update",
+    possession: "any",
+  })
   async updateUserNotificationSetting(
     @graphql.Args() args: UpdateUserNotificationSettingArgs
   ): Promise<UserNotificationSetting | null> {
@@ -95,6 +135,11 @@ export class UserNotificationSettingResolverBase {
   }
 
   @graphql.Mutation(() => UserNotificationSetting)
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUserNotificationSetting(
     @graphql.Args() args: DeleteUserNotificationSettingArgs
   ): Promise<UserNotificationSetting | null> {
@@ -110,9 +155,15 @@ export class UserNotificationSettingResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: UserNotificationSetting

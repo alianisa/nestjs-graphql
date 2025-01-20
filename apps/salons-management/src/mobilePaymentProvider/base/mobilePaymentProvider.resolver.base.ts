@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { MobilePaymentProvider } from "./MobilePaymentProvider";
 import { MobilePaymentProviderCountArgs } from "./MobilePaymentProviderCountArgs";
 import { MobilePaymentProviderFindManyArgs } from "./MobilePaymentProviderFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteMobilePaymentProviderArgs } from "./DeleteMobilePaymentProviderAr
 import { PaymentFindManyArgs } from "../../payment/base/PaymentFindManyArgs";
 import { Payment } from "../../payment/base/Payment";
 import { MobilePaymentProviderService } from "../mobilePaymentProvider.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => MobilePaymentProvider)
 export class MobilePaymentProviderResolverBase {
-  constructor(protected readonly service: MobilePaymentProviderService) {}
+  constructor(
+    protected readonly service: MobilePaymentProviderService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "read",
+    possession: "any",
+  })
   async _mobilePaymentProvidersMeta(
     @graphql.Args() args: MobilePaymentProviderCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class MobilePaymentProviderResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [MobilePaymentProvider])
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "read",
+    possession: "any",
+  })
   async mobilePaymentProviders(
     @graphql.Args() args: MobilePaymentProviderFindManyArgs
   ): Promise<MobilePaymentProvider[]> {
     return this.service.mobilePaymentProviders(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => MobilePaymentProvider, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "read",
+    possession: "own",
+  })
   async mobilePaymentProvider(
     @graphql.Args() args: MobilePaymentProviderFindUniqueArgs
   ): Promise<MobilePaymentProvider | null> {
@@ -54,7 +82,13 @@ export class MobilePaymentProviderResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => MobilePaymentProvider)
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "create",
+    possession: "any",
+  })
   async createMobilePaymentProvider(
     @graphql.Args() args: CreateMobilePaymentProviderArgs
   ): Promise<MobilePaymentProvider> {
@@ -64,7 +98,13 @@ export class MobilePaymentProviderResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => MobilePaymentProvider)
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "update",
+    possession: "any",
+  })
   async updateMobilePaymentProvider(
     @graphql.Args() args: UpdateMobilePaymentProviderArgs
   ): Promise<MobilePaymentProvider | null> {
@@ -84,6 +124,11 @@ export class MobilePaymentProviderResolverBase {
   }
 
   @graphql.Mutation(() => MobilePaymentProvider)
+  @nestAccessControl.UseRoles({
+    resource: "MobilePaymentProvider",
+    action: "delete",
+    possession: "any",
+  })
   async deleteMobilePaymentProvider(
     @graphql.Args() args: DeleteMobilePaymentProviderArgs
   ): Promise<MobilePaymentProvider | null> {
@@ -99,7 +144,13 @@ export class MobilePaymentProviderResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Payment], { name: "payments" })
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "read",
+    possession: "any",
+  })
   async findPayments(
     @graphql.Parent() parent: MobilePaymentProvider,
     @graphql.Args() args: PaymentFindManyArgs

@@ -57,10 +57,8 @@ string lastName = 18;
 string location = 19;
 int32 loyaltyPoints = 20;
 string phone = 21;
-string roles = 22;
-string updatedAt = 23;
-string username = 24;
-string website = 25;
+string updatedAt = 22;
+string website = 23;
 };
 message UserProfileWhereUniqueInput {
 string avatarUrl = 1;
@@ -84,10 +82,8 @@ string lastName = 18;
 string location = 19;
 int32 loyaltyPoints = 20;
 string phone = 21;
-string roles = 22;
-string updatedAt = 23;
-string username = 24;
-string website = 25;
+string updatedAt = 22;
+string website = 23;
 };
 message UserProfileParams {
 UserGenderWhereUniqueInput userGenderWhereUniqueInput = 1;

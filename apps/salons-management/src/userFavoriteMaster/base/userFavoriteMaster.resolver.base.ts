@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { UserFavoriteMaster } from "./UserFavoriteMaster";
 import { UserFavoriteMasterCountArgs } from "./UserFavoriteMasterCountArgs";
 import { UserFavoriteMasterFindManyArgs } from "./UserFavoriteMasterFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdateUserFavoriteMasterArgs } from "./UpdateUserFavoriteMasterArgs";
 import { DeleteUserFavoriteMasterArgs } from "./DeleteUserFavoriteMasterArgs";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { UserFavoriteMasterService } from "../userFavoriteMaster.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => UserFavoriteMaster)
 export class UserFavoriteMasterResolverBase {
-  constructor(protected readonly service: UserFavoriteMasterService) {}
+  constructor(
+    protected readonly service: UserFavoriteMasterService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "read",
+    possession: "any",
+  })
   async _userFavoriteMastersMeta(
     @graphql.Args() args: UserFavoriteMasterCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,14 +51,26 @@ export class UserFavoriteMasterResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [UserFavoriteMaster])
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "read",
+    possession: "any",
+  })
   async userFavoriteMasters(
     @graphql.Args() args: UserFavoriteMasterFindManyArgs
   ): Promise<UserFavoriteMaster[]> {
     return this.service.userFavoriteMasters(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => UserFavoriteMaster, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "read",
+    possession: "own",
+  })
   async userFavoriteMaster(
     @graphql.Args() args: UserFavoriteMasterFindUniqueArgs
   ): Promise<UserFavoriteMaster | null> {
@@ -53,7 +81,13 @@ export class UserFavoriteMasterResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserFavoriteMaster)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "create",
+    possession: "any",
+  })
   async createUserFavoriteMaster(
     @graphql.Args() args: CreateUserFavoriteMasterArgs
   ): Promise<UserFavoriteMaster> {
@@ -78,7 +112,13 @@ export class UserFavoriteMasterResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserFavoriteMaster)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "update",
+    possession: "any",
+  })
   async updateUserFavoriteMaster(
     @graphql.Args() args: UpdateUserFavoriteMasterArgs
   ): Promise<UserFavoriteMaster | null> {
@@ -113,6 +153,11 @@ export class UserFavoriteMasterResolverBase {
   }
 
   @graphql.Mutation(() => UserFavoriteMaster)
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUserFavoriteMaster(
     @graphql.Args() args: DeleteUserFavoriteMasterArgs
   ): Promise<UserFavoriteMaster | null> {
@@ -128,9 +173,15 @@ export class UserFavoriteMasterResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesUserFavoriteMastersMasterIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesUserFavoriteMastersMasterIdTouserProfiles(
     @graphql.Parent() parent: UserFavoriteMaster
@@ -146,9 +197,15 @@ export class UserFavoriteMasterResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfilesUserFavoriteMastersUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfilesUserFavoriteMastersUserIdTouserProfiles(
     @graphql.Parent() parent: UserFavoriteMaster

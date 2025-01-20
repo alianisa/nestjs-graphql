@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { TransactionService } from "../transaction.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { TransactionCreateInput } from "./TransactionCreateInput";
 import { Transaction } from "./Transaction";
 import { TransactionFindManyArgs } from "./TransactionFindManyArgs";
 import { TransactionWhereUniqueInput } from "./TransactionWhereUniqueInput";
 import { TransactionUpdateInput } from "./TransactionUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class TransactionControllerBase {
-  constructor(protected readonly service: TransactionService) {}
+  constructor(
+    protected readonly service: TransactionService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Transaction })
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createTransaction(
     @common.Body() data: TransactionCreateInput
   ): Promise<Transaction> {
@@ -70,9 +88,18 @@ export class TransactionControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Transaction] })
   @ApiNestedQuery(TransactionFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async transactions(@common.Req() request: Request): Promise<Transaction[]> {
     const args = plainToClass(TransactionFindManyArgs, request.query);
     return this.service.transactions({
@@ -101,9 +128,18 @@ export class TransactionControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Transaction })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async transaction(
     @common.Param() params: TransactionWhereUniqueInput
   ): Promise<Transaction | null> {
@@ -139,9 +175,18 @@ export class TransactionControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Transaction })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateTransaction(
     @common.Param() params: TransactionWhereUniqueInput,
     @common.Body() data: TransactionUpdateInput
@@ -199,6 +244,14 @@ export class TransactionControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Transaction })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteTransaction(
     @common.Param() params: TransactionWhereUniqueInput
   ): Promise<Transaction | null> {

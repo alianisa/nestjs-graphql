@@ -36,11 +36,10 @@ const CREATE_INPUT = {
   isEmployee: "true",
   jobTitle: "exampleJobTitle",
   lastName: "exampleLastName",
+  location: "exampleLocation",
   loyaltyPoints: 42,
   phone: "examplePhone",
-  roles: "exampleRoles",
   updatedAt: new Date(),
-  username: "exampleUsername",
   website: "exampleWebsite",
 };
 const CREATE_RESULT = {
@@ -62,11 +61,10 @@ const CREATE_RESULT = {
   isEmployee: "true",
   jobTitle: "exampleJobTitle",
   lastName: "exampleLastName",
+  location: "exampleLocation",
   loyaltyPoints: 42,
   phone: "examplePhone",
-  roles: "exampleRoles",
   updatedAt: new Date(),
-  username: "exampleUsername",
   website: "exampleWebsite",
 };
 const FIND_MANY_RESULT = [
@@ -89,11 +87,10 @@ const FIND_MANY_RESULT = [
     isEmployee: "true",
     jobTitle: "exampleJobTitle",
     lastName: "exampleLastName",
+    location: "exampleLocation",
     loyaltyPoints: 42,
     phone: "examplePhone",
-    roles: "exampleRoles",
     updatedAt: new Date(),
-    username: "exampleUsername",
     website: "exampleWebsite",
   },
 ];
@@ -116,11 +113,10 @@ const FIND_ONE_RESULT = {
   isEmployee: "true",
   jobTitle: "exampleJobTitle",
   lastName: "exampleLastName",
+  location: "exampleLocation",
   loyaltyPoints: 42,
   phone: "examplePhone",
-  roles: "exampleRoles",
   updatedAt: new Date(),
-  username: "exampleUsername",
   website: "exampleWebsite",
 };
 

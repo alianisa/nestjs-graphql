@@ -10,7 +10,6 @@ import { EmployeeTaskListRelationFilter } from "../employeeTask/EmployeeTaskList
 import { EmployeeWorkScheduleListRelationFilter } from "../employeeWorkSchedule/EmployeeWorkScheduleListRelationFilter";
 import { BooleanNullableFilter } from "../../util/BooleanNullableFilter";
 import { StringFilter } from "../../util/StringFilter";
-import { JsonFilter } from "../../util/JsonFilter";
 import { IntNullableFilter } from "../../util/IntNullableFilter";
 import { LoyaltyTransactionListRelationFilter } from "../loyaltyTransaction/LoyaltyTransactionListRelationFilter";
 import { NotificationListRelationFilter } from "../notification/NotificationListRelationFilter";
@@ -24,6 +23,7 @@ import { SalonListRelationFilter } from "../salon/SalonListRelationFilter";
 import { SalonWhereUniqueInput } from "../salon/SalonWhereUniqueInput";
 import { ScheduleListRelationFilter } from "../schedule/ScheduleListRelationFilter";
 import { TimeSlotListRelationFilter } from "../timeSlot/TimeSlotListRelationFilter";
+import { UserWhereUniqueInput } from "../user/UserWhereUniqueInput";
 import { UserAccountListRelationFilter } from "../userAccount/UserAccountListRelationFilter";
 import { UserAddressListRelationFilter } from "../userAddress/UserAddressListRelationFilter";
 import { UserBankCardListRelationFilter } from "../userBankCard/UserBankCardListRelationFilter";
@@ -62,7 +62,6 @@ export type UserProfileWhereInput = {
   isEmployee?: BooleanNullableFilter;
   jobTitle?: StringNullableFilter;
   lastName?: StringNullableFilter;
-  location?: JsonFilter;
   loyaltyPoints?: IntNullableFilter;
   loyaltyTransactions?: LoyaltyTransactionListRelationFilter;
   notifications?: NotificationListRelationFilter;
@@ -72,7 +71,6 @@ export type UserProfileWhereInput = {
   phone?: StringNullableFilter;
   queuesQueuesEmployeeIdTouserProfiles?: QueueListRelationFilter;
   queuesQueuesUserIdTouserProfiles?: QueueListRelationFilter;
-  roles?: StringFilter;
   salonAccounts?: SalonAccountListRelationFilter;
   salonRatingLikesSalonRatingLikesUserIdTouserProfiles?: SalonRatingLikeListRelationFilter;
   salonRatingLikesSalonRatingLikesVoterIdTouserProfiles?: SalonRatingLikeListRelationFilter;
@@ -84,6 +82,7 @@ export type UserProfileWhereInput = {
   scheduleScheduleUserIdTouserProfiles?: ScheduleListRelationFilter;
   timeSlots?: TimeSlotListRelationFilter;
   updatedAt?: DateTimeNullableFilter;
+  user?: UserWhereUniqueInput;
   userAccounts?: UserAccountListRelationFilter;
   userAddresses?: UserAddressListRelationFilter;
   userBankCards?: UserBankCardListRelationFilter;
@@ -94,6 +93,5 @@ export type UserProfileWhereInput = {
   userNotificationSettings?: UserNotificationSettingWhereUniqueInput;
   userRatingsUserRatingsOwnerTouserProfiles?: UserRatingListRelationFilter;
   userRatingsUserRatingsUserIdTouserProfiles?: UserRatingListRelationFilter;
-  username?: StringNullableFilter;
   website?: StringNullableFilter;
 };

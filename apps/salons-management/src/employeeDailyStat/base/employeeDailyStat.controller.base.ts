@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { EmployeeDailyStatService } from "../employeeDailyStat.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { EmployeeDailyStatCreateInput } from "./EmployeeDailyStatCreateInput";
 import { EmployeeDailyStat } from "./EmployeeDailyStat";
 import { EmployeeDailyStatFindManyArgs } from "./EmployeeDailyStatFindManyArgs";
 import { EmployeeDailyStatWhereUniqueInput } from "./EmployeeDailyStatWhereUniqueInput";
 import { EmployeeDailyStatUpdateInput } from "./EmployeeDailyStatUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class EmployeeDailyStatControllerBase {
-  constructor(protected readonly service: EmployeeDailyStatService) {}
+  constructor(
+    protected readonly service: EmployeeDailyStatService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: EmployeeDailyStat })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeDailyStat",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createEmployeeDailyStat(
     @common.Body() data: EmployeeDailyStatCreateInput
   ): Promise<EmployeeDailyStat> {
@@ -109,9 +127,18 @@ export class EmployeeDailyStatControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [EmployeeDailyStat] })
   @ApiNestedQuery(EmployeeDailyStatFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeDailyStat",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeDailyStats(
     @common.Req() request: Request
   ): Promise<EmployeeDailyStat[]> {
@@ -185,9 +212,18 @@ export class EmployeeDailyStatControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: EmployeeDailyStat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeDailyStat",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async employeeDailyStat(
     @common.Param() params: EmployeeDailyStatWhereUniqueInput
   ): Promise<EmployeeDailyStat | null> {
@@ -266,9 +302,18 @@ export class EmployeeDailyStatControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: EmployeeDailyStat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeDailyStat",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateEmployeeDailyStat(
     @common.Param() params: EmployeeDailyStatWhereUniqueInput,
     @common.Body() data: EmployeeDailyStatUpdateInput
@@ -365,6 +410,14 @@ export class EmployeeDailyStatControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: EmployeeDailyStat })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeDailyStat",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteEmployeeDailyStat(
     @common.Param() params: EmployeeDailyStatWhereUniqueInput
   ): Promise<EmployeeDailyStat | null> {

@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { PromocodeService } from "../promocode.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { PromocodeCreateInput } from "./PromocodeCreateInput";
 import { Promocode } from "./Promocode";
 import { PromocodeFindManyArgs } from "./PromocodeFindManyArgs";
@@ -26,10 +30,24 @@ import { OrderFindManyArgs } from "../../order/base/OrderFindManyArgs";
 import { Order } from "../../order/base/Order";
 import { OrderWhereUniqueInput } from "../../order/base/OrderWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class PromocodeControllerBase {
-  constructor(protected readonly service: PromocodeService) {}
+  constructor(
+    protected readonly service: PromocodeService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Promocode })
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createPromocode(
     @common.Body() data: PromocodeCreateInput
   ): Promise<Promocode> {
@@ -65,9 +83,18 @@ export class PromocodeControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Promocode] })
   @ApiNestedQuery(PromocodeFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async promocodes(@common.Req() request: Request): Promise<Promocode[]> {
     const args = plainToClass(PromocodeFindManyArgs, request.query);
     return this.service.promocodes({
@@ -94,9 +121,18 @@ export class PromocodeControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Promocode })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async promocode(
     @common.Param() params: PromocodeWhereUniqueInput
   ): Promise<Promocode | null> {
@@ -130,9 +166,18 @@ export class PromocodeControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Promocode })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updatePromocode(
     @common.Param() params: PromocodeWhereUniqueInput,
     @common.Body() data: PromocodeUpdateInput
@@ -182,6 +227,14 @@ export class PromocodeControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Promocode })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deletePromocode(
     @common.Param() params: PromocodeWhereUniqueInput
   ): Promise<Promocode | null> {
@@ -218,8 +271,14 @@ export class PromocodeControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/orders")
   @ApiNestedQuery(OrderFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
+  })
   async findOrders(
     @common.Req() request: Request,
     @common.Param() params: PromocodeWhereUniqueInput
@@ -311,6 +370,11 @@ export class PromocodeControllerBase {
   }
 
   @common.Post("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "update",
+    possession: "any",
+  })
   async connectOrders(
     @common.Param() params: PromocodeWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -328,6 +392,11 @@ export class PromocodeControllerBase {
   }
 
   @common.Patch("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "update",
+    possession: "any",
+  })
   async updateOrders(
     @common.Param() params: PromocodeWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]
@@ -345,6 +414,11 @@ export class PromocodeControllerBase {
   }
 
   @common.Delete("/:id/orders")
+  @nestAccessControl.UseRoles({
+    resource: "Promocode",
+    action: "update",
+    possession: "any",
+  })
   async disconnectOrders(
     @common.Param() params: PromocodeWhereUniqueInput,
     @common.Body() body: OrderWhereUniqueInput[]

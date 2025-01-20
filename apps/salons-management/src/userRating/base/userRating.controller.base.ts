@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { UserRatingService } from "../userRating.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { UserRatingCreateInput } from "./UserRatingCreateInput";
 import { UserRating } from "./UserRating";
 import { UserRatingFindManyArgs } from "./UserRatingFindManyArgs";
 import { UserRatingWhereUniqueInput } from "./UserRatingWhereUniqueInput";
 import { UserRatingUpdateInput } from "./UserRatingUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserRatingControllerBase {
-  constructor(protected readonly service: UserRatingService) {}
+  constructor(
+    protected readonly service: UserRatingService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: UserRating })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createUserRating(
     @common.Body() data: UserRatingCreateInput
   ): Promise<UserRating> {
@@ -76,9 +94,18 @@ export class UserRatingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [UserRating] })
   @ApiNestedQuery(UserRatingFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userRatings(@common.Req() request: Request): Promise<UserRating[]> {
     const args = plainToClass(UserRatingFindManyArgs, request.query);
     return this.service.userRatings({
@@ -111,9 +138,18 @@ export class UserRatingControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: UserRating })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userRating(
     @common.Param() params: UserRatingWhereUniqueInput
   ): Promise<UserRating | null> {
@@ -153,9 +189,18 @@ export class UserRatingControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: UserRating })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateUserRating(
     @common.Param() params: UserRatingWhereUniqueInput,
     @common.Body() data: UserRatingUpdateInput
@@ -219,6 +264,14 @@ export class UserRatingControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: UserRating })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteUserRating(
     @common.Param() params: UserRatingWhereUniqueInput
   ): Promise<UserRating | null> {

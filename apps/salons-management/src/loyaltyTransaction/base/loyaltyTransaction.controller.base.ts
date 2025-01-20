@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { LoyaltyTransactionService } from "../loyaltyTransaction.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { LoyaltyTransactionCreateInput } from "./LoyaltyTransactionCreateInput";
 import { LoyaltyTransaction } from "./LoyaltyTransaction";
 import { LoyaltyTransactionFindManyArgs } from "./LoyaltyTransactionFindManyArgs";
 import { LoyaltyTransactionWhereUniqueInput } from "./LoyaltyTransactionWhereUniqueInput";
 import { LoyaltyTransactionUpdateInput } from "./LoyaltyTransactionUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class LoyaltyTransactionControllerBase {
-  constructor(protected readonly service: LoyaltyTransactionService) {}
+  constructor(
+    protected readonly service: LoyaltyTransactionService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: LoyaltyTransaction })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createLoyaltyTransaction(
     @common.Body() data: LoyaltyTransactionCreateInput
   ): Promise<LoyaltyTransaction> {
@@ -70,9 +88,18 @@ export class LoyaltyTransactionControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [LoyaltyTransaction] })
   @ApiNestedQuery(LoyaltyTransactionFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async loyaltyTransactions(
     @common.Req() request: Request
   ): Promise<LoyaltyTransaction[]> {
@@ -103,9 +130,18 @@ export class LoyaltyTransactionControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: LoyaltyTransaction })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async loyaltyTransaction(
     @common.Param() params: LoyaltyTransactionWhereUniqueInput
   ): Promise<LoyaltyTransaction | null> {
@@ -141,9 +177,18 @@ export class LoyaltyTransactionControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: LoyaltyTransaction })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateLoyaltyTransaction(
     @common.Param() params: LoyaltyTransactionWhereUniqueInput,
     @common.Body() data: LoyaltyTransactionUpdateInput
@@ -201,6 +246,14 @@ export class LoyaltyTransactionControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: LoyaltyTransaction })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteLoyaltyTransaction(
     @common.Param() params: LoyaltyTransactionWhereUniqueInput
   ): Promise<LoyaltyTransaction | null> {

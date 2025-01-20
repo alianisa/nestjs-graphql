@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { VerificationCodeService } from "../verificationCode.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { VerificationCodeCreateInput } from "./VerificationCodeCreateInput";
 import { VerificationCode } from "./VerificationCode";
 import { VerificationCodeFindManyArgs } from "./VerificationCodeFindManyArgs";
 import { VerificationCodeWhereUniqueInput } from "./VerificationCodeWhereUniqueInput";
 import { VerificationCodeUpdateInput } from "./VerificationCodeUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class VerificationCodeControllerBase {
-  constructor(protected readonly service: VerificationCodeService) {}
+  constructor(
+    protected readonly service: VerificationCodeService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: VerificationCode })
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createVerificationCode(
     @common.Body() data: VerificationCodeCreateInput
   ): Promise<VerificationCode> {
@@ -51,9 +69,18 @@ export class VerificationCodeControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [VerificationCode] })
   @ApiNestedQuery(VerificationCodeFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async verificationCodes(
     @common.Req() request: Request
   ): Promise<VerificationCode[]> {
@@ -79,9 +106,18 @@ export class VerificationCodeControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: VerificationCode })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async verificationCode(
     @common.Param() params: VerificationCodeWhereUniqueInput
   ): Promise<VerificationCode | null> {
@@ -112,9 +148,18 @@ export class VerificationCodeControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: VerificationCode })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateVerificationCode(
     @common.Param() params: VerificationCodeWhereUniqueInput,
     @common.Body() data: VerificationCodeUpdateInput
@@ -153,6 +198,14 @@ export class VerificationCodeControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: VerificationCode })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "VerificationCode",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteVerificationCode(
     @common.Param() params: VerificationCodeWhereUniqueInput
   ): Promise<VerificationCode | null> {

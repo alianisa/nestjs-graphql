@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { UserProfile } from "./UserProfile";
 import { UserProfileCountArgs } from "./UserProfileCountArgs";
 import { UserProfileFindManyArgs } from "./UserProfileFindManyArgs";
@@ -70,13 +76,24 @@ import { UserFavoriteSalonFindManyArgs } from "../../userFavoriteSalon/base/User
 import { UserFavoriteSalon } from "../../userFavoriteSalon/base/UserFavoriteSalon";
 import { UserRatingFindManyArgs } from "../../userRating/base/UserRatingFindManyArgs";
 import { UserRating } from "../../userRating/base/UserRating";
+import { User } from "../../user/base/User";
 import { UserGender } from "../../userGender/base/UserGender";
 import { UserNotificationSetting } from "../../userNotificationSetting/base/UserNotificationSetting";
 import { UserProfileService } from "../userProfile.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => UserProfile)
 export class UserProfileResolverBase {
-  constructor(protected readonly service: UserProfileService) {}
+  constructor(
+    protected readonly service: UserProfileService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
+  })
   async _userProfilesMeta(
     @graphql.Args() args: UserProfileCountArgs
   ): Promise<MetaQueryPayload> {
@@ -86,14 +103,26 @@ export class UserProfileResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [UserProfile])
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
+  })
   async userProfiles(
     @graphql.Args() args: UserProfileFindManyArgs
   ): Promise<UserProfile[]> {
     return this.service.userProfiles(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => UserProfile, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "own",
+  })
   async userProfile(
     @graphql.Args() args: UserProfileFindUniqueArgs
   ): Promise<UserProfile | null> {
@@ -104,7 +133,13 @@ export class UserProfileResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserProfile)
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "create",
+    possession: "any",
+  })
   async createUserProfile(
     @graphql.Args() args: CreateUserProfileArgs
   ): Promise<UserProfile> {
@@ -117,6 +152,12 @@ export class UserProfileResolverBase {
           .salonsUserProfilesSalonIdTosalons
           ? {
               connect: args.data.salonsUserProfilesSalonIdTosalons,
+            }
+          : undefined,
+
+        user: args.data.user
+          ? {
+              connect: args.data.user,
             }
           : undefined,
 
@@ -135,7 +176,13 @@ export class UserProfileResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => UserProfile)
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "update",
+    possession: "any",
+  })
   async updateUserProfile(
     @graphql.Args() args: UpdateUserProfileArgs
   ): Promise<UserProfile | null> {
@@ -149,6 +196,12 @@ export class UserProfileResolverBase {
             .salonsUserProfilesSalonIdTosalons
             ? {
                 connect: args.data.salonsUserProfilesSalonIdTosalons,
+              }
+            : undefined,
+
+          user: args.data.user
+            ? {
+                connect: args.data.user,
               }
             : undefined,
 
@@ -176,6 +229,11 @@ export class UserProfileResolverBase {
   }
 
   @graphql.Mutation(() => UserProfile)
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "delete",
+    possession: "any",
+  })
   async deleteUserProfile(
     @graphql.Args() args: DeleteUserProfileArgs
   ): Promise<UserProfile | null> {
@@ -191,7 +249,13 @@ export class UserProfileResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Appointment], { name: "appointments" })
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
+  })
   async findAppointments(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: AppointmentFindManyArgs
@@ -205,7 +269,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Attendance], { name: "attendances" })
+  @nestAccessControl.UseRoles({
+    resource: "Attendance",
+    action: "read",
+    possession: "any",
+  })
   async findAttendances(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: AttendanceFindManyArgs
@@ -219,7 +289,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [ChatMessage], { name: "chatMessages" })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "any",
+  })
   async findChatMessages(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: ChatMessageFindManyArgs
@@ -233,7 +309,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Chat], { name: "chatsChatsUserATouserProfiles" })
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "read",
+    possession: "any",
+  })
   async findChatsChatsUserATouserProfiles(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: ChatFindManyArgs
@@ -250,7 +332,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Chat], { name: "chatsChatsUserBTouserProfiles" })
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "read",
+    possession: "any",
+  })
   async findChatsChatsUserBTouserProfiles(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: ChatFindManyArgs
@@ -267,7 +355,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Chat], { name: "chatsChatsUsersTouserProfiles" })
+  @nestAccessControl.UseRoles({
+    resource: "Chat",
+    action: "read",
+    possession: "any",
+  })
   async findChatsChatsUsersTouserProfiles(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: ChatFindManyArgs
@@ -284,8 +378,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [EmployeeDailyStat], {
     name: "employeeDailyStats",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeDailyStat",
+    action: "read",
+    possession: "any",
   })
   async findEmployeeDailyStats(
     @graphql.Parent() parent: UserProfile,
@@ -300,7 +400,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [EmployeeStat], { name: "employeeStats" })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "read",
+    possession: "any",
+  })
   async findEmployeeStats(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: EmployeeStatFindManyArgs
@@ -314,7 +420,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [EmployeeTask], { name: "employeeTasks" })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeTask",
+    action: "read",
+    possession: "any",
+  })
   async findEmployeeTasks(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: EmployeeTaskFindManyArgs
@@ -328,8 +440,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [EmployeeWorkSchedule], {
     name: "employeeWorkSchedules",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "read",
+    possession: "any",
   })
   async findEmployeeWorkSchedules(
     @graphql.Parent() parent: UserProfile,
@@ -347,8 +465,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [LoyaltyTransaction], {
     name: "loyaltyTransactions",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyTransaction",
+    action: "read",
+    possession: "any",
   })
   async findLoyaltyTransactions(
     @graphql.Parent() parent: UserProfile,
@@ -363,7 +487,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Notification], { name: "notifications" })
+  @nestAccessControl.UseRoles({
+    resource: "Notification",
+    action: "read",
+    possession: "any",
+  })
   async findNotifications(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: NotificationFindManyArgs
@@ -377,8 +507,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Order], {
     name: "ordersOrdersEmployeeIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async findOrdersOrdersEmployeeIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -396,8 +532,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Order], {
     name: "ordersOrdersUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async findOrdersOrdersUserIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -415,7 +557,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Payroll], { name: "payroll" })
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "read",
+    possession: "any",
+  })
   async findPayroll(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: PayrollFindManyArgs
@@ -429,8 +577,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Queue], {
     name: "queuesQueuesEmployeeIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
   })
   async findQueuesQueuesEmployeeIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -448,8 +602,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Queue], {
     name: "queuesQueuesUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Queue",
+    action: "read",
+    possession: "any",
   })
   async findQueuesQueuesUserIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -467,7 +627,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [SalonAccount], { name: "salonAccounts" })
+  @nestAccessControl.UseRoles({
+    resource: "SalonAccount",
+    action: "read",
+    possession: "any",
+  })
   async findSalonAccounts(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: SalonAccountFindManyArgs
@@ -481,8 +647,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [SalonRatingLike], {
     name: "salonRatingLikesSalonRatingLikesUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "read",
+    possession: "any",
   })
   async findSalonRatingLikesSalonRatingLikesUserIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -501,8 +673,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [SalonRatingLike], {
     name: "salonRatingLikesSalonRatingLikesVoterIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "read",
+    possession: "any",
   })
   async findSalonRatingLikesSalonRatingLikesVoterIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -521,8 +699,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [SalonRating], {
     name: "salonRatingsSalonRatingsUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "read",
+    possession: "any",
   })
   async findSalonRatingsSalonRatingsUserIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -541,8 +725,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [SalonRating], {
     name: "salonRatingsSalonRatingsVoterIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRating",
+    action: "read",
+    possession: "any",
   })
   async findSalonRatingsSalonRatingsVoterIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -561,8 +751,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Salon], {
     name: "salonsSalonsSalonAdminIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async findSalonsSalonsSalonAdminIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -581,8 +777,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Schedule], {
     name: "scheduleScheduleBarberIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Schedule",
+    action: "read",
+    possession: "any",
   })
   async findScheduleScheduleBarberIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -601,8 +803,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Schedule], {
     name: "scheduleScheduleUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Schedule",
+    action: "read",
+    possession: "any",
   })
   async findScheduleScheduleUserIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -620,7 +828,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [TimeSlot], { name: "timeSlots" })
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "read",
+    possession: "any",
+  })
   async findTimeSlots(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: TimeSlotFindManyArgs
@@ -634,7 +848,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserAccount], { name: "userAccounts" })
+  @nestAccessControl.UseRoles({
+    resource: "UserAccount",
+    action: "read",
+    possession: "any",
+  })
   async findUserAccounts(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: UserAccountFindManyArgs
@@ -648,7 +868,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserAddress], { name: "userAddresses" })
+  @nestAccessControl.UseRoles({
+    resource: "UserAddress",
+    action: "read",
+    possession: "any",
+  })
   async findUserAddresses(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: UserAddressFindManyArgs
@@ -662,7 +888,13 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserBankCard], { name: "userBankCards" })
+  @nestAccessControl.UseRoles({
+    resource: "UserBankCard",
+    action: "read",
+    possession: "any",
+  })
   async findUserBankCards(
     @graphql.Parent() parent: UserProfile,
     @graphql.Args() args: UserBankCardFindManyArgs
@@ -676,8 +908,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserFavoriteMaster], {
     name: "userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "read",
+    possession: "any",
   })
   async findUserFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -696,8 +934,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserFavoriteMaster], {
     name: "userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteMaster",
+    action: "read",
+    possession: "any",
   })
   async findUserFavoriteMastersUserFavoriteMastersUserIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -716,8 +960,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserFavoriteSalon], {
     name: "userFavoriteSalons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserFavoriteSalon",
+    action: "read",
+    possession: "any",
   })
   async findUserFavoriteSalons(
     @graphql.Parent() parent: UserProfile,
@@ -732,8 +982,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserRating], {
     name: "userRatingsUserRatingsOwnerTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "any",
   })
   async findUserRatingsUserRatingsOwnerTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -752,8 +1008,14 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [UserRating], {
     name: "userRatingsUserRatingsUserIdTouserProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserRating",
+    action: "read",
+    possession: "any",
   })
   async findUserRatingsUserRatingsUserIdTouserProfiles(
     @graphql.Parent() parent: UserProfile,
@@ -772,9 +1034,15 @@ export class UserProfileResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salonsUserProfilesSalonIdTosalons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalonsUserProfilesSalonIdTosalons(
     @graphql.Parent() parent: UserProfile
@@ -789,9 +1057,34 @@ export class UserProfileResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
+  @graphql.ResolveField(() => User, {
+    nullable: true,
+    name: "user",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "User",
+    action: "read",
+    possession: "any",
+  })
+  async getUser(@graphql.Parent() parent: UserProfile): Promise<User | null> {
+    const result = await this.service.getUser(parent.id);
+
+    if (!result) {
+      return null;
+    }
+    return result;
+  }
+
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserGender, {
     nullable: true,
     name: "userGenders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserGender",
+    action: "read",
+    possession: "any",
   })
   async getUserGenders(
     @graphql.Parent() parent: UserProfile
@@ -804,9 +1097,15 @@ export class UserProfileResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserNotificationSetting, {
     nullable: true,
     name: "userNotificationSettings",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserNotificationSetting",
+    action: "read",
+    possession: "any",
   })
   async getUserNotificationSettings(
     @graphql.Parent() parent: UserProfile

@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { LoyaltyProgram } from "./LoyaltyProgram";
 import { LoyaltyProgramCountArgs } from "./LoyaltyProgramCountArgs";
 import { LoyaltyProgramFindManyArgs } from "./LoyaltyProgramFindManyArgs";
@@ -21,10 +27,20 @@ import { CreateLoyaltyProgramArgs } from "./CreateLoyaltyProgramArgs";
 import { UpdateLoyaltyProgramArgs } from "./UpdateLoyaltyProgramArgs";
 import { DeleteLoyaltyProgramArgs } from "./DeleteLoyaltyProgramArgs";
 import { LoyaltyProgramService } from "../loyaltyProgram.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => LoyaltyProgram)
 export class LoyaltyProgramResolverBase {
-  constructor(protected readonly service: LoyaltyProgramService) {}
+  constructor(
+    protected readonly service: LoyaltyProgramService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "read",
+    possession: "any",
+  })
   async _loyaltyProgramsMeta(
     @graphql.Args() args: LoyaltyProgramCountArgs
   ): Promise<MetaQueryPayload> {
@@ -34,14 +50,26 @@ export class LoyaltyProgramResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [LoyaltyProgram])
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "read",
+    possession: "any",
+  })
   async loyaltyPrograms(
     @graphql.Args() args: LoyaltyProgramFindManyArgs
   ): Promise<LoyaltyProgram[]> {
     return this.service.loyaltyPrograms(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => LoyaltyProgram, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "read",
+    possession: "own",
+  })
   async loyaltyProgram(
     @graphql.Args() args: LoyaltyProgramFindUniqueArgs
   ): Promise<LoyaltyProgram | null> {
@@ -52,7 +80,13 @@ export class LoyaltyProgramResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => LoyaltyProgram)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "create",
+    possession: "any",
+  })
   async createLoyaltyProgram(
     @graphql.Args() args: CreateLoyaltyProgramArgs
   ): Promise<LoyaltyProgram> {
@@ -62,7 +96,13 @@ export class LoyaltyProgramResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => LoyaltyProgram)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "update",
+    possession: "any",
+  })
   async updateLoyaltyProgram(
     @graphql.Args() args: UpdateLoyaltyProgramArgs
   ): Promise<LoyaltyProgram | null> {
@@ -82,6 +122,11 @@ export class LoyaltyProgramResolverBase {
   }
 
   @graphql.Mutation(() => LoyaltyProgram)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "delete",
+    possession: "any",
+  })
   async deleteLoyaltyProgram(
     @graphql.Args() args: DeleteLoyaltyProgramArgs
   ): Promise<LoyaltyProgram | null> {

@@ -1,22 +1,6 @@
 import { Module } from "@nestjs/common";
 import { CacheModule } from "@nestjs/cache-manager";
 import { redisStore } from "cache-manager-ioredis-yet";
-import { AuditLogEntryModule } from "./auditLogEntry/auditLogEntry.module";
-import { FlowStateModule } from "./flowState/flowState.module";
-import { IdentityModule } from "./identity/identity.module";
-import { InstanceModule } from "./instance/instance.module";
-import { MfaAmrClaimModule } from "./mfaAmrClaim/mfaAmrClaim.module";
-import { MfaChallengeModule } from "./mfaChallenge/mfaChallenge.module";
-import { MfaFactorModule } from "./mfaFactor/mfaFactor.module";
-import { OneTimeTokenModule } from "./oneTimeToken/oneTimeToken.module";
-import { RefreshTokenModule } from "./refreshToken/refreshToken.module";
-import { SamlProviderModule } from "./samlProvider/samlProvider.module";
-import { SamlRelayStateModule } from "./samlRelayState/samlRelayState.module";
-import { SchemaMigrationModule } from "./schemaMigration/schemaMigration.module";
-import { SessionModule } from "./session/session.module";
-import { SsoDomainModule } from "./ssoDomain/ssoDomain.module";
-import { SsoProviderModule } from "./ssoProvider/ssoProvider.module";
-import { UserModule } from "./user/user.module";
 import { ApiKeyModule } from "./apiKey/apiKey.module";
 import { AppointmentModule } from "./appointment/appointment.module";
 import { AttendanceModule } from "./attendance/attendance.module";
@@ -29,7 +13,6 @@ import { EmployeeDailyStatModule } from "./employeeDailyStat/employeeDailyStat.m
 import { EmployeeStatModule } from "./employeeStat/employeeStat.module";
 import { EmployeeTaskModule } from "./employeeTask/employeeTask.module";
 import { EmployeeWorkScheduleModule } from "./employeeWorkSchedule/employeeWorkSchedule.module";
-import { ErrorLogModule } from "./errorLog/errorLog.module";
 import { LoyaltyProgramModule } from "./loyaltyProgram/loyaltyProgram.module";
 import { LoyaltyTransactionModule } from "./loyaltyTransaction/loyaltyTransaction.module";
 import { MetricModule } from "./metric/metric.module";
@@ -48,9 +31,7 @@ import { SalonRatingModule } from "./salonRating/salonRating.module";
 import { SalonServiceCategoryModule } from "./salonServiceCategory/salonServiceCategory.module";
 import { SalonServiceModule } from "./salonService/salonService.module";
 import { SalonModule } from "./salon/salon.module";
-import { SalonstestModule } from "./salonstest/salonstest.module";
 import { ScheduleModule } from "./schedule/schedule.module";
-import { TemplateModule } from "./template/template.module";
 import { TimeSlotModule } from "./timeSlot/timeSlot.module";
 import { TransactionModule } from "./transaction/transaction.module";
 import { UserAccountModule } from "./userAccount/userAccount.module";
@@ -65,6 +46,7 @@ import { UserProfileModule } from "./userProfile/userProfile.module";
 import { UserRatingModule } from "./userRating/userRating.module";
 import { VerificationCodeModule } from "./verificationCode/verificationCode.module";
 import { WebhookModule } from "./webhook/webhook.module";
+import { UserModule } from "./user/user.module";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { SecretsManagerModule } from "./providers/secrets/secretsManager.module";
@@ -74,25 +56,14 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 
+import { ACLModule } from "./auth/acl.module";
+import { AuthModule } from "./auth/auth.module";
+
 @Module({
   controllers: [],
   imports: [
-    AuditLogEntryModule,
-    FlowStateModule,
-    IdentityModule,
-    InstanceModule,
-    MfaAmrClaimModule,
-    MfaChallengeModule,
-    MfaFactorModule,
-    OneTimeTokenModule,
-    RefreshTokenModule,
-    SamlProviderModule,
-    SamlRelayStateModule,
-    SchemaMigrationModule,
-    SessionModule,
-    SsoDomainModule,
-    SsoProviderModule,
-    UserModule,
+    ACLModule,
+    AuthModule,
     ApiKeyModule,
     AppointmentModule,
     AttendanceModule,
@@ -105,7 +76,6 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     EmployeeStatModule,
     EmployeeTaskModule,
     EmployeeWorkScheduleModule,
-    ErrorLogModule,
     LoyaltyProgramModule,
     LoyaltyTransactionModule,
     MetricModule,
@@ -124,9 +94,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     SalonServiceCategoryModule,
     SalonServiceModule,
     SalonModule,
-    SalonstestModule,
     ScheduleModule,
-    TemplateModule,
     TimeSlotModule,
     TransactionModule,
     UserAccountModule,
@@ -141,6 +109,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
     UserRatingModule,
     VerificationCodeModule,
     WebhookModule,
+    UserModule,
     HealthModule,
     PrismaModule,
     SecretsManagerModule,

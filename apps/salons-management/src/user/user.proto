@@ -6,294 +6,52 @@ service UserService {
 rpc users (findManyParams) returns (stream User) {}
 rpc user (UserWhereUniqueInput) returns (User) {}
 rpc updateUser (UserUpdateInput) returns (User) {}
-rpc deleteUser (UserWhereUniqueInput) returns (User) {}
-rpc findManyUsers (UserWhereUniqueInput) returns (stream Identity) {}
-rpc updateUsers (IdentityParams) returns (stream Identity) {}
-rpc connectUsers (IdentityParams) returns (Identity) {}
-rpc disconnectUsers (IdentityParams) returns (Identity) {}
-rpc findManyUsers (UserWhereUniqueInput) returns (stream MfaFactor) {}
-rpc updateUsers (MfaFactorParams) returns (stream MfaFactor) {}
-rpc connectUsers (MfaFactorParams) returns (MfaFactor) {}
-rpc disconnectUsers (MfaFactorParams) returns (MfaFactor) {}
-rpc findManyUsers (UserWhereUniqueInput) returns (stream OneTimeToken) {}
-rpc updateUsers (OneTimeTokenParams) returns (stream OneTimeToken) {}
-rpc connectUsers (OneTimeTokenParams) returns (OneTimeToken) {}
-rpc disconnectUsers (OneTimeTokenParams) returns (OneTimeToken) {}
-rpc findManyUsers (UserWhereUniqueInput) returns (stream Session) {}
-rpc updateUsers (SessionParams) returns (stream Session) {}
-rpc connectUsers (SessionParams) returns (Session) {}
-rpc disconnectUsers (SessionParams) returns (Session) {} 
+rpc deleteUser (UserWhereUniqueInput) returns (User) {} 
  }
 message UserCreateInput {
-string aud = 1;
-string bannedUntil = 2;
-string confirmationSentAt = 3;
-string confirmationToken = 4;
-string confirmedAt = 5;
-string createdAt = 6;
-string deletedAt = 7;
-string email = 8;
-string emailChange = 9;
-int32 emailChangeConfirmStatus = 10;
-string emailChangeSentAt = 11;
-string emailChangeTokenCurrent = 12;
-string emailChangeTokenNew = 13;
-string emailConfirmedAt = 14;
-string id = 15;
-repeated Identity identities = 16;
-string instanceId = 17;
-string invitedAt = 18;
-bool isAnonymous = 19;
-bool isSsoUser = 20;
-bool isSuperAdmin = 21;
-string lastSignInAt = 22;
-repeated MfaFactor mfaFactors = 23;
-repeated OneTimeToken oneTimeTokens = 24;
-string password = 25;
-string phone = 26;
-string phoneChange = 27;
-string phoneChangeSentAt = 28;
-string phoneChangeToken = 29;
-string phoneConfirmedAt = 30;
-string rawAppMetaData = 31;
-string rawUserMetaData = 32;
-string reauthenticationSentAt = 33;
-string reauthenticationToken = 34;
-string recoverySentAt = 35;
-string recoveryToken = 36;
-repeated string roles = 37;
-repeated Session sessions = 38;
-string updatedAt = 39;
-string username = 40;
+string createdAt = 1;
+string email = 2;
+string firstName = 3;
+string id = 4;
+string lastName = 5;
+string password = 6;
+repeated string roles = 7;
+string updatedAt = 8;
+string username = 9;
 };
 message User {
-string aud = 1;
-string bannedUntil = 2;
-string confirmationSentAt = 3;
-string confirmationToken = 4;
-string confirmedAt = 5;
-string createdAt = 6;
-string deletedAt = 7;
-string email = 8;
-string emailChange = 9;
-int32 emailChangeConfirmStatus = 10;
-string emailChangeSentAt = 11;
-string emailChangeTokenCurrent = 12;
-string emailChangeTokenNew = 13;
-string emailConfirmedAt = 14;
-string id = 15;
-repeated Identity identities = 16;
-string instanceId = 17;
-string invitedAt = 18;
-bool isAnonymous = 19;
-bool isSsoUser = 20;
-bool isSuperAdmin = 21;
-string lastSignInAt = 22;
-repeated MfaFactor mfaFactors = 23;
-repeated OneTimeToken oneTimeTokens = 24;
-string password = 25;
-string phone = 26;
-string phoneChange = 27;
-string phoneChangeSentAt = 28;
-string phoneChangeToken = 29;
-string phoneConfirmedAt = 30;
-string rawAppMetaData = 31;
-string rawUserMetaData = 32;
-string reauthenticationSentAt = 33;
-string reauthenticationToken = 34;
-string recoverySentAt = 35;
-string recoveryToken = 36;
-repeated string roles = 37;
-repeated Session sessions = 38;
-string updatedAt = 39;
-string username = 40;
+string createdAt = 1;
+string email = 2;
+string firstName = 3;
+string id = 4;
+string lastName = 5;
+string password = 6;
+repeated string roles = 7;
+string updatedAt = 8;
+string username = 9;
 };
 message UserWhereUniqueInput {
-string aud = 1;
-string bannedUntil = 2;
-string confirmationSentAt = 3;
-string confirmationToken = 4;
-string confirmedAt = 5;
-string createdAt = 6;
-string deletedAt = 7;
-string email = 8;
-string emailChange = 9;
-int32 emailChangeConfirmStatus = 10;
-string emailChangeSentAt = 11;
-string emailChangeTokenCurrent = 12;
-string emailChangeTokenNew = 13;
-string emailConfirmedAt = 14;
-string id = 15;
-repeated Identity identities = 16;
-string instanceId = 17;
-string invitedAt = 18;
-bool isAnonymous = 19;
-bool isSsoUser = 20;
-bool isSuperAdmin = 21;
-string lastSignInAt = 22;
-repeated MfaFactor mfaFactors = 23;
-repeated OneTimeToken oneTimeTokens = 24;
-string password = 25;
-string phone = 26;
-string phoneChange = 27;
-string phoneChangeSentAt = 28;
-string phoneChangeToken = 29;
-string phoneConfirmedAt = 30;
-string rawAppMetaData = 31;
-string rawUserMetaData = 32;
-string reauthenticationSentAt = 33;
-string reauthenticationToken = 34;
-string recoverySentAt = 35;
-string recoveryToken = 36;
-repeated string roles = 37;
-repeated Session sessions = 38;
-string updatedAt = 39;
-string username = 40;
+string createdAt = 1;
+string email = 2;
+string firstName = 3;
+string id = 4;
+string lastName = 5;
+string password = 6;
+repeated string roles = 7;
+string updatedAt = 8;
+string username = 9;
 };
 message UserUpdateInput {
-string aud = 1;
-string bannedUntil = 2;
-string confirmationSentAt = 3;
-string confirmationToken = 4;
-string confirmedAt = 5;
-string createdAt = 6;
-string deletedAt = 7;
-string email = 8;
-string emailChange = 9;
-int32 emailChangeConfirmStatus = 10;
-string emailChangeSentAt = 11;
-string emailChangeTokenCurrent = 12;
-string emailChangeTokenNew = 13;
-string emailConfirmedAt = 14;
-string id = 15;
-repeated Identity identities = 16;
-string instanceId = 17;
-string invitedAt = 18;
-bool isAnonymous = 19;
-bool isSsoUser = 20;
-bool isSuperAdmin = 21;
-string lastSignInAt = 22;
-repeated MfaFactor mfaFactors = 23;
-repeated OneTimeToken oneTimeTokens = 24;
-string password = 25;
-string phone = 26;
-string phoneChange = 27;
-string phoneChangeSentAt = 28;
-string phoneChangeToken = 29;
-string phoneConfirmedAt = 30;
-string rawAppMetaData = 31;
-string rawUserMetaData = 32;
-string reauthenticationSentAt = 33;
-string reauthenticationToken = 34;
-string recoverySentAt = 35;
-string recoveryToken = 36;
-repeated string roles = 37;
-repeated Session sessions = 38;
-string updatedAt = 39;
-string username = 40;
+string createdAt = 1;
+string email = 2;
+string firstName = 3;
+string id = 4;
+string lastName = 5;
+string password = 6;
+repeated string roles = 7;
+string updatedAt = 8;
+string username = 9;
 };
 message findManyParams {
 
-};
-message Identity {
-string createdAt = 1;
-string email = 2;
-string id = 3;
-string identityData = 4;
-string lastSignInAt = 5;
-string provider = 6;
-string providerId = 7;
-string updatedAt = 8;
-};
-message IdentityWhereUniqueInput {
-string createdAt = 1;
-string email = 2;
-string id = 3;
-string identityData = 4;
-string lastSignInAt = 5;
-string provider = 6;
-string providerId = 7;
-string updatedAt = 8;
-};
-message IdentityParams {
-UserWhereUniqueInput userWhereUniqueInput = 1;
-IdentityWhereUniqueInput identityWhereUniqueInput = 2;
-};
-message MfaFactor {
-string createdAt = 1;
-repeated string factor_type = 2;
-string friendlyName = 3;
-string id = 4;
-string lastChallengedAt = 5;
-string phone = 6;
-string secret = 7;
-repeated string status = 8;
-string updatedAt = 9;
-string webAuthnAaguid = 10;
-string webAuthnCredential = 11;
-};
-message MfaFactorWhereUniqueInput {
-string createdAt = 1;
-repeated string factor_type = 2;
-string friendlyName = 3;
-string id = 4;
-string lastChallengedAt = 5;
-string phone = 6;
-string secret = 7;
-repeated string status = 8;
-string updatedAt = 9;
-string webAuthnAaguid = 10;
-string webAuthnCredential = 11;
-};
-message MfaFactorParams {
-UserWhereUniqueInput userWhereUniqueInput = 1;
-MfaFactorWhereUniqueInput mfafactorWhereUniqueInput = 2;
-};
-message OneTimeToken {
-string createdAt = 1;
-string id = 2;
-string relatesTo = 3;
-string tokenHash = 4;
-repeated string token_type = 5;
-string updatedAt = 6;
-};
-message OneTimeTokenWhereUniqueInput {
-string createdAt = 1;
-string id = 2;
-string relatesTo = 3;
-string tokenHash = 4;
-repeated string token_type = 5;
-string updatedAt = 6;
-};
-message OneTimeTokenParams {
-UserWhereUniqueInput userWhereUniqueInput = 1;
-OneTimeTokenWhereUniqueInput onetimetokenWhereUniqueInput = 2;
-};
-message Session {
-repeated string aal = 1;
-string createdAt = 2;
-string factorId = 3;
-string id = 4;
-string ip = 5;
-string notAfter = 6;
-string refreshedAt = 7;
-string tag = 8;
-string updatedAt = 9;
-string userAgent = 10;
-};
-message SessionWhereUniqueInput {
-repeated string aal = 1;
-string createdAt = 2;
-string factorId = 3;
-string id = 4;
-string ip = 5;
-string notAfter = 6;
-string refreshedAt = 7;
-string tag = 8;
-string updatedAt = 9;
-string userAgent = 10;
-};
-message SessionParams {
-UserWhereUniqueInput userWhereUniqueInput = 1;
-SessionWhereUniqueInput sessionWhereUniqueInput = 2;
 };

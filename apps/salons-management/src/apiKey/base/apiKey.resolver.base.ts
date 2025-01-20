@@ -13,83 +13,17 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
 import { ApiKey } from "./ApiKey";
-import { ApiKeyCountArgs } from "./ApiKeyCountArgs";
-import { ApiKeyFindManyArgs } from "./ApiKeyFindManyArgs";
-import { ApiKeyFindUniqueArgs } from "./ApiKeyFindUniqueArgs";
-import { CreateApiKeyArgs } from "./CreateApiKeyArgs";
-import { UpdateApiKeyArgs } from "./UpdateApiKeyArgs";
-import { DeleteApiKeyArgs } from "./DeleteApiKeyArgs";
 import { ApiKeyService } from "../apiKey.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => ApiKey)
 export class ApiKeyResolverBase {
-  constructor(protected readonly service: ApiKeyService) {}
-
-  async _apiKeysMeta(
-    @graphql.Args() args: ApiKeyCountArgs
-  ): Promise<MetaQueryPayload> {
-    const result = await this.service.count(args);
-    return {
-      count: result,
-    };
-  }
-
-  @graphql.Query(() => [ApiKey])
-  async apiKeys(@graphql.Args() args: ApiKeyFindManyArgs): Promise<ApiKey[]> {
-    return this.service.apiKeys(args);
-  }
-
-  @graphql.Query(() => ApiKey, { nullable: true })
-  async apiKey(
-    @graphql.Args() args: ApiKeyFindUniqueArgs
-  ): Promise<ApiKey | null> {
-    const result = await this.service.apiKey(args);
-    if (result === null) {
-      return null;
-    }
-    return result;
-  }
-
-  @graphql.Mutation(() => ApiKey)
-  async createApiKey(@graphql.Args() args: CreateApiKeyArgs): Promise<ApiKey> {
-    return await this.service.createApiKey({
-      ...args,
-      data: args.data,
-    });
-  }
-
-  @graphql.Mutation(() => ApiKey)
-  async updateApiKey(
-    @graphql.Args() args: UpdateApiKeyArgs
-  ): Promise<ApiKey | null> {
-    try {
-      return await this.service.updateApiKey({
-        ...args,
-        data: args.data,
-      });
-    } catch (error) {
-      if (isRecordNotFoundError(error)) {
-        throw new GraphQLError(
-          `No resource was found for ${JSON.stringify(args.where)}`
-        );
-      }
-      throw error;
-    }
-  }
-
-  @graphql.Mutation(() => ApiKey)
-  async deleteApiKey(
-    @graphql.Args() args: DeleteApiKeyArgs
-  ): Promise<ApiKey | null> {
-    try {
-      return await this.service.deleteApiKey(args);
-    } catch (error) {
-      if (isRecordNotFoundError(error)) {
-        throw new GraphQLError(
-          `No resource was found for ${JSON.stringify(args.where)}`
-        );
-      }
-      throw error;
-    }
-  }
+  constructor(
+    protected readonly service: ApiKeyService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 }

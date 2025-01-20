@@ -16,7 +16,11 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { SalonServiceCategoryService } from "../salonServiceCategory.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { SalonServiceCategoryCreateInput } from "./SalonServiceCategoryCreateInput";
 import { SalonServiceCategory } from "./SalonServiceCategory";
 import { SalonServiceCategoryFindManyArgs } from "./SalonServiceCategoryFindManyArgs";
@@ -26,10 +30,24 @@ import { SalonServiceFindManyArgs } from "../../salonService/base/SalonServiceFi
 import { SalonService } from "../../salonService/base/SalonService";
 import { SalonServiceWhereUniqueInput } from "../../salonService/base/SalonServiceWhereUniqueInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class SalonServiceCategoryControllerBase {
-  constructor(protected readonly service: SalonServiceCategoryService) {}
+  constructor(
+    protected readonly service: SalonServiceCategoryService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: SalonServiceCategory })
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createSalonServiceCategory(
     @common.Body() data: SalonServiceCategoryCreateInput
   ): Promise<SalonServiceCategory> {
@@ -42,9 +60,18 @@ export class SalonServiceCategoryControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [SalonServiceCategory] })
   @ApiNestedQuery(SalonServiceCategoryFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonServiceCategories(
     @common.Req() request: Request
   ): Promise<SalonServiceCategory[]> {
@@ -58,9 +85,18 @@ export class SalonServiceCategoryControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: SalonServiceCategory })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonServiceCategory(
     @common.Param() params: SalonServiceCategoryWhereUniqueInput
   ): Promise<SalonServiceCategory | null> {
@@ -79,9 +115,18 @@ export class SalonServiceCategoryControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: SalonServiceCategory })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateSalonServiceCategory(
     @common.Param() params: SalonServiceCategoryWhereUniqueInput,
     @common.Body() data: SalonServiceCategoryUpdateInput
@@ -108,6 +153,14 @@ export class SalonServiceCategoryControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: SalonServiceCategory })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteSalonServiceCategory(
     @common.Param() params: SalonServiceCategoryWhereUniqueInput
   ): Promise<SalonServiceCategory | null> {
@@ -129,8 +182,14 @@ export class SalonServiceCategoryControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/salonServices")
   @ApiNestedQuery(SalonServiceFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "SalonService",
+    action: "read",
+    possession: "any",
+  })
   async findSalonServices(
     @common.Req() request: Request,
     @common.Param() params: SalonServiceCategoryWhereUniqueInput
@@ -168,6 +227,11 @@ export class SalonServiceCategoryControllerBase {
   }
 
   @common.Post("/:id/salonServices")
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "update",
+    possession: "any",
+  })
   async connectSalonServices(
     @common.Param() params: SalonServiceCategoryWhereUniqueInput,
     @common.Body() body: SalonServiceWhereUniqueInput[]
@@ -185,6 +249,11 @@ export class SalonServiceCategoryControllerBase {
   }
 
   @common.Patch("/:id/salonServices")
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "update",
+    possession: "any",
+  })
   async updateSalonServices(
     @common.Param() params: SalonServiceCategoryWhereUniqueInput,
     @common.Body() body: SalonServiceWhereUniqueInput[]
@@ -202,6 +271,11 @@ export class SalonServiceCategoryControllerBase {
   }
 
   @common.Delete("/:id/salonServices")
+  @nestAccessControl.UseRoles({
+    resource: "SalonServiceCategory",
+    action: "update",
+    possession: "any",
+  })
   async disconnectSalonServices(
     @common.Param() params: SalonServiceCategoryWhereUniqueInput,
     @common.Body() body: SalonServiceWhereUniqueInput[]

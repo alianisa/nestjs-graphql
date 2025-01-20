@@ -32,9 +32,6 @@ import { EmployeeDailyStatCreateNestedManyWithoutUserProfilesInput } from "./Emp
 import { EmployeeStatCreateNestedManyWithoutUserProfilesInput } from "./EmployeeStatCreateNestedManyWithoutUserProfilesInput";
 import { EmployeeTaskCreateNestedManyWithoutUserProfilesInput } from "./EmployeeTaskCreateNestedManyWithoutUserProfilesInput";
 import { EmployeeWorkScheduleCreateNestedManyWithoutUserProfilesInput } from "./EmployeeWorkScheduleCreateNestedManyWithoutUserProfilesInput";
-import { IsJSONValue } from "../../validators";
-import { GraphQLJSON } from "graphql-type-json";
-import { InputJsonValue } from "../../types";
 import { LoyaltyTransactionCreateNestedManyWithoutUserProfilesInput } from "./LoyaltyTransactionCreateNestedManyWithoutUserProfilesInput";
 import { NotificationCreateNestedManyWithoutUserProfilesInput } from "./NotificationCreateNestedManyWithoutUserProfilesInput";
 import { OrderCreateNestedManyWithoutUserProfilesInput } from "./OrderCreateNestedManyWithoutUserProfilesInput";
@@ -47,6 +44,7 @@ import { SalonCreateNestedManyWithoutUserProfilesInput } from "./SalonCreateNest
 import { SalonWhereUniqueInput } from "../../salon/base/SalonWhereUniqueInput";
 import { ScheduleCreateNestedManyWithoutUserProfilesInput } from "./ScheduleCreateNestedManyWithoutUserProfilesInput";
 import { TimeSlotCreateNestedManyWithoutUserProfilesInput } from "./TimeSlotCreateNestedManyWithoutUserProfilesInput";
+import { UserWhereUniqueInput } from "../../user/base/UserWhereUniqueInput";
 import { UserAccountCreateNestedManyWithoutUserProfilesInput } from "./UserAccountCreateNestedManyWithoutUserProfilesInput";
 import { UserAddressCreateNestedManyWithoutUserProfilesInput } from "./UserAddressCreateNestedManyWithoutUserProfilesInput";
 import { UserBankCardCreateNestedManyWithoutUserProfilesInput } from "./UserBankCardCreateNestedManyWithoutUserProfilesInput";
@@ -374,13 +372,14 @@ class UserProfileCreateInput {
 
   @ApiProperty({
     required: false,
+    type: String,
   })
-  @IsJSONValue()
+  @IsString()
   @IsOptional()
-  @Field(() => GraphQLJSON, {
+  @Field(() => String, {
     nullable: true,
   })
-  location?: InputJsonValue;
+  location?: string | null;
 
   @ApiProperty({
     required: false,
@@ -489,15 +488,6 @@ class UserProfileCreateInput {
     nullable: true,
   })
   queuesQueuesUserIdTouserProfiles?: QueueCreateNestedManyWithoutUserProfilesInput;
-
-  @ApiProperty({
-    required: true,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @Field(() => String)
-  roles!: string;
 
   @ApiProperty({
     required: false,
@@ -632,6 +622,18 @@ class UserProfileCreateInput {
 
   @ApiProperty({
     required: false,
+    type: () => UserWhereUniqueInput,
+  })
+  @ValidateNested()
+  @Type(() => UserWhereUniqueInput)
+  @IsOptional()
+  @Field(() => UserWhereUniqueInput, {
+    nullable: true,
+  })
+  user?: UserWhereUniqueInput | null;
+
+  @ApiProperty({
+    required: false,
     type: () => UserAccountCreateNestedManyWithoutUserProfilesInput,
   })
   @ValidateNested()
@@ -749,18 +751,6 @@ class UserProfileCreateInput {
     nullable: true,
   })
   userRatingsUserRatingsUserIdTouserProfiles?: UserRatingCreateNestedManyWithoutUserProfilesInput;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  username?: string | null;
 
   @ApiProperty({
     required: false,

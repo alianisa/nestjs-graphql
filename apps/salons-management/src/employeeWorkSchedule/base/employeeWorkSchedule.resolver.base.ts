@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { EmployeeWorkSchedule } from "./EmployeeWorkSchedule";
 import { EmployeeWorkScheduleCountArgs } from "./EmployeeWorkScheduleCountArgs";
 import { EmployeeWorkScheduleFindManyArgs } from "./EmployeeWorkScheduleFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteEmployeeWorkScheduleArgs } from "./DeleteEmployeeWorkScheduleArgs
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { EmployeeWorkScheduleService } from "../employeeWorkSchedule.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => EmployeeWorkSchedule)
 export class EmployeeWorkScheduleResolverBase {
-  constructor(protected readonly service: EmployeeWorkScheduleService) {}
+  constructor(
+    protected readonly service: EmployeeWorkScheduleService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "read",
+    possession: "any",
+  })
   async _employeeWorkSchedulesMeta(
     @graphql.Args() args: EmployeeWorkScheduleCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class EmployeeWorkScheduleResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [EmployeeWorkSchedule])
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "read",
+    possession: "any",
+  })
   async employeeWorkSchedules(
     @graphql.Args() args: EmployeeWorkScheduleFindManyArgs
   ): Promise<EmployeeWorkSchedule[]> {
     return this.service.employeeWorkSchedules(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => EmployeeWorkSchedule, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "read",
+    possession: "own",
+  })
   async employeeWorkSchedule(
     @graphql.Args() args: EmployeeWorkScheduleFindUniqueArgs
   ): Promise<EmployeeWorkSchedule | null> {
@@ -54,7 +82,13 @@ export class EmployeeWorkScheduleResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => EmployeeWorkSchedule)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "create",
+    possession: "any",
+  })
   async createEmployeeWorkSchedule(
     @graphql.Args() args: CreateEmployeeWorkScheduleArgs
   ): Promise<EmployeeWorkSchedule> {
@@ -74,7 +108,13 @@ export class EmployeeWorkScheduleResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => EmployeeWorkSchedule)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "update",
+    possession: "any",
+  })
   async updateEmployeeWorkSchedule(
     @graphql.Args() args: UpdateEmployeeWorkScheduleArgs
   ): Promise<EmployeeWorkSchedule | null> {
@@ -104,6 +144,11 @@ export class EmployeeWorkScheduleResolverBase {
   }
 
   @graphql.Mutation(() => EmployeeWorkSchedule)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeWorkSchedule",
+    action: "delete",
+    possession: "any",
+  })
   async deleteEmployeeWorkSchedule(
     @graphql.Args() args: DeleteEmployeeWorkScheduleArgs
   ): Promise<EmployeeWorkSchedule | null> {
@@ -119,9 +164,15 @@ export class EmployeeWorkScheduleResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(
     @graphql.Parent() parent: EmployeeWorkSchedule
@@ -134,9 +185,15 @@ export class EmployeeWorkScheduleResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: EmployeeWorkSchedule

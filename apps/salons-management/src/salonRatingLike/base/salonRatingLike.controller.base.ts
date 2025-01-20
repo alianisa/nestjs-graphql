@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { SalonRatingLikeService } from "../salonRatingLike.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { SalonRatingLikeCreateInput } from "./SalonRatingLikeCreateInput";
 import { SalonRatingLike } from "./SalonRatingLike";
 import { SalonRatingLikeFindManyArgs } from "./SalonRatingLikeFindManyArgs";
 import { SalonRatingLikeWhereUniqueInput } from "./SalonRatingLikeWhereUniqueInput";
 import { SalonRatingLikeUpdateInput } from "./SalonRatingLikeUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class SalonRatingLikeControllerBase {
-  constructor(protected readonly service: SalonRatingLikeService) {}
+  constructor(
+    protected readonly service: SalonRatingLikeService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: SalonRatingLike })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createSalonRatingLike(
     @common.Body() data: SalonRatingLikeCreateInput
   ): Promise<SalonRatingLike> {
@@ -90,9 +108,18 @@ export class SalonRatingLikeControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [SalonRatingLike] })
   @ApiNestedQuery(SalonRatingLikeFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonRatingLikes(
     @common.Req() request: Request
   ): Promise<SalonRatingLike[]> {
@@ -131,9 +158,18 @@ export class SalonRatingLikeControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: SalonRatingLike })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async salonRatingLike(
     @common.Param() params: SalonRatingLikeWhereUniqueInput
   ): Promise<SalonRatingLike | null> {
@@ -177,9 +213,18 @@ export class SalonRatingLikeControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: SalonRatingLike })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateSalonRatingLike(
     @common.Param() params: SalonRatingLikeWhereUniqueInput,
     @common.Body() data: SalonRatingLikeUpdateInput
@@ -259,6 +304,14 @@ export class SalonRatingLikeControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: SalonRatingLike })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "SalonRatingLike",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteSalonRatingLike(
     @common.Param() params: SalonRatingLikeWhereUniqueInput
   ): Promise<SalonRatingLike | null> {

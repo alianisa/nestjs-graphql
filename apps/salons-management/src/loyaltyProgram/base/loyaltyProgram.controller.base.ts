@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { LoyaltyProgramService } from "../loyaltyProgram.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { LoyaltyProgramCreateInput } from "./LoyaltyProgramCreateInput";
 import { LoyaltyProgram } from "./LoyaltyProgram";
 import { LoyaltyProgramFindManyArgs } from "./LoyaltyProgramFindManyArgs";
 import { LoyaltyProgramWhereUniqueInput } from "./LoyaltyProgramWhereUniqueInput";
 import { LoyaltyProgramUpdateInput } from "./LoyaltyProgramUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class LoyaltyProgramControllerBase {
-  constructor(protected readonly service: LoyaltyProgramService) {}
+  constructor(
+    protected readonly service: LoyaltyProgramService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: LoyaltyProgram })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createLoyaltyProgram(
     @common.Body() data: LoyaltyProgramCreateInput
   ): Promise<LoyaltyProgram> {
@@ -45,9 +63,18 @@ export class LoyaltyProgramControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [LoyaltyProgram] })
   @ApiNestedQuery(LoyaltyProgramFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async loyaltyPrograms(
     @common.Req() request: Request
   ): Promise<LoyaltyProgram[]> {
@@ -67,9 +94,18 @@ export class LoyaltyProgramControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: LoyaltyProgram })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async loyaltyProgram(
     @common.Param() params: LoyaltyProgramWhereUniqueInput
   ): Promise<LoyaltyProgram | null> {
@@ -94,9 +130,18 @@ export class LoyaltyProgramControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: LoyaltyProgram })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateLoyaltyProgram(
     @common.Param() params: LoyaltyProgramWhereUniqueInput,
     @common.Body() data: LoyaltyProgramUpdateInput
@@ -129,6 +174,14 @@ export class LoyaltyProgramControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: LoyaltyProgram })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "LoyaltyProgram",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteLoyaltyProgram(
     @common.Param() params: LoyaltyProgramWhereUniqueInput
   ): Promise<LoyaltyProgram | null> {

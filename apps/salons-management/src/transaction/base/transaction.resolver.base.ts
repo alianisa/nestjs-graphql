@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Transaction } from "./Transaction";
 import { TransactionCountArgs } from "./TransactionCountArgs";
 import { TransactionFindManyArgs } from "./TransactionFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteTransactionArgs } from "./DeleteTransactionArgs";
 import { Order } from "../../order/base/Order";
 import { Payment } from "../../payment/base/Payment";
 import { TransactionService } from "../transaction.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Transaction)
 export class TransactionResolverBase {
-  constructor(protected readonly service: TransactionService) {}
+  constructor(
+    protected readonly service: TransactionService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "any",
+  })
   async _transactionsMeta(
     @graphql.Args() args: TransactionCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class TransactionResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Transaction])
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "any",
+  })
   async transactions(
     @graphql.Args() args: TransactionFindManyArgs
   ): Promise<Transaction[]> {
     return this.service.transactions(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Transaction, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "read",
+    possession: "own",
+  })
   async transaction(
     @graphql.Args() args: TransactionFindUniqueArgs
   ): Promise<Transaction | null> {
@@ -54,7 +82,13 @@ export class TransactionResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Transaction)
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "create",
+    possession: "any",
+  })
   async createTransaction(
     @graphql.Args() args: CreateTransactionArgs
   ): Promise<Transaction> {
@@ -78,7 +112,13 @@ export class TransactionResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Transaction)
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "update",
+    possession: "any",
+  })
   async updateTransaction(
     @graphql.Args() args: UpdateTransactionArgs
   ): Promise<Transaction | null> {
@@ -112,6 +152,11 @@ export class TransactionResolverBase {
   }
 
   @graphql.Mutation(() => Transaction)
+  @nestAccessControl.UseRoles({
+    resource: "Transaction",
+    action: "delete",
+    possession: "any",
+  })
   async deleteTransaction(
     @graphql.Args() args: DeleteTransactionArgs
   ): Promise<Transaction | null> {
@@ -127,9 +172,15 @@ export class TransactionResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Order, {
     nullable: true,
     name: "orders",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Order",
+    action: "read",
+    possession: "any",
   })
   async getOrders(
     @graphql.Parent() parent: Transaction
@@ -142,9 +193,15 @@ export class TransactionResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Payment, {
     nullable: true,
     name: "payments",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Payment",
+    action: "read",
+    possession: "any",
   })
   async getPayments(
     @graphql.Parent() parent: Transaction

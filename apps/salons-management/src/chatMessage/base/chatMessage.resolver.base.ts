@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { ChatMessage } from "./ChatMessage";
 import { ChatMessageCountArgs } from "./ChatMessageCountArgs";
 import { ChatMessageFindManyArgs } from "./ChatMessageFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdateChatMessageArgs } from "./UpdateChatMessageArgs";
 import { DeleteChatMessageArgs } from "./DeleteChatMessageArgs";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { ChatMessageService } from "../chatMessage.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => ChatMessage)
 export class ChatMessageResolverBase {
-  constructor(protected readonly service: ChatMessageService) {}
+  constructor(
+    protected readonly service: ChatMessageService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "any",
+  })
   async _chatMessagesMeta(
     @graphql.Args() args: ChatMessageCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,14 +51,26 @@ export class ChatMessageResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [ChatMessage])
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "any",
+  })
   async chatMessages(
     @graphql.Args() args: ChatMessageFindManyArgs
   ): Promise<ChatMessage[]> {
     return this.service.chatMessages(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => ChatMessage, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "own",
+  })
   async chatMessage(
     @graphql.Args() args: ChatMessageFindUniqueArgs
   ): Promise<ChatMessage | null> {
@@ -53,7 +81,13 @@ export class ChatMessageResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => ChatMessage)
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "create",
+    possession: "any",
+  })
   async createChatMessage(
     @graphql.Args() args: CreateChatMessageArgs
   ): Promise<ChatMessage> {
@@ -77,7 +111,13 @@ export class ChatMessageResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => ChatMessage)
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "update",
+    possession: "any",
+  })
   async updateChatMessage(
     @graphql.Args() args: UpdateChatMessageArgs
   ): Promise<ChatMessage | null> {
@@ -111,6 +151,11 @@ export class ChatMessageResolverBase {
   }
 
   @graphql.Mutation(() => ChatMessage)
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "delete",
+    possession: "any",
+  })
   async deleteChatMessage(
     @graphql.Args() args: DeleteChatMessageArgs
   ): Promise<ChatMessage | null> {
@@ -126,7 +171,13 @@ export class ChatMessageResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [ChatMessage], { name: "otherChatMessages" })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "any",
+  })
   async findOtherChatMessages(
     @graphql.Parent() parent: ChatMessage,
     @graphql.Args() args: ChatMessageFindManyArgs
@@ -140,9 +191,15 @@ export class ChatMessageResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => ChatMessage, {
     nullable: true,
     name: "chatMessages",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "any",
   })
   async getChatMessages(
     @graphql.Parent() parent: ChatMessage
@@ -155,9 +212,15 @@ export class ChatMessageResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: ChatMessage

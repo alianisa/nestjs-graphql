@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { UserAddressService } from "../userAddress.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { UserAddressCreateInput } from "./UserAddressCreateInput";
 import { UserAddress } from "./UserAddress";
 import { UserAddressFindManyArgs } from "./UserAddressFindManyArgs";
 import { UserAddressWhereUniqueInput } from "./UserAddressWhereUniqueInput";
 import { UserAddressUpdateInput } from "./UserAddressUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class UserAddressControllerBase {
-  constructor(protected readonly service: UserAddressService) {}
+  constructor(
+    protected readonly service: UserAddressService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: UserAddress })
+  @nestAccessControl.UseRoles({
+    resource: "UserAddress",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createUserAddress(
     @common.Body() data: UserAddressCreateInput
   ): Promise<UserAddress> {
@@ -56,9 +74,18 @@ export class UserAddressControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [UserAddress] })
   @ApiNestedQuery(UserAddressFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "UserAddress",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userAddresses(@common.Req() request: Request): Promise<UserAddress[]> {
     const args = plainToClass(UserAddressFindManyArgs, request.query);
     return this.service.userAddresses({
@@ -81,9 +108,18 @@ export class UserAddressControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: UserAddress })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserAddress",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async userAddress(
     @common.Param() params: UserAddressWhereUniqueInput
   ): Promise<UserAddress | null> {
@@ -113,9 +149,18 @@ export class UserAddressControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: UserAddress })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserAddress",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateUserAddress(
     @common.Param() params: UserAddressWhereUniqueInput,
     @common.Body() data: UserAddressUpdateInput
@@ -159,6 +204,14 @@ export class UserAddressControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: UserAddress })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "UserAddress",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteUserAddress(
     @common.Param() params: UserAddressWhereUniqueInput
   ): Promise<UserAddress | null> {

@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { MetricService } from "../metric.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { MetricCreateInput } from "./MetricCreateInput";
 import { Metric } from "./Metric";
 import { MetricFindManyArgs } from "./MetricFindManyArgs";
 import { MetricWhereUniqueInput } from "./MetricWhereUniqueInput";
 import { MetricUpdateInput } from "./MetricUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class MetricControllerBase {
-  constructor(protected readonly service: MetricService) {}
+  constructor(
+    protected readonly service: MetricService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Metric })
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createMetric(@common.Body() data: MetricCreateInput): Promise<Metric> {
     return await this.service.createMetric({
       data: data,
@@ -41,9 +59,18 @@ export class MetricControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Metric] })
   @ApiNestedQuery(MetricFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async metrics(@common.Req() request: Request): Promise<Metric[]> {
     const args = plainToClass(MetricFindManyArgs, request.query);
     return this.service.metrics({
@@ -59,9 +86,18 @@ export class MetricControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Metric })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async metric(
     @common.Param() params: MetricWhereUniqueInput
   ): Promise<Metric | null> {
@@ -84,9 +120,18 @@ export class MetricControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Metric })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateMetric(
     @common.Param() params: MetricWhereUniqueInput,
     @common.Body() data: MetricUpdateInput
@@ -117,6 +162,14 @@ export class MetricControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Metric })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Metric",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteMetric(
     @common.Param() params: MetricWhereUniqueInput
   ): Promise<Metric | null> {

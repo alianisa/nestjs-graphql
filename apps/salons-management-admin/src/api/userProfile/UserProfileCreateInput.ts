@@ -6,7 +6,6 @@ import { EmployeeDailyStatCreateNestedManyWithoutUserProfilesInput } from "./Emp
 import { EmployeeStatCreateNestedManyWithoutUserProfilesInput } from "./EmployeeStatCreateNestedManyWithoutUserProfilesInput";
 import { EmployeeTaskCreateNestedManyWithoutUserProfilesInput } from "./EmployeeTaskCreateNestedManyWithoutUserProfilesInput";
 import { EmployeeWorkScheduleCreateNestedManyWithoutUserProfilesInput } from "./EmployeeWorkScheduleCreateNestedManyWithoutUserProfilesInput";
-import { InputJsonValue } from "../../types";
 import { LoyaltyTransactionCreateNestedManyWithoutUserProfilesInput } from "./LoyaltyTransactionCreateNestedManyWithoutUserProfilesInput";
 import { NotificationCreateNestedManyWithoutUserProfilesInput } from "./NotificationCreateNestedManyWithoutUserProfilesInput";
 import { OrderCreateNestedManyWithoutUserProfilesInput } from "./OrderCreateNestedManyWithoutUserProfilesInput";
@@ -19,6 +18,7 @@ import { SalonCreateNestedManyWithoutUserProfilesInput } from "./SalonCreateNest
 import { SalonWhereUniqueInput } from "../salon/SalonWhereUniqueInput";
 import { ScheduleCreateNestedManyWithoutUserProfilesInput } from "./ScheduleCreateNestedManyWithoutUserProfilesInput";
 import { TimeSlotCreateNestedManyWithoutUserProfilesInput } from "./TimeSlotCreateNestedManyWithoutUserProfilesInput";
+import { UserWhereUniqueInput } from "../user/UserWhereUniqueInput";
 import { UserAccountCreateNestedManyWithoutUserProfilesInput } from "./UserAccountCreateNestedManyWithoutUserProfilesInput";
 import { UserAddressCreateNestedManyWithoutUserProfilesInput } from "./UserAddressCreateNestedManyWithoutUserProfilesInput";
 import { UserBankCardCreateNestedManyWithoutUserProfilesInput } from "./UserBankCardCreateNestedManyWithoutUserProfilesInput";
@@ -56,7 +56,7 @@ export type UserProfileCreateInput = {
   isEmployee?: boolean | null;
   jobTitle?: string | null;
   lastName?: string | null;
-  location?: InputJsonValue;
+  location?: string | null;
   loyaltyPoints?: number | null;
   loyaltyTransactions?: LoyaltyTransactionCreateNestedManyWithoutUserProfilesInput;
   notifications?: NotificationCreateNestedManyWithoutUserProfilesInput;
@@ -66,7 +66,6 @@ export type UserProfileCreateInput = {
   phone?: string | null;
   queuesQueuesEmployeeIdTouserProfiles?: QueueCreateNestedManyWithoutUserProfilesInput;
   queuesQueuesUserIdTouserProfiles?: QueueCreateNestedManyWithoutUserProfilesInput;
-  roles: string;
   salonAccounts?: SalonAccountCreateNestedManyWithoutUserProfilesInput;
   salonRatingLikesSalonRatingLikesUserIdTouserProfiles?: SalonRatingLikeCreateNestedManyWithoutUserProfilesInput;
   salonRatingLikesSalonRatingLikesVoterIdTouserProfiles?: SalonRatingLikeCreateNestedManyWithoutUserProfilesInput;
@@ -78,6 +77,7 @@ export type UserProfileCreateInput = {
   scheduleScheduleUserIdTouserProfiles?: ScheduleCreateNestedManyWithoutUserProfilesInput;
   timeSlots?: TimeSlotCreateNestedManyWithoutUserProfilesInput;
   updatedAt?: Date | null;
+  user?: UserWhereUniqueInput | null;
   userAccounts?: UserAccountCreateNestedManyWithoutUserProfilesInput;
   userAddresses?: UserAddressCreateNestedManyWithoutUserProfilesInput;
   userBankCards?: UserBankCardCreateNestedManyWithoutUserProfilesInput;
@@ -88,6 +88,5 @@ export type UserProfileCreateInput = {
   userNotificationSettings?: UserNotificationSettingWhereUniqueInput | null;
   userRatingsUserRatingsOwnerTouserProfiles?: UserRatingCreateNestedManyWithoutUserProfilesInput;
   userRatingsUserRatingsUserIdTouserProfiles?: UserRatingCreateNestedManyWithoutUserProfilesInput;
-  username?: string | null;
   website?: string | null;
 };

@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { TimeSlot } from "./TimeSlot";
 import { TimeSlotCountArgs } from "./TimeSlotCountArgs";
 import { TimeSlotFindManyArgs } from "./TimeSlotFindManyArgs";
@@ -25,10 +31,20 @@ import { Appointment } from "../../appointment/base/Appointment";
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { TimeSlotService } from "../timeSlot.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => TimeSlot)
 export class TimeSlotResolverBase {
-  constructor(protected readonly service: TimeSlotService) {}
+  constructor(
+    protected readonly service: TimeSlotService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "read",
+    possession: "any",
+  })
   async _timeSlotsMeta(
     @graphql.Args() args: TimeSlotCountArgs
   ): Promise<MetaQueryPayload> {
@@ -38,14 +54,26 @@ export class TimeSlotResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [TimeSlot])
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "read",
+    possession: "any",
+  })
   async timeSlots(
     @graphql.Args() args: TimeSlotFindManyArgs
   ): Promise<TimeSlot[]> {
     return this.service.timeSlots(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => TimeSlot, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "read",
+    possession: "own",
+  })
   async timeSlot(
     @graphql.Args() args: TimeSlotFindUniqueArgs
   ): Promise<TimeSlot | null> {
@@ -56,7 +84,13 @@ export class TimeSlotResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => TimeSlot)
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "create",
+    possession: "any",
+  })
   async createTimeSlot(
     @graphql.Args() args: CreateTimeSlotArgs
   ): Promise<TimeSlot> {
@@ -80,7 +114,13 @@ export class TimeSlotResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => TimeSlot)
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "update",
+    possession: "any",
+  })
   async updateTimeSlot(
     @graphql.Args() args: UpdateTimeSlotArgs
   ): Promise<TimeSlot | null> {
@@ -114,6 +154,11 @@ export class TimeSlotResolverBase {
   }
 
   @graphql.Mutation(() => TimeSlot)
+  @nestAccessControl.UseRoles({
+    resource: "TimeSlot",
+    action: "delete",
+    possession: "any",
+  })
   async deleteTimeSlot(
     @graphql.Args() args: DeleteTimeSlotArgs
   ): Promise<TimeSlot | null> {
@@ -129,7 +174,13 @@ export class TimeSlotResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => [Appointment], { name: "appointments" })
+  @nestAccessControl.UseRoles({
+    resource: "Appointment",
+    action: "read",
+    possession: "any",
+  })
   async findAppointments(
     @graphql.Parent() parent: TimeSlot,
     @graphql.Args() args: AppointmentFindManyArgs
@@ -143,9 +194,15 @@ export class TimeSlotResolverBase {
     return results;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(@graphql.Parent() parent: TimeSlot): Promise<Salon | null> {
     const result = await this.service.getSalons(parent.id);
@@ -156,9 +213,15 @@ export class TimeSlotResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: TimeSlot

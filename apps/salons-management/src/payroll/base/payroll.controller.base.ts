@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { PayrollService } from "../payroll.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { PayrollCreateInput } from "./PayrollCreateInput";
 import { Payroll } from "./Payroll";
 import { PayrollFindManyArgs } from "./PayrollFindManyArgs";
 import { PayrollWhereUniqueInput } from "./PayrollWhereUniqueInput";
 import { PayrollUpdateInput } from "./PayrollUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class PayrollControllerBase {
-  constructor(protected readonly service: PayrollService) {}
+  constructor(
+    protected readonly service: PayrollService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Payroll })
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createPayroll(
     @common.Body() data: PayrollCreateInput
   ): Promise<Payroll> {
@@ -52,9 +70,18 @@ export class PayrollControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Payroll] })
   @ApiNestedQuery(PayrollFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async payrolls(@common.Req() request: Request): Promise<Payroll[]> {
     const args = plainToClass(PayrollFindManyArgs, request.query);
     return this.service.payrolls({
@@ -73,9 +100,18 @@ export class PayrollControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Payroll })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async payroll(
     @common.Param() params: PayrollWhereUniqueInput
   ): Promise<Payroll | null> {
@@ -101,9 +137,18 @@ export class PayrollControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Payroll })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updatePayroll(
     @common.Param() params: PayrollWhereUniqueInput,
     @common.Body() data: PayrollUpdateInput
@@ -143,6 +188,14 @@ export class PayrollControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Payroll })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deletePayroll(
     @common.Param() params: PayrollWhereUniqueInput
   ): Promise<Payroll | null> {

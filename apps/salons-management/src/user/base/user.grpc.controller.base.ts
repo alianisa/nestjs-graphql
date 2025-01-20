@@ -24,18 +24,6 @@ import { UserWhereUniqueInput } from "./UserWhereUniqueInput";
 import { UserFindManyArgs } from "./UserFindManyArgs";
 import { UserUpdateInput } from "./UserUpdateInput";
 import { User } from "./User";
-import { IdentityFindManyArgs } from "../../identity/base/IdentityFindManyArgs";
-import { Identity } from "../../identity/base/Identity";
-import { IdentityWhereUniqueInput } from "../../identity/base/IdentityWhereUniqueInput";
-import { MfaFactorFindManyArgs } from "../../mfaFactor/base/MfaFactorFindManyArgs";
-import { MfaFactor } from "../../mfaFactor/base/MfaFactor";
-import { MfaFactorWhereUniqueInput } from "../../mfaFactor/base/MfaFactorWhereUniqueInput";
-import { OneTimeTokenFindManyArgs } from "../../oneTimeToken/base/OneTimeTokenFindManyArgs";
-import { OneTimeToken } from "../../oneTimeToken/base/OneTimeToken";
-import { OneTimeTokenWhereUniqueInput } from "../../oneTimeToken/base/OneTimeTokenWhereUniqueInput";
-import { SessionFindManyArgs } from "../../session/base/SessionFindManyArgs";
-import { Session } from "../../session/base/Session";
-import { SessionWhereUniqueInput } from "../../session/base/SessionWhereUniqueInput";
 
 export class UserGrpcControllerBase {
   constructor(protected readonly service: UserService) {}
@@ -44,42 +32,30 @@ export class UserGrpcControllerBase {
   @GrpcMethod("UserService", "createUser")
   async createUser(@common.Body() data: UserCreateInput): Promise<User> {
     return await this.service.createUser({
-      data: data,
+      data: {
+        ...data,
+
+        userProfiles: data.userProfiles
+          ? {
+              connect: data.userProfiles,
+            }
+          : undefined,
+      },
       select: {
-        aud: true,
-        bannedUntil: true,
-        confirmationSentAt: true,
-        confirmationToken: true,
-        confirmedAt: true,
         createdAt: true,
-        deletedAt: true,
         email: true,
-        emailChange: true,
-        emailChangeConfirmStatus: true,
-        emailChangeSentAt: true,
-        emailChangeTokenCurrent: true,
-        emailChangeTokenNew: true,
-        emailConfirmedAt: true,
+        firstName: true,
         id: true,
-        instanceId: true,
-        invitedAt: true,
-        isAnonymous: true,
-        isSsoUser: true,
-        isSuperAdmin: true,
-        lastSignInAt: true,
-        phone: true,
-        phoneChange: true,
-        phoneChangeSentAt: true,
-        phoneChangeToken: true,
-        phoneConfirmedAt: true,
-        rawAppMetaData: true,
-        rawUserMetaData: true,
-        reauthenticationSentAt: true,
-        reauthenticationToken: true,
-        recoverySentAt: true,
-        recoveryToken: true,
+        lastName: true,
         roles: true,
         updatedAt: true,
+
+        userProfiles: {
+          select: {
+            id: true,
+          },
+        },
+
         username: true,
       },
     });
@@ -94,40 +70,20 @@ export class UserGrpcControllerBase {
     return this.service.users({
       ...args,
       select: {
-        aud: true,
-        bannedUntil: true,
-        confirmationSentAt: true,
-        confirmationToken: true,
-        confirmedAt: true,
         createdAt: true,
-        deletedAt: true,
         email: true,
-        emailChange: true,
-        emailChangeConfirmStatus: true,
-        emailChangeSentAt: true,
-        emailChangeTokenCurrent: true,
-        emailChangeTokenNew: true,
-        emailConfirmedAt: true,
+        firstName: true,
         id: true,
-        instanceId: true,
-        invitedAt: true,
-        isAnonymous: true,
-        isSsoUser: true,
-        isSuperAdmin: true,
-        lastSignInAt: true,
-        phone: true,
-        phoneChange: true,
-        phoneChangeSentAt: true,
-        phoneChangeToken: true,
-        phoneConfirmedAt: true,
-        rawAppMetaData: true,
-        rawUserMetaData: true,
-        reauthenticationSentAt: true,
-        reauthenticationToken: true,
-        recoverySentAt: true,
-        recoveryToken: true,
+        lastName: true,
         roles: true,
         updatedAt: true,
+
+        userProfiles: {
+          select: {
+            id: true,
+          },
+        },
+
         username: true,
       },
     });
@@ -143,40 +99,20 @@ export class UserGrpcControllerBase {
     const result = await this.service.user({
       where: params,
       select: {
-        aud: true,
-        bannedUntil: true,
-        confirmationSentAt: true,
-        confirmationToken: true,
-        confirmedAt: true,
         createdAt: true,
-        deletedAt: true,
         email: true,
-        emailChange: true,
-        emailChangeConfirmStatus: true,
-        emailChangeSentAt: true,
-        emailChangeTokenCurrent: true,
-        emailChangeTokenNew: true,
-        emailConfirmedAt: true,
+        firstName: true,
         id: true,
-        instanceId: true,
-        invitedAt: true,
-        isAnonymous: true,
-        isSsoUser: true,
-        isSuperAdmin: true,
-        lastSignInAt: true,
-        phone: true,
-        phoneChange: true,
-        phoneChangeSentAt: true,
-        phoneChangeToken: true,
-        phoneConfirmedAt: true,
-        rawAppMetaData: true,
-        rawUserMetaData: true,
-        reauthenticationSentAt: true,
-        reauthenticationToken: true,
-        recoverySentAt: true,
-        recoveryToken: true,
+        lastName: true,
         roles: true,
         updatedAt: true,
+
+        userProfiles: {
+          select: {
+            id: true,
+          },
+        },
+
         username: true,
       },
     });
@@ -199,42 +135,30 @@ export class UserGrpcControllerBase {
     try {
       return await this.service.updateUser({
         where: params,
-        data: data,
+        data: {
+          ...data,
+
+          userProfiles: data.userProfiles
+            ? {
+                connect: data.userProfiles,
+              }
+            : undefined,
+        },
         select: {
-          aud: true,
-          bannedUntil: true,
-          confirmationSentAt: true,
-          confirmationToken: true,
-          confirmedAt: true,
           createdAt: true,
-          deletedAt: true,
           email: true,
-          emailChange: true,
-          emailChangeConfirmStatus: true,
-          emailChangeSentAt: true,
-          emailChangeTokenCurrent: true,
-          emailChangeTokenNew: true,
-          emailConfirmedAt: true,
+          firstName: true,
           id: true,
-          instanceId: true,
-          invitedAt: true,
-          isAnonymous: true,
-          isSsoUser: true,
-          isSuperAdmin: true,
-          lastSignInAt: true,
-          phone: true,
-          phoneChange: true,
-          phoneChangeSentAt: true,
-          phoneChangeToken: true,
-          phoneConfirmedAt: true,
-          rawAppMetaData: true,
-          rawUserMetaData: true,
-          reauthenticationSentAt: true,
-          reauthenticationToken: true,
-          recoverySentAt: true,
-          recoveryToken: true,
+          lastName: true,
           roles: true,
           updatedAt: true,
+
+          userProfiles: {
+            select: {
+              id: true,
+            },
+          },
+
           username: true,
         },
       });
@@ -259,40 +183,20 @@ export class UserGrpcControllerBase {
       return await this.service.deleteUser({
         where: params,
         select: {
-          aud: true,
-          bannedUntil: true,
-          confirmationSentAt: true,
-          confirmationToken: true,
-          confirmedAt: true,
           createdAt: true,
-          deletedAt: true,
           email: true,
-          emailChange: true,
-          emailChangeConfirmStatus: true,
-          emailChangeSentAt: true,
-          emailChangeTokenCurrent: true,
-          emailChangeTokenNew: true,
-          emailConfirmedAt: true,
+          firstName: true,
           id: true,
-          instanceId: true,
-          invitedAt: true,
-          isAnonymous: true,
-          isSsoUser: true,
-          isSuperAdmin: true,
-          lastSignInAt: true,
-          phone: true,
-          phoneChange: true,
-          phoneChangeSentAt: true,
-          phoneChangeToken: true,
-          phoneConfirmedAt: true,
-          rawAppMetaData: true,
-          rawUserMetaData: true,
-          reauthenticationSentAt: true,
-          reauthenticationToken: true,
-          recoverySentAt: true,
-          recoveryToken: true,
+          lastName: true,
           roles: true,
           updatedAt: true,
+
+          userProfiles: {
+            select: {
+              id: true,
+            },
+          },
+
           username: true,
         },
       });
@@ -304,365 +208,5 @@ export class UserGrpcControllerBase {
       }
       throw error;
     }
-  }
-
-  @common.Get("/:id/identities")
-  @ApiNestedQuery(IdentityFindManyArgs)
-  @GrpcMethod("UserService", "findManyIdentities")
-  async findManyIdentities(
-    @common.Req() request: Request,
-    @common.Param() params: UserWhereUniqueInput
-  ): Promise<Identity[]> {
-    const query = plainToClass(IdentityFindManyArgs, request.query);
-    const results = await this.service.findIdentities(params.id, {
-      ...query,
-      select: {
-        createdAt: true,
-        email: true,
-        id: true,
-        identityData: true,
-        lastSignInAt: true,
-        provider: true,
-        providerId: true,
-        updatedAt: true,
-
-        users: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
-    if (results === null) {
-      throw new errors.NotFoundException(
-        `No resource was found for ${JSON.stringify(params)}`
-      );
-    }
-    return results;
-  }
-
-  @common.Post("/:id/identities")
-  @GrpcMethod("UserService", "connectIdentities")
-  async connectIdentities(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: IdentityWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      identities: {
-        connect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Patch("/:id/identities")
-  @GrpcMethod("UserService", "updateIdentities")
-  async updateIdentities(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: IdentityWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      identities: {
-        set: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Delete("/:id/identities")
-  @GrpcMethod("UserService", "disconnectIdentities")
-  async disconnectIdentities(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: IdentityWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      identities: {
-        disconnect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Get("/:id/mfaFactors")
-  @ApiNestedQuery(MfaFactorFindManyArgs)
-  @GrpcMethod("UserService", "findManyMfaFactors")
-  async findManyMfaFactors(
-    @common.Req() request: Request,
-    @common.Param() params: UserWhereUniqueInput
-  ): Promise<MfaFactor[]> {
-    const query = plainToClass(MfaFactorFindManyArgs, request.query);
-    const results = await this.service.findMfaFactors(params.id, {
-      ...query,
-      select: {
-        createdAt: true,
-        factor_type: true,
-        friendlyName: true,
-        id: true,
-        lastChallengedAt: true,
-        phone: true,
-        secret: true,
-        status: true,
-        updatedAt: true,
-
-        users: {
-          select: {
-            id: true,
-          },
-        },
-
-        webAuthnAaguid: true,
-        webAuthnCredential: true,
-      },
-    });
-    if (results === null) {
-      throw new errors.NotFoundException(
-        `No resource was found for ${JSON.stringify(params)}`
-      );
-    }
-    return results;
-  }
-
-  @common.Post("/:id/mfaFactors")
-  @GrpcMethod("UserService", "connectMfaFactors")
-  async connectMfaFactors(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: MfaFactorWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      mfaFactors: {
-        connect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Patch("/:id/mfaFactors")
-  @GrpcMethod("UserService", "updateMfaFactors")
-  async updateMfaFactors(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: MfaFactorWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      mfaFactors: {
-        set: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Delete("/:id/mfaFactors")
-  @GrpcMethod("UserService", "disconnectMfaFactors")
-  async disconnectMfaFactors(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: MfaFactorWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      mfaFactors: {
-        disconnect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Get("/:id/oneTimeTokens")
-  @ApiNestedQuery(OneTimeTokenFindManyArgs)
-  @GrpcMethod("UserService", "findManyOneTimeTokens")
-  async findManyOneTimeTokens(
-    @common.Req() request: Request,
-    @common.Param() params: UserWhereUniqueInput
-  ): Promise<OneTimeToken[]> {
-    const query = plainToClass(OneTimeTokenFindManyArgs, request.query);
-    const results = await this.service.findOneTimeTokens(params.id, {
-      ...query,
-      select: {
-        createdAt: true,
-        id: true,
-        relatesTo: true,
-        tokenHash: true,
-        token_type: true,
-        updatedAt: true,
-
-        users: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
-    if (results === null) {
-      throw new errors.NotFoundException(
-        `No resource was found for ${JSON.stringify(params)}`
-      );
-    }
-    return results;
-  }
-
-  @common.Post("/:id/oneTimeTokens")
-  @GrpcMethod("UserService", "connectOneTimeTokens")
-  async connectOneTimeTokens(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: OneTimeTokenWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      oneTimeTokens: {
-        connect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Patch("/:id/oneTimeTokens")
-  @GrpcMethod("UserService", "updateOneTimeTokens")
-  async updateOneTimeTokens(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: OneTimeTokenWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      oneTimeTokens: {
-        set: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Delete("/:id/oneTimeTokens")
-  @GrpcMethod("UserService", "disconnectOneTimeTokens")
-  async disconnectOneTimeTokens(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: OneTimeTokenWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      oneTimeTokens: {
-        disconnect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Get("/:id/sessions")
-  @ApiNestedQuery(SessionFindManyArgs)
-  @GrpcMethod("UserService", "findManySessions")
-  async findManySessions(
-    @common.Req() request: Request,
-    @common.Param() params: UserWhereUniqueInput
-  ): Promise<Session[]> {
-    const query = plainToClass(SessionFindManyArgs, request.query);
-    const results = await this.service.findSessions(params.id, {
-      ...query,
-      select: {
-        aal: true,
-        createdAt: true,
-        factorId: true,
-        id: true,
-        ip: true,
-        notAfter: true,
-        refreshedAt: true,
-        tag: true,
-        updatedAt: true,
-        userAgent: true,
-
-        users: {
-          select: {
-            id: true,
-          },
-        },
-      },
-    });
-    if (results === null) {
-      throw new errors.NotFoundException(
-        `No resource was found for ${JSON.stringify(params)}`
-      );
-    }
-    return results;
-  }
-
-  @common.Post("/:id/sessions")
-  @GrpcMethod("UserService", "connectSessions")
-  async connectSessions(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: SessionWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      sessions: {
-        connect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Patch("/:id/sessions")
-  @GrpcMethod("UserService", "updateSessions")
-  async updateSessions(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: SessionWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      sessions: {
-        set: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
-  }
-
-  @common.Delete("/:id/sessions")
-  @GrpcMethod("UserService", "disconnectSessions")
-  async disconnectSessions(
-    @common.Param() params: UserWhereUniqueInput,
-    @common.Body() body: SessionWhereUniqueInput[]
-  ): Promise<void> {
-    const data = {
-      sessions: {
-        disconnect: body,
-      },
-    };
-    await this.service.updateUser({
-      where: params,
-      data,
-      select: { id: true },
-    });
   }
 }

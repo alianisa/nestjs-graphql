@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ConversationService } from "../conversation.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ConversationCreateInput } from "./ConversationCreateInput";
 import { Conversation } from "./Conversation";
 import { ConversationFindManyArgs } from "./ConversationFindManyArgs";
 import { ConversationWhereUniqueInput } from "./ConversationWhereUniqueInput";
 import { ConversationUpdateInput } from "./ConversationUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ConversationControllerBase {
-  constructor(protected readonly service: ConversationService) {}
+  constructor(
+    protected readonly service: ConversationService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Conversation })
+  @nestAccessControl.UseRoles({
+    resource: "Conversation",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createConversation(
     @common.Body() data: ConversationCreateInput
   ): Promise<Conversation> {
@@ -42,9 +60,18 @@ export class ConversationControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Conversation] })
   @ApiNestedQuery(ConversationFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Conversation",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async conversations(@common.Req() request: Request): Promise<Conversation[]> {
     const args = plainToClass(ConversationFindManyArgs, request.query);
     return this.service.conversations({
@@ -59,9 +86,18 @@ export class ConversationControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Conversation })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Conversation",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async conversation(
     @common.Param() params: ConversationWhereUniqueInput
   ): Promise<Conversation | null> {
@@ -83,9 +119,18 @@ export class ConversationControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Conversation })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Conversation",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateConversation(
     @common.Param() params: ConversationWhereUniqueInput,
     @common.Body() data: ConversationUpdateInput
@@ -115,6 +160,14 @@ export class ConversationControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Conversation })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Conversation",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteConversation(
     @common.Param() params: ConversationWhereUniqueInput
   ): Promise<Conversation | null> {

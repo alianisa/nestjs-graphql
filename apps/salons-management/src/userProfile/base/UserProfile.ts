@@ -32,9 +32,6 @@ import { EmployeeDailyStat } from "../../employeeDailyStat/base/EmployeeDailySta
 import { EmployeeStat } from "../../employeeStat/base/EmployeeStat";
 import { EmployeeTask } from "../../employeeTask/base/EmployeeTask";
 import { EmployeeWorkSchedule } from "../../employeeWorkSchedule/base/EmployeeWorkSchedule";
-import { IsJSONValue } from "../../validators";
-import { GraphQLJSON } from "graphql-type-json";
-import { JsonValue } from "type-fest";
 import { LoyaltyTransaction } from "../../loyaltyTransaction/base/LoyaltyTransaction";
 import { Notification } from "../../notification/base/Notification";
 import { Order } from "../../order/base/Order";
@@ -46,6 +43,7 @@ import { SalonRating } from "../../salonRating/base/SalonRating";
 import { Salon } from "../../salon/base/Salon";
 import { Schedule } from "../../schedule/base/Schedule";
 import { TimeSlot } from "../../timeSlot/base/TimeSlot";
+import { User } from "../../user/base/User";
 import { UserAccount } from "../../userAccount/base/UserAccount";
 import { UserAddress } from "../../userAddress/base/UserAddress";
 import { UserBankCard } from "../../userBankCard/base/UserBankCard";
@@ -351,13 +349,14 @@ class UserProfile {
 
   @ApiProperty({
     required: false,
+    type: String,
   })
-  @IsJSONValue()
+  @IsString()
   @IsOptional()
-  @Field(() => GraphQLJSON, {
+  @Field(() => String, {
     nullable: true,
   })
-  location!: JsonValue;
+  location!: string | null;
 
   @ApiProperty({
     required: false,
@@ -445,15 +444,6 @@ class UserProfile {
   @Type(() => Queue)
   @IsOptional()
   queuesQueuesUserIdTouserProfiles?: Array<Queue>;
-
-  @ApiProperty({
-    required: true,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @Field(() => String)
-  roles!: string;
 
   @ApiProperty({
     required: false,
@@ -558,6 +548,15 @@ class UserProfile {
 
   @ApiProperty({
     required: false,
+    type: () => User,
+  })
+  @ValidateNested()
+  @Type(() => User)
+  @IsOptional()
+  user?: User | null;
+
+  @ApiProperty({
+    required: false,
     type: () => [UserAccount],
   })
   @ValidateNested()
@@ -645,18 +644,6 @@ class UserProfile {
   @Type(() => UserRating)
   @IsOptional()
   userRatingsUserRatingsUserIdTouserProfiles?: Array<UserRating>;
-
-  @ApiProperty({
-    required: false,
-    type: String,
-  })
-  @IsString()
-  @MaxLength(256)
-  @IsOptional()
-  @Field(() => String, {
-    nullable: true,
-  })
-  username!: string | null;
 
   @ApiProperty({
     required: false,

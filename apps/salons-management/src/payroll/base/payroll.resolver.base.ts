@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { Payroll } from "./Payroll";
 import { PayrollCountArgs } from "./PayrollCountArgs";
 import { PayrollFindManyArgs } from "./PayrollFindManyArgs";
@@ -22,10 +28,20 @@ import { UpdatePayrollArgs } from "./UpdatePayrollArgs";
 import { DeletePayrollArgs } from "./DeletePayrollArgs";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { PayrollService } from "../payroll.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Payroll)
 export class PayrollResolverBase {
-  constructor(protected readonly service: PayrollService) {}
+  constructor(
+    protected readonly service: PayrollService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "read",
+    possession: "any",
+  })
   async _payrollsMeta(
     @graphql.Args() args: PayrollCountArgs
   ): Promise<MetaQueryPayload> {
@@ -35,14 +51,26 @@ export class PayrollResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Payroll])
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "read",
+    possession: "any",
+  })
   async payrolls(
     @graphql.Args() args: PayrollFindManyArgs
   ): Promise<Payroll[]> {
     return this.service.payrolls(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Payroll, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "read",
+    possession: "own",
+  })
   async payroll(
     @graphql.Args() args: PayrollFindUniqueArgs
   ): Promise<Payroll | null> {
@@ -53,7 +81,13 @@ export class PayrollResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Payroll)
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "create",
+    possession: "any",
+  })
   async createPayroll(
     @graphql.Args() args: CreatePayrollArgs
   ): Promise<Payroll> {
@@ -69,7 +103,13 @@ export class PayrollResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => Payroll)
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "update",
+    possession: "any",
+  })
   async updatePayroll(
     @graphql.Args() args: UpdatePayrollArgs
   ): Promise<Payroll | null> {
@@ -95,6 +135,11 @@ export class PayrollResolverBase {
   }
 
   @graphql.Mutation(() => Payroll)
+  @nestAccessControl.UseRoles({
+    resource: "Payroll",
+    action: "delete",
+    possession: "any",
+  })
   async deletePayroll(
     @graphql.Args() args: DeletePayrollArgs
   ): Promise<Payroll | null> {
@@ -110,9 +155,15 @@ export class PayrollResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: Payroll

@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ChatMessageService } from "../chatMessage.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ChatMessageCreateInput } from "./ChatMessageCreateInput";
 import { ChatMessage } from "./ChatMessage";
 import { ChatMessageFindManyArgs } from "./ChatMessageFindManyArgs";
 import { ChatMessageWhereUniqueInput } from "./ChatMessageWhereUniqueInput";
 import { ChatMessageUpdateInput } from "./ChatMessageUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ChatMessageControllerBase {
-  constructor(protected readonly service: ChatMessageService) {}
+  constructor(
+    protected readonly service: ChatMessageService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: ChatMessage })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createChatMessage(
     @common.Body() data: ChatMessageCreateInput
   ): Promise<ChatMessage> {
@@ -66,9 +84,18 @@ export class ChatMessageControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [ChatMessage] })
   @ApiNestedQuery(ChatMessageFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async chatMessages(@common.Req() request: Request): Promise<ChatMessage[]> {
     const args = plainToClass(ChatMessageFindManyArgs, request.query);
     return this.service.chatMessages({
@@ -93,9 +120,18 @@ export class ChatMessageControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: ChatMessage })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async chatMessage(
     @common.Param() params: ChatMessageWhereUniqueInput
   ): Promise<ChatMessage | null> {
@@ -127,9 +163,18 @@ export class ChatMessageControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: ChatMessage })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateChatMessage(
     @common.Param() params: ChatMessageWhereUniqueInput,
     @common.Body() data: ChatMessageUpdateInput
@@ -183,6 +228,14 @@ export class ChatMessageControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: ChatMessage })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteChatMessage(
     @common.Param() params: ChatMessageWhereUniqueInput
   ): Promise<ChatMessage | null> {
@@ -217,8 +270,14 @@ export class ChatMessageControllerBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id/otherChatMessages")
   @ApiNestedQuery(ChatMessageFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "read",
+    possession: "any",
+  })
   async findOtherChatMessages(
     @common.Req() request: Request,
     @common.Param() params: ChatMessageWhereUniqueInput
@@ -253,6 +312,11 @@ export class ChatMessageControllerBase {
   }
 
   @common.Post("/:id/otherChatMessages")
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "update",
+    possession: "any",
+  })
   async connectOtherChatMessages(
     @common.Param() params: ChatMessageWhereUniqueInput,
     @common.Body() body: ChatMessageWhereUniqueInput[]
@@ -270,6 +334,11 @@ export class ChatMessageControllerBase {
   }
 
   @common.Patch("/:id/otherChatMessages")
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "update",
+    possession: "any",
+  })
   async updateOtherChatMessages(
     @common.Param() params: ChatMessageWhereUniqueInput,
     @common.Body() body: ChatMessageWhereUniqueInput[]
@@ -287,6 +356,11 @@ export class ChatMessageControllerBase {
   }
 
   @common.Delete("/:id/otherChatMessages")
+  @nestAccessControl.UseRoles({
+    resource: "ChatMessage",
+    action: "update",
+    possession: "any",
+  })
   async disconnectOtherChatMessages(
     @common.Param() params: ChatMessageWhereUniqueInput,
     @common.Body() body: ChatMessageWhereUniqueInput[]

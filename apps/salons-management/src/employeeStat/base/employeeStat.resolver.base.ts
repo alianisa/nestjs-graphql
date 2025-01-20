@@ -13,6 +13,12 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
 import { EmployeeStat } from "./EmployeeStat";
 import { EmployeeStatCountArgs } from "./EmployeeStatCountArgs";
 import { EmployeeStatFindManyArgs } from "./EmployeeStatFindManyArgs";
@@ -23,10 +29,20 @@ import { DeleteEmployeeStatArgs } from "./DeleteEmployeeStatArgs";
 import { Salon } from "../../salon/base/Salon";
 import { UserProfile } from "../../userProfile/base/UserProfile";
 import { EmployeeStatService } from "../employeeStat.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => EmployeeStat)
 export class EmployeeStatResolverBase {
-  constructor(protected readonly service: EmployeeStatService) {}
+  constructor(
+    protected readonly service: EmployeeStatService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "read",
+    possession: "any",
+  })
   async _employeeStatsMeta(
     @graphql.Args() args: EmployeeStatCountArgs
   ): Promise<MetaQueryPayload> {
@@ -36,14 +52,26 @@ export class EmployeeStatResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [EmployeeStat])
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "read",
+    possession: "any",
+  })
   async employeeStats(
     @graphql.Args() args: EmployeeStatFindManyArgs
   ): Promise<EmployeeStat[]> {
     return this.service.employeeStats(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => EmployeeStat, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "read",
+    possession: "own",
+  })
   async employeeStat(
     @graphql.Args() args: EmployeeStatFindUniqueArgs
   ): Promise<EmployeeStat | null> {
@@ -54,7 +82,13 @@ export class EmployeeStatResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => EmployeeStat)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "create",
+    possession: "any",
+  })
   async createEmployeeStat(
     @graphql.Args() args: CreateEmployeeStatArgs
   ): Promise<EmployeeStat> {
@@ -74,7 +108,13 @@ export class EmployeeStatResolverBase {
     });
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @graphql.Mutation(() => EmployeeStat)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "update",
+    possession: "any",
+  })
   async updateEmployeeStat(
     @graphql.Args() args: UpdateEmployeeStatArgs
   ): Promise<EmployeeStat | null> {
@@ -104,6 +144,11 @@ export class EmployeeStatResolverBase {
   }
 
   @graphql.Mutation(() => EmployeeStat)
+  @nestAccessControl.UseRoles({
+    resource: "EmployeeStat",
+    action: "delete",
+    possession: "any",
+  })
   async deleteEmployeeStat(
     @graphql.Args() args: DeleteEmployeeStatArgs
   ): Promise<EmployeeStat | null> {
@@ -119,9 +164,15 @@ export class EmployeeStatResolverBase {
     }
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => Salon, {
     nullable: true,
     name: "salons",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "Salon",
+    action: "read",
+    possession: "any",
   })
   async getSalons(
     @graphql.Parent() parent: EmployeeStat
@@ -134,9 +185,15 @@ export class EmployeeStatResolverBase {
     return result;
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.ResolveField(() => UserProfile, {
     nullable: true,
     name: "userProfiles",
+  })
+  @nestAccessControl.UseRoles({
+    resource: "UserProfile",
+    action: "read",
+    possession: "any",
   })
   async getUserProfiles(
     @graphql.Parent() parent: EmployeeStat

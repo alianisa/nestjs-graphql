@@ -1,4 +1,5 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
+import { AuthModule } from "../auth/auth.module";
 import { UserNotificationSettingModuleBase } from "./base/userNotificationSetting.module.base";
 import { UserNotificationSettingService } from "./userNotificationSetting.service";
 import { UserNotificationSettingController } from "./userNotificationSetting.controller";
@@ -6,7 +7,7 @@ import { UserNotificationSettingGrpcController } from "./userNotificationSetting
 import { UserNotificationSettingResolver } from "./userNotificationSetting.resolver";
 
 @Module({
-  imports: [UserNotificationSettingModuleBase],
+  imports: [UserNotificationSettingModuleBase, forwardRef(() => AuthModule)],
   controllers: [
     UserNotificationSettingController,
     UserNotificationSettingGrpcController,

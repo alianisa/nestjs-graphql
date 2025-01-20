@@ -22,11 +22,10 @@ export type UserProfileOrderByInput = {
   location?: SortOrder;
   loyaltyPoints?: SortOrder;
   phone?: SortOrder;
-  roles?: SortOrder;
   salon_id?: SortOrder;
   updatedAt?: SortOrder;
+  userId?: SortOrder;
   gender?: SortOrder;
   userNotificationSettingsId?: SortOrder;
-  username?: SortOrder;
   website?: SortOrder;
 };

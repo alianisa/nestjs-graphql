@@ -259,17 +259,6 @@ class UserProfileOrderByInput {
   @Field(() => SortOrder, {
     nullable: true,
   })
-  roles?: SortOrder;
-
-  @ApiProperty({
-    required: false,
-    enum: ["asc", "desc"],
-  })
-  @IsOptional()
-  @IsEnum(SortOrder)
-  @Field(() => SortOrder, {
-    nullable: true,
-  })
   salon_id?: SortOrder;
 
   @ApiProperty({
@@ -292,6 +281,17 @@ class UserProfileOrderByInput {
   @Field(() => SortOrder, {
     nullable: true,
   })
+  userId?: SortOrder;
+
+  @ApiProperty({
+    required: false,
+    enum: ["asc", "desc"],
+  })
+  @IsOptional()
+  @IsEnum(SortOrder)
+  @Field(() => SortOrder, {
+    nullable: true,
+  })
   gender?: SortOrder;
 
   @ApiProperty({
@@ -304,17 +304,6 @@ class UserProfileOrderByInput {
     nullable: true,
   })
   userNotificationSettingsId?: SortOrder;
-
-  @ApiProperty({
-    required: false,
-    enum: ["asc", "desc"],
-  })
-  @IsOptional()
-  @IsEnum(SortOrder)
-  @Field(() => SortOrder, {
-    nullable: true,
-  })
-  username?: SortOrder;
 
   @ApiProperty({
     required: false,

@@ -119,6 +119,12 @@ export class UserProfileGrpcControllerBase {
               }
             : undefined,
 
+        user: data.user
+          ? {
+              connect: data.user,
+            }
+          : undefined,
+
         userGenders: data.userGenders
           ? {
               connect: data.userGenders,
@@ -153,7 +159,6 @@ export class UserProfileGrpcControllerBase {
         location: true,
         loyaltyPoints: true,
         phone: true,
-        roles: true,
 
         salonsUserProfilesSalonIdTosalons: {
           select: {
@@ -162,6 +167,12 @@ export class UserProfileGrpcControllerBase {
         },
 
         updatedAt: true,
+
+        user: {
+          select: {
+            id: true,
+          },
+        },
 
         userGenders: {
           select: {
@@ -175,7 +186,6 @@ export class UserProfileGrpcControllerBase {
           },
         },
 
-        username: true,
         website: true,
       },
     });
@@ -211,7 +221,6 @@ export class UserProfileGrpcControllerBase {
         location: true,
         loyaltyPoints: true,
         phone: true,
-        roles: true,
 
         salonsUserProfilesSalonIdTosalons: {
           select: {
@@ -220,6 +229,12 @@ export class UserProfileGrpcControllerBase {
         },
 
         updatedAt: true,
+
+        user: {
+          select: {
+            id: true,
+          },
+        },
 
         userGenders: {
           select: {
@@ -233,7 +248,6 @@ export class UserProfileGrpcControllerBase {
           },
         },
 
-        username: true,
         website: true,
       },
     });
@@ -270,7 +284,6 @@ export class UserProfileGrpcControllerBase {
         location: true,
         loyaltyPoints: true,
         phone: true,
-        roles: true,
 
         salonsUserProfilesSalonIdTosalons: {
           select: {
@@ -279,6 +292,12 @@ export class UserProfileGrpcControllerBase {
         },
 
         updatedAt: true,
+
+        user: {
+          select: {
+            id: true,
+          },
+        },
 
         userGenders: {
           select: {
@@ -292,7 +311,6 @@ export class UserProfileGrpcControllerBase {
           },
         },
 
-        username: true,
         website: true,
       },
     });
@@ -324,6 +342,12 @@ export class UserProfileGrpcControllerBase {
                   connect: data.salonsUserProfilesSalonIdTosalons,
                 }
               : undefined,
+
+          user: data.user
+            ? {
+                connect: data.user,
+              }
+            : undefined,
 
           userGenders: data.userGenders
             ? {
@@ -359,7 +383,6 @@ export class UserProfileGrpcControllerBase {
           location: true,
           loyaltyPoints: true,
           phone: true,
-          roles: true,
 
           salonsUserProfilesSalonIdTosalons: {
             select: {
@@ -368,6 +391,12 @@ export class UserProfileGrpcControllerBase {
           },
 
           updatedAt: true,
+
+          user: {
+            select: {
+              id: true,
+            },
+          },
 
           userGenders: {
             select: {
@@ -381,7 +410,6 @@ export class UserProfileGrpcControllerBase {
             },
           },
 
-          username: true,
           website: true,
         },
       });
@@ -427,7 +455,6 @@ export class UserProfileGrpcControllerBase {
           location: true,
           loyaltyPoints: true,
           phone: true,
-          roles: true,
 
           salonsUserProfilesSalonIdTosalons: {
             select: {
@@ -436,6 +463,12 @@ export class UserProfileGrpcControllerBase {
           },
 
           updatedAt: true,
+
+          user: {
+            select: {
+              id: true,
+            },
+          },
 
           userGenders: {
             select: {
@@ -449,7 +482,6 @@ export class UserProfileGrpcControllerBase {
             },
           },
 
-          username: true,
           website: true,
         },
       });

@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { OrderImageService } from "../orderImage.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { OrderImageCreateInput } from "./OrderImageCreateInput";
 import { OrderImage } from "./OrderImage";
 import { OrderImageFindManyArgs } from "./OrderImageFindManyArgs";
 import { OrderImageWhereUniqueInput } from "./OrderImageWhereUniqueInput";
 import { OrderImageUpdateInput } from "./OrderImageUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class OrderImageControllerBase {
-  constructor(protected readonly service: OrderImageService) {}
+  constructor(
+    protected readonly service: OrderImageService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: OrderImage })
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createOrderImage(
     @common.Body() data: OrderImageCreateInput
   ): Promise<OrderImage> {
@@ -52,9 +70,18 @@ export class OrderImageControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [OrderImage] })
   @ApiNestedQuery(OrderImageFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async orderImages(@common.Req() request: Request): Promise<OrderImage[]> {
     const args = plainToClass(OrderImageFindManyArgs, request.query);
     return this.service.orderImages({
@@ -73,9 +100,18 @@ export class OrderImageControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: OrderImage })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async orderImage(
     @common.Param() params: OrderImageWhereUniqueInput
   ): Promise<OrderImage | null> {
@@ -101,9 +137,18 @@ export class OrderImageControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: OrderImage })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateOrderImage(
     @common.Param() params: OrderImageWhereUniqueInput,
     @common.Body() data: OrderImageUpdateInput
@@ -143,6 +188,14 @@ export class OrderImageControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: OrderImage })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "OrderImage",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteOrderImage(
     @common.Param() params: OrderImageWhereUniqueInput
   ): Promise<OrderImage | null> {
