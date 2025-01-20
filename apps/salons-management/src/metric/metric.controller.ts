@@ -1,0 +1,17 @@
+import * as common from "@nestjs/common";
+import * as swagger from "@nestjs/swagger";
+import * as nestAccessControl from "nest-access-control";
+import { MetricService } from "./metric.service";
+import { MetricControllerBase } from "./base/metric.controller.base";
+
+@swagger.ApiTags("metrics")
+@common.Controller("metrics")
+export class MetricController extends MetricControllerBase {
+  constructor(
+    protected readonly service: MetricService,
+    @nestAccessControl.InjectRolesBuilder()
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {
+    super(service, rolesBuilder);
+  }
+}

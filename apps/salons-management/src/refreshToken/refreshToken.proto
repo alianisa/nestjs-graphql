@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+                 package refreshToken;
+service RefreshTokenService {
+ rpc createRefreshToken (RefreshTokenCreateInput) returns (RefreshToken) {}
+rpc refreshTokens (findManyParams) returns (stream RefreshToken) {}
+rpc refreshToken (RefreshTokenWhereUniqueInput) returns (RefreshToken) {}
+rpc updateRefreshToken (RefreshTokenUpdateInput) returns (RefreshToken) {}
+rpc deleteRefreshToken (RefreshTokenWhereUniqueInput) returns (RefreshToken) {} 
+ }
+message RefreshTokenCreateInput {
+string createdAt = 1;
+int32 id = 2;
+string instanceId = 3;
+string parent = 4;
+bool revoked = 5;
+string token = 6;
+string updatedAt = 7;
+string userId = 8;
+};
+message RefreshToken {
+string createdAt = 1;
+int32 id = 2;
+string instanceId = 3;
+string parent = 4;
+bool revoked = 5;
+string token = 6;
+string updatedAt = 7;
+string userId = 8;
+};
+message RefreshTokenWhereUniqueInput {
+string createdAt = 1;
+int32 id = 2;
+string instanceId = 3;
+string parent = 4;
+bool revoked = 5;
+string token = 6;
+string updatedAt = 7;
+string userId = 8;
+};
+message RefreshTokenUpdateInput {
+string createdAt = 1;
+int32 id = 2;
+string instanceId = 3;
+string parent = 4;
+bool revoked = 5;
+string token = 6;
+string updatedAt = 7;
+string userId = 8;
+};
+message findManyParams {
+
+};

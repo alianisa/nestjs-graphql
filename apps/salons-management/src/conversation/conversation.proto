@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+                 package conversation;
+service ConversationService {
+ rpc createConversation (ConversationCreateInput) returns (Conversation) {}
+rpc conversations (findManyParams) returns (stream Conversation) {}
+rpc conversation (ConversationWhereUniqueInput) returns (Conversation) {}
+rpc updateConversation (ConversationUpdateInput) returns (Conversation) {}
+rpc deleteConversation (ConversationWhereUniqueInput) returns (Conversation) {} 
+ }
+message ConversationCreateInput {
+string chatId = 1;
+string content = 2;
+string createdAt = 3;
+string id = 4;
+string typeField = 5;
+};
+message Conversation {
+string chatId = 1;
+string content = 2;
+string createdAt = 3;
+string id = 4;
+string typeField = 5;
+};
+message ConversationWhereUniqueInput {
+string chatId = 1;
+string content = 2;
+string createdAt = 3;
+string id = 4;
+string typeField = 5;
+};
+message ConversationUpdateInput {
+string chatId = 1;
+string content = 2;
+string createdAt = 3;
+string id = 4;
+string typeField = 5;
+};
+message findManyParams {
+
+};

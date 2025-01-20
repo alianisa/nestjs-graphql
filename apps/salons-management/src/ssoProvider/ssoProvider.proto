@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+                 package ssoProvider;
+service SsoProviderService {
+ rpc createSsoProvider (SsoProviderCreateInput) returns (SsoProvider) {}
+rpc ssoProviders (findManyParams) returns (stream SsoProvider) {}
+rpc ssoProvider (SsoProviderWhereUniqueInput) returns (SsoProvider) {}
+rpc updateSsoProvider (SsoProviderUpdateInput) returns (SsoProvider) {}
+rpc deleteSsoProvider (SsoProviderWhereUniqueInput) returns (SsoProvider) {}
+rpc findManySsoProviders (SsoProviderWhereUniqueInput) returns (stream SamlProvider) {}
+rpc updateSsoProviders (SamlProviderParams) returns (stream SamlProvider) {}
+rpc connectSsoProviders (SamlProviderParams) returns (SamlProvider) {}
+rpc disconnectSsoProviders (SamlProviderParams) returns (SamlProvider) {}
+rpc findManySsoProviders (SsoProviderWhereUniqueInput) returns (stream SamlRelayState) {}
+rpc updateSsoProviders (SamlRelayStateParams) returns (stream SamlRelayState) {}
+rpc connectSsoProviders (SamlRelayStateParams) returns (SamlRelayState) {}
+rpc disconnectSsoProviders (SamlRelayStateParams) returns (SamlRelayState) {}
+rpc findManySsoProviders (SsoProviderWhereUniqueInput) returns (stream SsoDomain) {}
+rpc updateSsoProviders (SsoDomainParams) returns (stream SsoDomain) {}
+rpc connectSsoProviders (SsoDomainParams) returns (SsoDomain) {}
+rpc disconnectSsoProviders (SsoDomainParams) returns (SsoDomain) {} 
+ }
+message SsoProviderCreateInput {
+string createdAt = 1;
+string id = 2;
+string resourceId = 3;
+repeated SamlProvider samlProviders = 4;
+repeated SamlRelayState samlRelayStates = 5;
+repeated SsoDomain ssoDomains = 6;
+string updatedAt = 7;
+};
+message SsoProvider {
+string createdAt = 1;
+string id = 2;
+string resourceId = 3;
+repeated SamlProvider samlProviders = 4;
+repeated SamlRelayState samlRelayStates = 5;
+repeated SsoDomain ssoDomains = 6;
+string updatedAt = 7;
+};
+message SsoProviderWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+string resourceId = 3;
+repeated SamlProvider samlProviders = 4;
+repeated SamlRelayState samlRelayStates = 5;
+repeated SsoDomain ssoDomains = 6;
+string updatedAt = 7;
+};
+message SsoProviderUpdateInput {
+string createdAt = 1;
+string id = 2;
+string resourceId = 3;
+repeated SamlProvider samlProviders = 4;
+repeated SamlRelayState samlRelayStates = 5;
+repeated SsoDomain ssoDomains = 6;
+string updatedAt = 7;
+};
+message findManyParams {
+
+};
+message SamlProvider {
+string attributeMapping = 1;
+string createdAt = 2;
+string entityId = 3;
+string id = 4;
+string metadataUrl = 5;
+string metadataXml = 6;
+string nameIdFormat = 7;
+string updatedAt = 8;
+};
+message SamlProviderWhereUniqueInput {
+string attributeMapping = 1;
+string createdAt = 2;
+string entityId = 3;
+string id = 4;
+string metadataUrl = 5;
+string metadataXml = 6;
+string nameIdFormat = 7;
+string updatedAt = 8;
+};
+message SamlProviderParams {
+SsoProviderWhereUniqueInput ssoProviderWhereUniqueInput = 1;
+SamlProviderWhereUniqueInput samlproviderWhereUniqueInput = 2;
+};
+message SamlRelayState {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message SamlRelayStateWhereUniqueInput {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message SamlRelayStateParams {
+SsoProviderWhereUniqueInput ssoProviderWhereUniqueInput = 1;
+SamlRelayStateWhereUniqueInput samlrelaystateWhereUniqueInput = 2;
+};
+message SsoDomain {
+string createdAt = 1;
+string domain = 2;
+string id = 3;
+string updatedAt = 4;
+};
+message SsoDomainWhereUniqueInput {
+string createdAt = 1;
+string domain = 2;
+string id = 3;
+string updatedAt = 4;
+};
+message SsoDomainParams {
+SsoProviderWhereUniqueInput ssoProviderWhereUniqueInput = 1;
+SsoDomainWhereUniqueInput ssodomainWhereUniqueInput = 2;
+};

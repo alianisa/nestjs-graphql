@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+                 package loyaltyTransaction;
+service LoyaltyTransactionService {
+ rpc createLoyaltyTransaction (LoyaltyTransactionCreateInput) returns (LoyaltyTransaction) {}
+rpc loyaltyTransactions (findManyParams) returns (stream LoyaltyTransaction) {}
+rpc loyaltyTransaction (LoyaltyTransactionWhereUniqueInput) returns (LoyaltyTransaction) {}
+rpc updateLoyaltyTransaction (LoyaltyTransactionUpdateInput) returns (LoyaltyTransaction) {}
+rpc deleteLoyaltyTransaction (LoyaltyTransactionWhereUniqueInput) returns (LoyaltyTransaction) {} 
+ }
+message LoyaltyTransactionCreateInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 pointsEarned = 4;
+int32 pointsSpent = 5;
+string transactionType = 6;
+};
+message LoyaltyTransaction {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 pointsEarned = 4;
+int32 pointsSpent = 5;
+string transactionType = 6;
+};
+message LoyaltyTransactionWhereUniqueInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 pointsEarned = 4;
+int32 pointsSpent = 5;
+string transactionType = 6;
+};
+message LoyaltyTransactionUpdateInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 pointsEarned = 4;
+int32 pointsSpent = 5;
+string transactionType = 6;
+};
+message findManyParams {
+
+};

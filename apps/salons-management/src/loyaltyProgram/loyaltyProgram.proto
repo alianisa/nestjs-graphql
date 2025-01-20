@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+                 package loyaltyProgram;
+service LoyaltyProgramService {
+ rpc createLoyaltyProgram (LoyaltyProgramCreateInput) returns (LoyaltyProgram) {}
+rpc loyaltyPrograms (findManyParams) returns (stream LoyaltyProgram) {}
+rpc loyaltyProgram (LoyaltyProgramWhereUniqueInput) returns (LoyaltyProgram) {}
+rpc updateLoyaltyProgram (LoyaltyProgramUpdateInput) returns (LoyaltyProgram) {}
+rpc deleteLoyaltyProgram (LoyaltyProgramWhereUniqueInput) returns (LoyaltyProgram) {} 
+ }
+message LoyaltyProgramCreateInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 minPointsForRedemption = 4;
+string name = 5;
+int32 pointsPerCurrency = 6;
+int32 redemptionRate = 7;
+string updatedAt = 8;
+};
+message LoyaltyProgram {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 minPointsForRedemption = 4;
+string name = 5;
+int32 pointsPerCurrency = 6;
+int32 redemptionRate = 7;
+string updatedAt = 8;
+};
+message LoyaltyProgramWhereUniqueInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 minPointsForRedemption = 4;
+string name = 5;
+int32 pointsPerCurrency = 6;
+int32 redemptionRate = 7;
+string updatedAt = 8;
+};
+message LoyaltyProgramUpdateInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 minPointsForRedemption = 4;
+string name = 5;
+int32 pointsPerCurrency = 6;
+int32 redemptionRate = 7;
+string updatedAt = 8;
+};
+message findManyParams {
+
+};

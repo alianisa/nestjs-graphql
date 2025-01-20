@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+                 package samlRelayState;
+service SamlRelayStateService {
+ rpc createSamlRelayState (SamlRelayStateCreateInput) returns (SamlRelayState) {}
+rpc samlRelayStates (findManyParams) returns (stream SamlRelayState) {}
+rpc samlRelayState (SamlRelayStateWhereUniqueInput) returns (SamlRelayState) {}
+rpc updateSamlRelayState (SamlRelayStateUpdateInput) returns (SamlRelayState) {}
+rpc deleteSamlRelayState (SamlRelayStateWhereUniqueInput) returns (SamlRelayState) {} 
+ }
+message SamlRelayStateCreateInput {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message SamlRelayState {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message SamlRelayStateWhereUniqueInput {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message SamlRelayStateUpdateInput {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message findManyParams {
+
+};

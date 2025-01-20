@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+                 package schedule;
+service ScheduleService {
+ rpc createSchedule (ScheduleCreateInput) returns (Schedule) {}
+rpc schedules (findManyParams) returns (stream Schedule) {}
+rpc schedule (ScheduleWhereUniqueInput) returns (Schedule) {}
+rpc updateSchedule (ScheduleUpdateInput) returns (Schedule) {}
+rpc deleteSchedule (ScheduleWhereUniqueInput) returns (Schedule) {} 
+ }
+message ScheduleCreateInput {
+string appointmentDate = 1;
+string appointmentTime = 2;
+int32 id = 3;
+};
+message Schedule {
+string appointmentDate = 1;
+string appointmentTime = 2;
+int32 id = 3;
+};
+message ScheduleWhereUniqueInput {
+string appointmentDate = 1;
+string appointmentTime = 2;
+int32 id = 3;
+};
+message ScheduleUpdateInput {
+string appointmentDate = 1;
+string appointmentTime = 2;
+int32 id = 3;
+};
+message findManyParams {
+
+};

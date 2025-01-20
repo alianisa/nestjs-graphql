@@ -1,0 +1,31 @@
+import { StringFilter } from "../../util/StringFilter";
+import { JsonFilter } from "../../util/JsonFilter";
+import { DateTimeFilter } from "../../util/DateTimeFilter";
+import { StringNullableFilter } from "../../util/StringNullableFilter";
+import { IntNullableFilter } from "../../util/IntNullableFilter";
+
+export type SalonstestWhereInput = {
+  address?: StringFilter;
+  categories?: StringFilter;
+  coordinates?: JsonFilter;
+  createdAt?: DateTimeFilter;
+  description?: StringNullableFilter;
+  district?: StringNullableFilter;
+  email?: StringNullableFilter;
+  features?: StringFilter;
+  googlePlaceId?: StringNullableFilter;
+  id?: StringFilter;
+  importedFrom?: StringNullableFilter;
+  metro?: JsonFilter;
+  name?: StringFilter;
+  phones?: StringFilter;
+  photos?: JsonFilter;
+  photosCount?: IntNullableFilter;
+  priceCategory?: StringNullableFilter;
+  rating?: JsonFilter;
+  socialLinks?: JsonFilter;
+  status?: StringNullableFilter;
+  updatedAt?: DateTimeFilter;
+  website?: StringNullableFilter;
+  workingHours?: JsonFilter;
+};

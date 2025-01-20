@@ -1,0 +1,1133 @@
+syntax = "proto3";
+
+                 package userProfile;
+service UserProfileService {
+ rpc createUserProfile (UserProfileCreateInput) returns (UserProfile) {}
+rpc userProfiles (findManyParams) returns (stream UserProfile) {}
+rpc userProfile (UserProfileWhereUniqueInput) returns (UserProfile) {}
+rpc updateUserProfile (UserProfileUpdateInput) returns (UserProfile) {}
+rpc deleteUserProfile (UserProfileWhereUniqueInput) returns (UserProfile) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream Appointment) {}
+rpc updateUserProfiles (AppointmentParams) returns (stream Appointment) {}
+rpc connectUserProfiles (AppointmentParams) returns (Appointment) {}
+rpc disconnectUserProfiles (AppointmentParams) returns (Appointment) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream Attendance) {}
+rpc updateUserProfiles (AttendanceParams) returns (stream Attendance) {}
+rpc connectUserProfiles (AttendanceParams) returns (Attendance) {}
+rpc disconnectUserProfiles (AttendanceParams) returns (Attendance) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream ChatMessage) {}
+rpc updateUserProfiles (ChatMessageParams) returns (stream ChatMessage) {}
+rpc connectUserProfiles (ChatMessageParams) returns (ChatMessage) {}
+rpc disconnectUserProfiles (ChatMessageParams) returns (ChatMessage) {}
+rpc findManyUserProfilesChatsUserATouserProfiles (UserProfileWhereUniqueInput) returns (stream Chat) {}
+rpc updateUserProfilesChatsUserATouserProfiles (ChatParams) returns (stream Chat) {}
+rpc connectUserProfilesChatsUserATouserProfiles (ChatParams) returns (Chat) {}
+rpc disconnectUserProfilesChatsUserATouserProfiles (ChatParams) returns (Chat) {}
+rpc findManyUserProfilesChatsUserBTouserProfiles (UserProfileWhereUniqueInput) returns (stream Chat) {}
+rpc updateUserProfilesChatsUserBTouserProfiles (ChatParams) returns (stream Chat) {}
+rpc connectUserProfilesChatsUserBTouserProfiles (ChatParams) returns (Chat) {}
+rpc disconnectUserProfilesChatsUserBTouserProfiles (ChatParams) returns (Chat) {}
+rpc findManyUserProfilesChatsUsersTouserProfiles (UserProfileWhereUniqueInput) returns (stream Chat) {}
+rpc updateUserProfilesChatsUsersTouserProfiles (ChatParams) returns (stream Chat) {}
+rpc connectUserProfilesChatsUsersTouserProfiles (ChatParams) returns (Chat) {}
+rpc disconnectUserProfilesChatsUsersTouserProfiles (ChatParams) returns (Chat) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream EmployeeDailyStat) {}
+rpc updateUserProfiles (EmployeeDailyStatParams) returns (stream EmployeeDailyStat) {}
+rpc connectUserProfiles (EmployeeDailyStatParams) returns (EmployeeDailyStat) {}
+rpc disconnectUserProfiles (EmployeeDailyStatParams) returns (EmployeeDailyStat) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream EmployeeStat) {}
+rpc updateUserProfiles (EmployeeStatParams) returns (stream EmployeeStat) {}
+rpc connectUserProfiles (EmployeeStatParams) returns (EmployeeStat) {}
+rpc disconnectUserProfiles (EmployeeStatParams) returns (EmployeeStat) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream EmployeeTask) {}
+rpc updateUserProfiles (EmployeeTaskParams) returns (stream EmployeeTask) {}
+rpc connectUserProfiles (EmployeeTaskParams) returns (EmployeeTask) {}
+rpc disconnectUserProfiles (EmployeeTaskParams) returns (EmployeeTask) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream EmployeeWorkSchedule) {}
+rpc updateUserProfiles (EmployeeWorkScheduleParams) returns (stream EmployeeWorkSchedule) {}
+rpc connectUserProfiles (EmployeeWorkScheduleParams) returns (EmployeeWorkSchedule) {}
+rpc disconnectUserProfiles (EmployeeWorkScheduleParams) returns (EmployeeWorkSchedule) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream LoyaltyTransaction) {}
+rpc updateUserProfiles (LoyaltyTransactionParams) returns (stream LoyaltyTransaction) {}
+rpc connectUserProfiles (LoyaltyTransactionParams) returns (LoyaltyTransaction) {}
+rpc disconnectUserProfiles (LoyaltyTransactionParams) returns (LoyaltyTransaction) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream Notification) {}
+rpc updateUserProfiles (NotificationParams) returns (stream Notification) {}
+rpc connectUserProfiles (NotificationParams) returns (Notification) {}
+rpc disconnectUserProfiles (NotificationParams) returns (Notification) {}
+rpc findManyUserProfilesOrdersEmployeeIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream Order) {}
+rpc updateUserProfilesOrdersEmployeeIdTouserProfiles (OrderParams) returns (stream Order) {}
+rpc connectUserProfilesOrdersEmployeeIdTouserProfiles (OrderParams) returns (Order) {}
+rpc disconnectUserProfilesOrdersEmployeeIdTouserProfiles (OrderParams) returns (Order) {}
+rpc findManyUserProfilesOrdersUserIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream Order) {}
+rpc updateUserProfilesOrdersUserIdTouserProfiles (OrderParams) returns (stream Order) {}
+rpc connectUserProfilesOrdersUserIdTouserProfiles (OrderParams) returns (Order) {}
+rpc disconnectUserProfilesOrdersUserIdTouserProfiles (OrderParams) returns (Order) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream Payroll) {}
+rpc updateUserProfiles (PayrollParams) returns (stream Payroll) {}
+rpc connectUserProfiles (PayrollParams) returns (Payroll) {}
+rpc disconnectUserProfiles (PayrollParams) returns (Payroll) {}
+rpc findManyUserProfilesQueuesEmployeeIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream Queue) {}
+rpc updateUserProfilesQueuesEmployeeIdTouserProfiles (QueueParams) returns (stream Queue) {}
+rpc connectUserProfilesQueuesEmployeeIdTouserProfiles (QueueParams) returns (Queue) {}
+rpc disconnectUserProfilesQueuesEmployeeIdTouserProfiles (QueueParams) returns (Queue) {}
+rpc findManyUserProfilesQueuesUserIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream Queue) {}
+rpc updateUserProfilesQueuesUserIdTouserProfiles (QueueParams) returns (stream Queue) {}
+rpc connectUserProfilesQueuesUserIdTouserProfiles (QueueParams) returns (Queue) {}
+rpc disconnectUserProfilesQueuesUserIdTouserProfiles (QueueParams) returns (Queue) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream SalonAccount) {}
+rpc updateUserProfiles (SalonAccountParams) returns (stream SalonAccount) {}
+rpc connectUserProfiles (SalonAccountParams) returns (SalonAccount) {}
+rpc disconnectUserProfiles (SalonAccountParams) returns (SalonAccount) {}
+rpc findManyUserProfilesSalonRatingLikesUserIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream SalonRatingLike) {}
+rpc updateUserProfilesSalonRatingLikesUserIdTouserProfiles (SalonRatingLikeParams) returns (stream SalonRatingLike) {}
+rpc connectUserProfilesSalonRatingLikesUserIdTouserProfiles (SalonRatingLikeParams) returns (SalonRatingLike) {}
+rpc disconnectUserProfilesSalonRatingLikesUserIdTouserProfiles (SalonRatingLikeParams) returns (SalonRatingLike) {}
+rpc findManyUserProfilesSalonRatingLikesVoterIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream SalonRatingLike) {}
+rpc updateUserProfilesSalonRatingLikesVoterIdTouserProfiles (SalonRatingLikeParams) returns (stream SalonRatingLike) {}
+rpc connectUserProfilesSalonRatingLikesVoterIdTouserProfiles (SalonRatingLikeParams) returns (SalonRatingLike) {}
+rpc disconnectUserProfilesSalonRatingLikesVoterIdTouserProfiles (SalonRatingLikeParams) returns (SalonRatingLike) {}
+rpc findManyUserProfilesSalonRatingsUserIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream SalonRating) {}
+rpc updateUserProfilesSalonRatingsUserIdTouserProfiles (SalonRatingParams) returns (stream SalonRating) {}
+rpc connectUserProfilesSalonRatingsUserIdTouserProfiles (SalonRatingParams) returns (SalonRating) {}
+rpc disconnectUserProfilesSalonRatingsUserIdTouserProfiles (SalonRatingParams) returns (SalonRating) {}
+rpc findManyUserProfilesSalonRatingsVoterIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream SalonRating) {}
+rpc updateUserProfilesSalonRatingsVoterIdTouserProfiles (SalonRatingParams) returns (stream SalonRating) {}
+rpc connectUserProfilesSalonRatingsVoterIdTouserProfiles (SalonRatingParams) returns (SalonRating) {}
+rpc disconnectUserProfilesSalonRatingsVoterIdTouserProfiles (SalonRatingParams) returns (SalonRating) {}
+rpc findManyUserProfilesSalonsSalonAdminIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream Salon) {}
+rpc updateUserProfilesSalonsSalonAdminIdTouserProfiles (SalonParams) returns (stream Salon) {}
+rpc connectUserProfilesSalonsSalonAdminIdTouserProfiles (SalonParams) returns (Salon) {}
+rpc disconnectUserProfilesSalonsSalonAdminIdTouserProfiles (SalonParams) returns (Salon) {}
+rpc findManyUserProfilesScheduleBarberIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream Schedule) {}
+rpc updateUserProfilesScheduleBarberIdTouserProfiles (ScheduleParams) returns (stream Schedule) {}
+rpc connectUserProfilesScheduleBarberIdTouserProfiles (ScheduleParams) returns (Schedule) {}
+rpc disconnectUserProfilesScheduleBarberIdTouserProfiles (ScheduleParams) returns (Schedule) {}
+rpc findManyUserProfilesScheduleUserIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream Schedule) {}
+rpc updateUserProfilesScheduleUserIdTouserProfiles (ScheduleParams) returns (stream Schedule) {}
+rpc connectUserProfilesScheduleUserIdTouserProfiles (ScheduleParams) returns (Schedule) {}
+rpc disconnectUserProfilesScheduleUserIdTouserProfiles (ScheduleParams) returns (Schedule) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream TimeSlot) {}
+rpc updateUserProfiles (TimeSlotParams) returns (stream TimeSlot) {}
+rpc connectUserProfiles (TimeSlotParams) returns (TimeSlot) {}
+rpc disconnectUserProfiles (TimeSlotParams) returns (TimeSlot) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream UserAccount) {}
+rpc updateUserProfiles (UserAccountParams) returns (stream UserAccount) {}
+rpc connectUserProfiles (UserAccountParams) returns (UserAccount) {}
+rpc disconnectUserProfiles (UserAccountParams) returns (UserAccount) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream UserAddress) {}
+rpc updateUserProfiles (UserAddressParams) returns (stream UserAddress) {}
+rpc connectUserProfiles (UserAddressParams) returns (UserAddress) {}
+rpc disconnectUserProfiles (UserAddressParams) returns (UserAddress) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream UserBankCard) {}
+rpc updateUserProfiles (UserBankCardParams) returns (stream UserBankCard) {}
+rpc connectUserProfiles (UserBankCardParams) returns (UserBankCard) {}
+rpc disconnectUserProfiles (UserBankCardParams) returns (UserBankCard) {}
+rpc findManyUserProfilesUserFavoriteMastersMasterIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream UserFavoriteMaster) {}
+rpc updateUserProfilesUserFavoriteMastersMasterIdTouserProfiles (UserFavoriteMasterParams) returns (stream UserFavoriteMaster) {}
+rpc connectUserProfilesUserFavoriteMastersMasterIdTouserProfiles (UserFavoriteMasterParams) returns (UserFavoriteMaster) {}
+rpc disconnectUserProfilesUserFavoriteMastersMasterIdTouserProfiles (UserFavoriteMasterParams) returns (UserFavoriteMaster) {}
+rpc findManyUserProfilesUserFavoriteMastersUserIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream UserFavoriteMaster) {}
+rpc updateUserProfilesUserFavoriteMastersUserIdTouserProfiles (UserFavoriteMasterParams) returns (stream UserFavoriteMaster) {}
+rpc connectUserProfilesUserFavoriteMastersUserIdTouserProfiles (UserFavoriteMasterParams) returns (UserFavoriteMaster) {}
+rpc disconnectUserProfilesUserFavoriteMastersUserIdTouserProfiles (UserFavoriteMasterParams) returns (UserFavoriteMaster) {}
+rpc findManyUserProfiles (UserProfileWhereUniqueInput) returns (stream UserFavoriteSalon) {}
+rpc updateUserProfiles (UserFavoriteSalonParams) returns (stream UserFavoriteSalon) {}
+rpc connectUserProfiles (UserFavoriteSalonParams) returns (UserFavoriteSalon) {}
+rpc disconnectUserProfiles (UserFavoriteSalonParams) returns (UserFavoriteSalon) {}
+rpc findManyUserProfilesUserRatingsOwnerTouserProfiles (UserProfileWhereUniqueInput) returns (stream UserRating) {}
+rpc updateUserProfilesUserRatingsOwnerTouserProfiles (UserRatingParams) returns (stream UserRating) {}
+rpc connectUserProfilesUserRatingsOwnerTouserProfiles (UserRatingParams) returns (UserRating) {}
+rpc disconnectUserProfilesUserRatingsOwnerTouserProfiles (UserRatingParams) returns (UserRating) {}
+rpc findManyUserProfilesUserRatingsUserIdTouserProfiles (UserProfileWhereUniqueInput) returns (stream UserRating) {}
+rpc updateUserProfilesUserRatingsUserIdTouserProfiles (UserRatingParams) returns (stream UserRating) {}
+rpc connectUserProfilesUserRatingsUserIdTouserProfiles (UserRatingParams) returns (UserRating) {}
+rpc disconnectUserProfilesUserRatingsUserIdTouserProfiles (UserRatingParams) returns (UserRating) {} 
+ }
+message UserProfileCreateInput {
+repeated Appointment appointments = 1;
+repeated Attendance attendances = 2;
+string avatarUrl = 3;
+string bio = 4;
+repeated ChatMessage chatMessages = 5;
+repeated Chat chatsChatsUserATouserProfiles = 6;
+repeated Chat chatsChatsUserBTouserProfiles = 7;
+repeated Chat chatsChatsUsersTouserProfiles = 8;
+string createdAt = 9;
+string dateOfBirth = 10;
+string deletedAt = 11;
+string email = 12;
+repeated EmployeeDailyStat employeeDailyStats = 13;
+string employeeDismissalAt = 14;
+string employeeEmploymentAt = 15;
+repeated EmployeeStat employeeStats = 16;
+repeated EmployeeTask employeeTasks = 17;
+repeated EmployeeWorkSchedule employeeWorkSchedules = 18;
+string firstName = 19;
+string fullName = 20;
+bool fullRegistered = 21;
+string hiredDate = 22;
+string id = 23;
+bool isAdmin = 24;
+bool isBarber = 25;
+bool isEmployee = 26;
+string jobTitle = 27;
+string lastName = 28;
+string location = 29;
+int32 loyaltyPoints = 30;
+repeated LoyaltyTransaction loyaltyTransactions = 31;
+repeated Notification notifications = 32;
+repeated Order ordersOrdersEmployeeIdTouserProfiles = 33;
+repeated Order ordersOrdersUserIdTouserProfiles = 34;
+repeated Payroll payroll = 35;
+string phone = 36;
+repeated Queue queuesQueuesEmployeeIdTouserProfiles = 37;
+repeated Queue queuesQueuesUserIdTouserProfiles = 38;
+repeated SalonAccount salonAccounts = 39;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesUserIdTouserProfiles = 40;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesVoterIdTouserProfiles = 41;
+repeated SalonRating salonRatingsSalonRatingsUserIdTouserProfiles = 42;
+repeated SalonRating salonRatingsSalonRatingsVoterIdTouserProfiles = 43;
+repeated Salon salonsSalonsSalonAdminIdTouserProfiles = 44;
+repeated Schedule scheduleScheduleBarberIdTouserProfiles = 45;
+repeated Schedule scheduleScheduleUserIdTouserProfiles = 46;
+repeated TimeSlot timeSlots = 47;
+string updatedAt = 48;
+User user = 49;
+repeated UserAccount userAccounts = 50;
+repeated UserAddress userAddresses = 51;
+repeated UserBankCard userBankCards = 52;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles = 53;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles = 54;
+repeated UserFavoriteSalon userFavoriteSalons = 55;
+UserNotificationSetting userNotificationSettings = 56;
+repeated UserRating userRatingsUserRatingsOwnerTouserProfiles = 57;
+repeated UserRating userRatingsUserRatingsUserIdTouserProfiles = 58;
+string website = 59;
+};
+message UserProfile {
+repeated Appointment appointments = 1;
+repeated Attendance attendances = 2;
+string avatarUrl = 3;
+string bio = 4;
+repeated ChatMessage chatMessages = 5;
+repeated Chat chatsChatsUserATouserProfiles = 6;
+repeated Chat chatsChatsUserBTouserProfiles = 7;
+repeated Chat chatsChatsUsersTouserProfiles = 8;
+string createdAt = 9;
+string dateOfBirth = 10;
+string deletedAt = 11;
+string email = 12;
+repeated EmployeeDailyStat employeeDailyStats = 13;
+string employeeDismissalAt = 14;
+string employeeEmploymentAt = 15;
+repeated EmployeeStat employeeStats = 16;
+repeated EmployeeTask employeeTasks = 17;
+repeated EmployeeWorkSchedule employeeWorkSchedules = 18;
+string firstName = 19;
+string fullName = 20;
+bool fullRegistered = 21;
+string hiredDate = 22;
+string id = 23;
+bool isAdmin = 24;
+bool isBarber = 25;
+bool isEmployee = 26;
+string jobTitle = 27;
+string lastName = 28;
+string location = 29;
+int32 loyaltyPoints = 30;
+repeated LoyaltyTransaction loyaltyTransactions = 31;
+repeated Notification notifications = 32;
+repeated Order ordersOrdersEmployeeIdTouserProfiles = 33;
+repeated Order ordersOrdersUserIdTouserProfiles = 34;
+repeated Payroll payroll = 35;
+string phone = 36;
+repeated Queue queuesQueuesEmployeeIdTouserProfiles = 37;
+repeated Queue queuesQueuesUserIdTouserProfiles = 38;
+repeated SalonAccount salonAccounts = 39;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesUserIdTouserProfiles = 40;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesVoterIdTouserProfiles = 41;
+repeated SalonRating salonRatingsSalonRatingsUserIdTouserProfiles = 42;
+repeated SalonRating salonRatingsSalonRatingsVoterIdTouserProfiles = 43;
+repeated Salon salonsSalonsSalonAdminIdTouserProfiles = 44;
+repeated Schedule scheduleScheduleBarberIdTouserProfiles = 45;
+repeated Schedule scheduleScheduleUserIdTouserProfiles = 46;
+repeated TimeSlot timeSlots = 47;
+string updatedAt = 48;
+User user = 49;
+repeated UserAccount userAccounts = 50;
+repeated UserAddress userAddresses = 51;
+repeated UserBankCard userBankCards = 52;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles = 53;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles = 54;
+repeated UserFavoriteSalon userFavoriteSalons = 55;
+UserNotificationSetting userNotificationSettings = 56;
+repeated UserRating userRatingsUserRatingsOwnerTouserProfiles = 57;
+repeated UserRating userRatingsUserRatingsUserIdTouserProfiles = 58;
+string website = 59;
+};
+message UserProfileWhereUniqueInput {
+repeated Appointment appointments = 1;
+repeated Attendance attendances = 2;
+string avatarUrl = 3;
+string bio = 4;
+repeated ChatMessage chatMessages = 5;
+repeated Chat chatsChatsUserATouserProfiles = 6;
+repeated Chat chatsChatsUserBTouserProfiles = 7;
+repeated Chat chatsChatsUsersTouserProfiles = 8;
+string createdAt = 9;
+string dateOfBirth = 10;
+string deletedAt = 11;
+string email = 12;
+repeated EmployeeDailyStat employeeDailyStats = 13;
+string employeeDismissalAt = 14;
+string employeeEmploymentAt = 15;
+repeated EmployeeStat employeeStats = 16;
+repeated EmployeeTask employeeTasks = 17;
+repeated EmployeeWorkSchedule employeeWorkSchedules = 18;
+string firstName = 19;
+string fullName = 20;
+bool fullRegistered = 21;
+string hiredDate = 22;
+string id = 23;
+bool isAdmin = 24;
+bool isBarber = 25;
+bool isEmployee = 26;
+string jobTitle = 27;
+string lastName = 28;
+string location = 29;
+int32 loyaltyPoints = 30;
+repeated LoyaltyTransaction loyaltyTransactions = 31;
+repeated Notification notifications = 32;
+repeated Order ordersOrdersEmployeeIdTouserProfiles = 33;
+repeated Order ordersOrdersUserIdTouserProfiles = 34;
+repeated Payroll payroll = 35;
+string phone = 36;
+repeated Queue queuesQueuesEmployeeIdTouserProfiles = 37;
+repeated Queue queuesQueuesUserIdTouserProfiles = 38;
+repeated SalonAccount salonAccounts = 39;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesUserIdTouserProfiles = 40;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesVoterIdTouserProfiles = 41;
+repeated SalonRating salonRatingsSalonRatingsUserIdTouserProfiles = 42;
+repeated SalonRating salonRatingsSalonRatingsVoterIdTouserProfiles = 43;
+repeated Salon salonsSalonsSalonAdminIdTouserProfiles = 44;
+repeated Schedule scheduleScheduleBarberIdTouserProfiles = 45;
+repeated Schedule scheduleScheduleUserIdTouserProfiles = 46;
+repeated TimeSlot timeSlots = 47;
+string updatedAt = 48;
+User user = 49;
+repeated UserAccount userAccounts = 50;
+repeated UserAddress userAddresses = 51;
+repeated UserBankCard userBankCards = 52;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles = 53;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles = 54;
+repeated UserFavoriteSalon userFavoriteSalons = 55;
+UserNotificationSetting userNotificationSettings = 56;
+repeated UserRating userRatingsUserRatingsOwnerTouserProfiles = 57;
+repeated UserRating userRatingsUserRatingsUserIdTouserProfiles = 58;
+string website = 59;
+};
+message UserProfileUpdateInput {
+repeated Appointment appointments = 1;
+repeated Attendance attendances = 2;
+string avatarUrl = 3;
+string bio = 4;
+repeated ChatMessage chatMessages = 5;
+repeated Chat chatsChatsUserATouserProfiles = 6;
+repeated Chat chatsChatsUserBTouserProfiles = 7;
+repeated Chat chatsChatsUsersTouserProfiles = 8;
+string createdAt = 9;
+string dateOfBirth = 10;
+string deletedAt = 11;
+string email = 12;
+repeated EmployeeDailyStat employeeDailyStats = 13;
+string employeeDismissalAt = 14;
+string employeeEmploymentAt = 15;
+repeated EmployeeStat employeeStats = 16;
+repeated EmployeeTask employeeTasks = 17;
+repeated EmployeeWorkSchedule employeeWorkSchedules = 18;
+string firstName = 19;
+string fullName = 20;
+bool fullRegistered = 21;
+string hiredDate = 22;
+string id = 23;
+bool isAdmin = 24;
+bool isBarber = 25;
+bool isEmployee = 26;
+string jobTitle = 27;
+string lastName = 28;
+string location = 29;
+int32 loyaltyPoints = 30;
+repeated LoyaltyTransaction loyaltyTransactions = 31;
+repeated Notification notifications = 32;
+repeated Order ordersOrdersEmployeeIdTouserProfiles = 33;
+repeated Order ordersOrdersUserIdTouserProfiles = 34;
+repeated Payroll payroll = 35;
+string phone = 36;
+repeated Queue queuesQueuesEmployeeIdTouserProfiles = 37;
+repeated Queue queuesQueuesUserIdTouserProfiles = 38;
+repeated SalonAccount salonAccounts = 39;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesUserIdTouserProfiles = 40;
+repeated SalonRatingLike salonRatingLikesSalonRatingLikesVoterIdTouserProfiles = 41;
+repeated SalonRating salonRatingsSalonRatingsUserIdTouserProfiles = 42;
+repeated SalonRating salonRatingsSalonRatingsVoterIdTouserProfiles = 43;
+repeated Salon salonsSalonsSalonAdminIdTouserProfiles = 44;
+repeated Schedule scheduleScheduleBarberIdTouserProfiles = 45;
+repeated Schedule scheduleScheduleUserIdTouserProfiles = 46;
+repeated TimeSlot timeSlots = 47;
+string updatedAt = 48;
+User user = 49;
+repeated UserAccount userAccounts = 50;
+repeated UserAddress userAddresses = 51;
+repeated UserBankCard userBankCards = 52;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles = 53;
+repeated UserFavoriteMaster userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles = 54;
+repeated UserFavoriteSalon userFavoriteSalons = 55;
+UserNotificationSetting userNotificationSettings = 56;
+repeated UserRating userRatingsUserRatingsOwnerTouserProfiles = 57;
+repeated UserRating userRatingsUserRatingsUserIdTouserProfiles = 58;
+string website = 59;
+};
+message findManyParams {
+
+};
+message Appointment {
+string appointmentDate = 1;
+string employeeId = 2;
+string id = 3;
+};
+message AppointmentWhereUniqueInput {
+string appointmentDate = 1;
+string employeeId = 2;
+string id = 3;
+};
+message AppointmentParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+AppointmentWhereUniqueInput appointmentWhereUniqueInput = 2;
+};
+message Attendance {
+repeated string action = 1;
+string actionTime = 2;
+string clockin = 3;
+string clockout = 4;
+bool completed = 5;
+string createdAt = 6;
+string date = 7;
+string id = 8;
+string updatedAt = 9;
+};
+message AttendanceWhereUniqueInput {
+repeated string action = 1;
+string actionTime = 2;
+string clockin = 3;
+string clockout = 4;
+bool completed = 5;
+string createdAt = 6;
+string date = 7;
+string id = 8;
+string updatedAt = 9;
+};
+message AttendanceParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+AttendanceWhereUniqueInput attendanceWhereUniqueInput = 2;
+};
+message ChatMessage {
+string id = 1;
+string text = 2;
+string timestamp = 3;
+};
+message ChatMessageWhereUniqueInput {
+string id = 1;
+string text = 2;
+string timestamp = 3;
+};
+message ChatMessageParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+ChatMessageWhereUniqueInput chatmessageWhereUniqueInput = 2;
+};
+message Chat {
+string id = 1;
+string lastMessage = 2;
+string lastMessageTime = 3;
+};
+message ChatWhereUniqueInput {
+string id = 1;
+string lastMessage = 2;
+string lastMessageTime = 3;
+};
+message ChatParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+ChatWhereUniqueInput chatWhereUniqueInput = 2;
+};
+message EmployeeDailyStat {
+int32 averageOrderAmount = 1;
+int32 averageServiceTime = 2;
+int32 avgServiceTimeChangePercent = 3;
+string avgServiceTimeTrend = 4;
+string bestServiceTime = 5;
+int32 canceledOrders = 6;
+int32 cardRevenue = 7;
+int32 cashRevenue = 8;
+int32 clientsChangePercent = 9;
+string clientsTrend = 10;
+int32 completedOrders = 11;
+string createdAt = 12;
+int32 dailyRating = 13;
+string date = 14;
+int32 efficiencyChangePercent = 15;
+int32 efficiencyRate = 16;
+string efficiencyTrend = 17;
+string firstOrderTime = 18;
+string id = 19;
+string lastOrderTime = 20;
+int32 monthToDateOrders = 21;
+int32 monthToDateRevenue = 22;
+int32 newClients = 23;
+int32 offPeakOrders = 24;
+int32 ordersChangePercent = 25;
+int32 ordersCount = 26;
+string ordersTrend = 27;
+int32 overtimeHours = 28;
+int32 peakHoursOrders = 29;
+int32 performanceScore = 30;
+int32 prevMonthOrders = 31;
+int32 prevMonthRevenue = 32;
+int32 ratingChangePercent = 33;
+string ratingTrend = 34;
+int32 ratingsCount = 35;
+int32 repeatClients = 36;
+int32 revenue = 37;
+int32 revenueChangePercent = 38;
+string revenueTrend = 39;
+int32 scheduledHours = 40;
+int32 servicesCount = 41;
+int32 totalBreaksTime = 42;
+int32 totalClients = 43;
+int32 totalIdleTime = 44;
+int32 totalWorkedHours = 45;
+string updatedAt = 46;
+int32 workTime = 47;
+string worstServiceTime = 48;
+};
+message EmployeeDailyStatWhereUniqueInput {
+int32 averageOrderAmount = 1;
+int32 averageServiceTime = 2;
+int32 avgServiceTimeChangePercent = 3;
+string avgServiceTimeTrend = 4;
+string bestServiceTime = 5;
+int32 canceledOrders = 6;
+int32 cardRevenue = 7;
+int32 cashRevenue = 8;
+int32 clientsChangePercent = 9;
+string clientsTrend = 10;
+int32 completedOrders = 11;
+string createdAt = 12;
+int32 dailyRating = 13;
+string date = 14;
+int32 efficiencyChangePercent = 15;
+int32 efficiencyRate = 16;
+string efficiencyTrend = 17;
+string firstOrderTime = 18;
+string id = 19;
+string lastOrderTime = 20;
+int32 monthToDateOrders = 21;
+int32 monthToDateRevenue = 22;
+int32 newClients = 23;
+int32 offPeakOrders = 24;
+int32 ordersChangePercent = 25;
+int32 ordersCount = 26;
+string ordersTrend = 27;
+int32 overtimeHours = 28;
+int32 peakHoursOrders = 29;
+int32 performanceScore = 30;
+int32 prevMonthOrders = 31;
+int32 prevMonthRevenue = 32;
+int32 ratingChangePercent = 33;
+string ratingTrend = 34;
+int32 ratingsCount = 35;
+int32 repeatClients = 36;
+int32 revenue = 37;
+int32 revenueChangePercent = 38;
+string revenueTrend = 39;
+int32 scheduledHours = 40;
+int32 servicesCount = 41;
+int32 totalBreaksTime = 42;
+int32 totalClients = 43;
+int32 totalIdleTime = 44;
+int32 totalWorkedHours = 45;
+string updatedAt = 46;
+int32 workTime = 47;
+string worstServiceTime = 48;
+};
+message EmployeeDailyStatParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+EmployeeDailyStatWhereUniqueInput employeedailystatWhereUniqueInput = 2;
+};
+message EmployeeStat {
+int32 averageOrderAmount = 1;
+int32 averageOrderDuration = 2;
+int32 averageRating = 3;
+int32 averageServiceTime = 4;
+int32 canceledOrdersCount = 5;
+int32 cardPaymentsAmount = 6;
+int32 cashPaymentsAmount = 7;
+int32 consistencyScore = 8;
+int32 conversionRate = 9;
+string createdAt = 10;
+int32 currentMonthOrders = 11;
+int32 currentMonthRevenue = 12;
+int32 efficiencyChangePercent = 13;
+int32 efficiencyRate = 14;
+int32 efficiencyScore = 15;
+string efficiencyTrend = 16;
+int32 executionRate = 17;
+int32 fillRate = 18;
+string id = 19;
+string lastOrderAt = 20;
+int32 negativeReviews = 21;
+int32 ordersChangePercent = 22;
+int32 ordersGrowthRate = 23;
+int32 ordersPerDay = 24;
+string ordersTrend = 25;
+int32 overtimeCount = 26;
+int32 peakHoursOrders = 27;
+int32 peakPerformanceRate = 28;
+int32 performanceChangePercent = 29;
+int32 performanceScore = 30;
+string performanceTrend = 31;
+int32 positiveReviews = 32;
+int32 prevMonthEfficiencyRate = 33;
+int32 prevMonthPerformanceScore = 34;
+int32 prevMonthTotalOrders = 35;
+int32 prevMonthTotalRevenue = 36;
+int32 previousMonthOrders = 37;
+int32 previousMonthRevenue = 38;
+int32 qualityScore = 39;
+int32 rating = 40;
+int32 ratingChangePercent = 41;
+string ratingTrend = 42;
+int32 revenueChangePercent = 43;
+int32 revenueGrowthRate = 44;
+int32 revenuePerHour = 45;
+string revenueTrend = 46;
+int32 servicesChangePercent = 47;
+int32 servicesGrowthRate = 48;
+int32 servicesPerHour = 49;
+string servicesTrend = 50;
+int32 totalDowntimeHours = 51;
+int32 totalExecutionTime = 52;
+int32 totalIdleTime = 53;
+int32 totalOrders = 54;
+int32 totalRatings = 55;
+int32 totalRevenue = 56;
+int32 totalServices = 57;
+int32 totalWorkTime = 58;
+int32 totalWorkedHours = 59;
+string updatedAt = 60;
+int32 utilizationRate = 61;
+int32 workloadPercentage = 62;
+int32 yearToDateOrders = 63;
+int32 yearToDateRevenue = 64;
+int32 yearToDateServices = 65;
+};
+message EmployeeStatWhereUniqueInput {
+int32 averageOrderAmount = 1;
+int32 averageOrderDuration = 2;
+int32 averageRating = 3;
+int32 averageServiceTime = 4;
+int32 canceledOrdersCount = 5;
+int32 cardPaymentsAmount = 6;
+int32 cashPaymentsAmount = 7;
+int32 consistencyScore = 8;
+int32 conversionRate = 9;
+string createdAt = 10;
+int32 currentMonthOrders = 11;
+int32 currentMonthRevenue = 12;
+int32 efficiencyChangePercent = 13;
+int32 efficiencyRate = 14;
+int32 efficiencyScore = 15;
+string efficiencyTrend = 16;
+int32 executionRate = 17;
+int32 fillRate = 18;
+string id = 19;
+string lastOrderAt = 20;
+int32 negativeReviews = 21;
+int32 ordersChangePercent = 22;
+int32 ordersGrowthRate = 23;
+int32 ordersPerDay = 24;
+string ordersTrend = 25;
+int32 overtimeCount = 26;
+int32 peakHoursOrders = 27;
+int32 peakPerformanceRate = 28;
+int32 performanceChangePercent = 29;
+int32 performanceScore = 30;
+string performanceTrend = 31;
+int32 positiveReviews = 32;
+int32 prevMonthEfficiencyRate = 33;
+int32 prevMonthPerformanceScore = 34;
+int32 prevMonthTotalOrders = 35;
+int32 prevMonthTotalRevenue = 36;
+int32 previousMonthOrders = 37;
+int32 previousMonthRevenue = 38;
+int32 qualityScore = 39;
+int32 rating = 40;
+int32 ratingChangePercent = 41;
+string ratingTrend = 42;
+int32 revenueChangePercent = 43;
+int32 revenueGrowthRate = 44;
+int32 revenuePerHour = 45;
+string revenueTrend = 46;
+int32 servicesChangePercent = 47;
+int32 servicesGrowthRate = 48;
+int32 servicesPerHour = 49;
+string servicesTrend = 50;
+int32 totalDowntimeHours = 51;
+int32 totalExecutionTime = 52;
+int32 totalIdleTime = 53;
+int32 totalOrders = 54;
+int32 totalRatings = 55;
+int32 totalRevenue = 56;
+int32 totalServices = 57;
+int32 totalWorkTime = 58;
+int32 totalWorkedHours = 59;
+string updatedAt = 60;
+int32 utilizationRate = 61;
+int32 workloadPercentage = 62;
+int32 yearToDateOrders = 63;
+int32 yearToDateRevenue = 64;
+int32 yearToDateServices = 65;
+};
+message EmployeeStatParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+EmployeeStatWhereUniqueInput employeestatWhereUniqueInput = 2;
+};
+message EmployeeTask {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message EmployeeTaskWhereUniqueInput {
+int32 actualDuration = 1;
+string actualStartTime = 2;
+string completedAt = 3;
+string createdAt = 4;
+int32 estimatedDuration = 5;
+string id = 6;
+string notes = 7;
+repeated string order_type = 8;
+string scheduledStartTime = 9;
+repeated string task_status = 10;
+string updatedAt = 11;
+};
+message EmployeeTaskParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+EmployeeTaskWhereUniqueInput employeetaskWhereUniqueInput = 2;
+};
+message EmployeeWorkSchedule {
+string breakEnd = 1;
+string breakStart = 2;
+repeated string day_of_week = 3;
+string id = 4;
+string shiftEnd = 5;
+string shiftStart = 6;
+};
+message EmployeeWorkScheduleWhereUniqueInput {
+string breakEnd = 1;
+string breakStart = 2;
+repeated string day_of_week = 3;
+string id = 4;
+string shiftEnd = 5;
+string shiftStart = 6;
+};
+message EmployeeWorkScheduleParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+EmployeeWorkScheduleWhereUniqueInput employeeworkscheduleWhereUniqueInput = 2;
+};
+message LoyaltyTransaction {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 pointsEarned = 4;
+int32 pointsSpent = 5;
+string transactionType = 6;
+};
+message LoyaltyTransactionWhereUniqueInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 pointsEarned = 4;
+int32 pointsSpent = 5;
+string transactionType = 6;
+};
+message LoyaltyTransactionParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+LoyaltyTransactionWhereUniqueInput loyaltytransactionWhereUniqueInput = 2;
+};
+message Notification {
+string body = 1;
+string createdAt = 2;
+string id = 3;
+string imageUrl = 4;
+string title = 5;
+};
+message NotificationWhereUniqueInput {
+string body = 1;
+string createdAt = 2;
+string id = 3;
+string imageUrl = 4;
+string title = 5;
+};
+message NotificationParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+NotificationWhereUniqueInput notificationWhereUniqueInput = 2;
+};
+message Order {
+int32 amount = 1;
+bool canceled = 2;
+string canceledReason = 3;
+bool completed = 4;
+string completedAt = 5;
+string createdAt = 6;
+int32 depositAmount = 7;
+int32 discount = 8;
+int32 discountAmount = 9;
+string id = 10;
+int32 loyaltyPointsEarned = 11;
+int32 loyaltyPointsUsed = 12;
+string orderImageId = 13;
+string orderNumber = 14;
+repeated string order_type = 15;
+string services = 16;
+bool started = 17;
+string startedAt = 18;
+repeated string status = 19;
+int32 totalAmount = 20;
+string updatedAt = 21;
+};
+message OrderWhereUniqueInput {
+int32 amount = 1;
+bool canceled = 2;
+string canceledReason = 3;
+bool completed = 4;
+string completedAt = 5;
+string createdAt = 6;
+int32 depositAmount = 7;
+int32 discount = 8;
+int32 discountAmount = 9;
+string id = 10;
+int32 loyaltyPointsEarned = 11;
+int32 loyaltyPointsUsed = 12;
+string orderImageId = 13;
+string orderNumber = 14;
+repeated string order_type = 15;
+string services = 16;
+bool started = 17;
+string startedAt = 18;
+repeated string status = 19;
+int32 totalAmount = 20;
+string updatedAt = 21;
+};
+message OrderParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+OrderWhereUniqueInput orderWhereUniqueInput = 2;
+};
+message Payroll {
+int32 amount = 1;
+string createdAt = 2;
+string id = 3;
+};
+message PayrollWhereUniqueInput {
+int32 amount = 1;
+string createdAt = 2;
+string id = 3;
+};
+message PayrollParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+PayrollWhereUniqueInput payrollWhereUniqueInput = 2;
+};
+message Queue {
+bool completed = 1;
+string completedAt = 2;
+string createdAt = 3;
+int32 estimatedWaitTime = 4;
+string id = 5;
+int32 queueNumber = 6;
+string updatedAt = 7;
+};
+message QueueWhereUniqueInput {
+bool completed = 1;
+string completedAt = 2;
+string createdAt = 3;
+int32 estimatedWaitTime = 4;
+string id = 5;
+int32 queueNumber = 6;
+string updatedAt = 7;
+};
+message QueueParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+QueueWhereUniqueInput queueWhereUniqueInput = 2;
+};
+message SalonAccount {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message SalonAccountWhereUniqueInput {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message SalonAccountParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+SalonAccountWhereUniqueInput salonaccountWhereUniqueInput = 2;
+};
+message SalonRatingLike {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message SalonRatingLikeWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message SalonRatingLikeParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+SalonRatingLikeWhereUniqueInput salonratinglikeWhereUniqueInput = 2;
+};
+message SalonRating {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+};
+message SalonRatingWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+};
+message SalonRatingParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+SalonRatingWhereUniqueInput salonratingWhereUniqueInput = 2;
+};
+message Salon {
+bool active = 1;
+string address = 2;
+string barbers = 3;
+string categories = 4;
+string closeTime = 5;
+string createdAt = 6;
+string description = 7;
+string email = 8;
+string id = 9;
+string images = 10;
+string img = 11;
+string latLng = 12;
+string location = 13;
+string logo = 14;
+string name = 15;
+bool open = 16;
+string openTime = 17;
+string phone = 18;
+string timezone = 19;
+string updatedAt = 20;
+string website = 21;
+};
+message SalonWhereUniqueInput {
+bool active = 1;
+string address = 2;
+string barbers = 3;
+string categories = 4;
+string closeTime = 5;
+string createdAt = 6;
+string description = 7;
+string email = 8;
+string id = 9;
+string images = 10;
+string img = 11;
+string latLng = 12;
+string location = 13;
+string logo = 14;
+string name = 15;
+bool open = 16;
+string openTime = 17;
+string phone = 18;
+string timezone = 19;
+string updatedAt = 20;
+string website = 21;
+};
+message SalonParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+SalonWhereUniqueInput salonWhereUniqueInput = 2;
+};
+message Schedule {
+string appointmentDate = 1;
+string appointmentTime = 2;
+int32 id = 3;
+};
+message ScheduleWhereUniqueInput {
+string appointmentDate = 1;
+string appointmentTime = 2;
+int32 id = 3;
+};
+message ScheduleParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+ScheduleWhereUniqueInput scheduleWhereUniqueInput = 2;
+};
+message TimeSlot {
+string createdAt = 1;
+string endTime = 2;
+string id = 3;
+bool isAvailable = 4;
+string slotDate = 5;
+string slotTime = 6;
+string startTime = 7;
+string updatedAt = 8;
+};
+message TimeSlotWhereUniqueInput {
+string createdAt = 1;
+string endTime = 2;
+string id = 3;
+bool isAvailable = 4;
+string slotDate = 5;
+string slotTime = 6;
+string startTime = 7;
+string updatedAt = 8;
+};
+message TimeSlotParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+TimeSlotWhereUniqueInput timeslotWhereUniqueInput = 2;
+};
+message UserAccount {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message UserAccountWhereUniqueInput {
+int32 balance = 1;
+string createdAt = 2;
+string id = 3;
+string name = 4;
+int32 numberField = 5;
+string typeField = 6;
+string updatedAt = 7;
+};
+message UserAccountParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+UserAccountWhereUniqueInput useraccountWhereUniqueInput = 2;
+};
+message UserAddress {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 lat = 4;
+int32 lng = 5;
+string name = 6;
+string updatedAt = 7;
+};
+message UserAddressWhereUniqueInput {
+string createdAt = 1;
+string description = 2;
+string id = 3;
+int32 lat = 4;
+int32 lng = 5;
+string name = 6;
+string updatedAt = 7;
+};
+message UserAddressParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+UserAddressWhereUniqueInput useraddressWhereUniqueInput = 2;
+};
+message UserBankCard {
+string createdAt = 1;
+int32 cvv = 2;
+string expDate = 3;
+bool favorite = 4;
+string id = 5;
+bool main = 6;
+string name = 7;
+string numberField = 8;
+string token = 9;
+string updatedAt = 10;
+};
+message UserBankCardWhereUniqueInput {
+string createdAt = 1;
+int32 cvv = 2;
+string expDate = 3;
+bool favorite = 4;
+string id = 5;
+bool main = 6;
+string name = 7;
+string numberField = 8;
+string token = 9;
+string updatedAt = 10;
+};
+message UserBankCardParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+UserBankCardWhereUniqueInput userbankcardWhereUniqueInput = 2;
+};
+message UserFavoriteMaster {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteMasterWhereUniqueInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteMasterParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+UserFavoriteMasterWhereUniqueInput userfavoritemasterWhereUniqueInput = 2;
+};
+message UserFavoriteSalon {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteSalonWhereUniqueInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteSalonParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+UserFavoriteSalonWhereUniqueInput userfavoritesalonWhereUniqueInput = 2;
+};
+message UserRating {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+};
+message UserRatingWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+int32 rating = 3;
+string review = 4;
+};
+message UserRatingParams {
+UserProfileWhereUniqueInput userProfileWhereUniqueInput = 1;
+UserRatingWhereUniqueInput userratingWhereUniqueInput = 2;
+};

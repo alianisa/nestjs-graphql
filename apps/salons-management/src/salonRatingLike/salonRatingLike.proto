@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+                 package salonRatingLike;
+service SalonRatingLikeService {
+ rpc createSalonRatingLike (SalonRatingLikeCreateInput) returns (SalonRatingLike) {}
+rpc salonRatingLikes (findManyParams) returns (stream SalonRatingLike) {}
+rpc salonRatingLike (SalonRatingLikeWhereUniqueInput) returns (SalonRatingLike) {}
+rpc updateSalonRatingLike (SalonRatingLikeUpdateInput) returns (SalonRatingLike) {}
+rpc deleteSalonRatingLike (SalonRatingLikeWhereUniqueInput) returns (SalonRatingLike) {} 
+ }
+message SalonRatingLikeCreateInput {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message SalonRatingLike {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message SalonRatingLikeWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message SalonRatingLikeUpdateInput {
+string createdAt = 1;
+string id = 2;
+string review = 3;
+};
+message findManyParams {
+
+};

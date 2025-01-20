@@ -1,0 +1,1063 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ApiKey {
+  apiKey String @map("api_key")
+  id     String @id @default(cuid()) @map("service")
+
+  @@map("api_keys")
+  @@schema("public")
+}
+
+model Appointment {
+  appointmentDate                         DateTime       @map("appointment_date") @db.Date
+  employeeId                              String         @map("employee_id") @db.Uuid
+  employeeTasks                           EmployeeTask[]
+  id                                      String         @id @default(dbgenerated("gen_random_uuid()")) @map("appointment_id") @db.Uuid
+  ordersAppointmentsOrderIdToorders       Order?         @relation(name: "appointmentsAppointmentsOrderIdToorders", fields: [order_id], references: [id])
+  order_id                                String?
+  ordersOrdersAppointmentIdToappointments Order[]        @relation(name: "appointmentsOrdersAppointmentIdToappointments")
+  timeSlots                               TimeSlot       @relation(fields: [time_slot_id], references: [id])
+  time_slot_id                            String
+  userProfiles                            UserProfile    @relation(fields: [user_id], references: [id])
+  user_id                                 String
+
+  @@index([time_slot_id], map: "idx_appointments_time_slot")
+  @@map("appointments")
+  @@schema("public")
+}
+
+model Attendance {
+  action       EnumAttendanceAction?
+  actionTime   DateTime?             @map("action_time") @db.Timestamp(6)
+  clockin      DateTime?             @db.Timestamptz(6)
+  clockout     DateTime?             @db.Timestamptz(6)
+  completed    Boolean?              @default(false)
+  createdAt    DateTime?             @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  date         DateTime              @db.Date
+  id           String                @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  salons       Salon                 @relation(fields: [salon_id], references: [id])
+  salon_id     String
+  updatedAt    DateTime?             @map("updated_at") @db.Timestamp(6)
+  userProfiles UserProfile           @relation(fields: [employee_id], references: [id])
+  employee_id  String
+
+  @@index([employee_id, date], map: "idx_attendances_employee_date")
+  @@map("attendances")
+  @@schema("public")
+}
+
+model ChatMessage {
+  chatMessages      ChatMessage?  @relation(name: "otherChatMessages", fields: [chat], references: [id])
+  chat              String?
+  id                String        @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  otherChatMessages ChatMessage[] @relation(name: "otherChatMessages")
+  text              String?
+  timestamp         DateTime?     @db.Timestamptz(6)
+  userProfiles      UserProfile?  @relation(fields: [user], references: [id])
+  user              String?
+
+  @@map("chat_messages")
+  @@schema("public")
+}
+
+model Chat {
+  id                                   String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  lastMessage                          String?      @map("last_message")
+  lastMessageTime                      DateTime?    @map("last_message_time") @db.Timestamptz(6)
+  userProfilesChatsUserATouserProfiles UserProfile? @relation(name: "chatsChatsUserATouserProfiles", fields: [user_a], references: [id])
+  user_a                               String?
+  userProfilesChatsUserBTouserProfiles UserProfile? @relation(name: "chatsChatsUserBTouserProfiles", fields: [user_b], references: [id])
+  user_b                               String?
+  userProfilesChatsUsersTouserProfiles UserProfile? @relation(name: "chatsChatsUsersTouserProfiles", fields: [users], references: [id])
+  users                                String?
+
+  @@map("chats")
+  @@schema("public")
+}
+
+model Conversation {
+  chatId    String   @map("chat_id") @db.Uuid
+  content   String   @db.VarChar
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  typeField String   @map("type")
+
+  @@map("conversation")
+  @@schema("public")
+}
+
+model Deposit {
+  amount     Decimal   @db.Decimal
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  id         String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  orders     Order?    @relation(fields: [order_id], references: [id])
+  order_id   String?
+  payments   Payment?  @relation(fields: [payment_id], references: [id])
+  payment_id String?
+
+  @@map("deposits")
+  @@schema("public")
+}
+
+model Discount {
+  createdAt         DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
+  description       String?
+  discountType      String      @map("discount_type")
+  endDate           DateTime?   @map("end_date") @db.Timestamptz(6)
+  id                String      @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  isActive          Boolean?    @default(true) @map("is_active")
+  maxDiscountAmount Decimal?    @map("max_discount_amount") @db.Decimal
+  minOrderAmount    Decimal?    @map("min_order_amount") @db.Decimal
+  name              String
+  orders            Order[]
+  promocodes        Promocode[]
+  serviceCategories String      @map("service_categories")
+  startDate         DateTime?   @map("start_date") @db.Timestamptz(6)
+  updatedAt         DateTime?   @map("updated_at") @db.Timestamptz(6)
+  usageLimit        Decimal?    @map("usage_limit") @db.Decimal
+  userLimit         Decimal?    @map("user_limit") @db.Decimal
+  value             Decimal     @db.Decimal
+
+  @@map("discounts")
+  @@schema("public")
+}
+
+model EmployeeDailyStat {
+  averageOrderAmount          Decimal?    @default(0) @map("average_order_amount") @db.Decimal
+  averageServiceTime          Int?        @default(0) @map("average_service_time")
+  avgServiceTimeChangePercent Decimal?    @default(0) @map("avg_service_time_change_percent") @db.Decimal
+  avgServiceTimeTrend         String?     @default("stable") @map("avg_service_time_trend")
+  bestServiceTime             DateTime?   @map("best_service_time") @db.Time(6)
+  canceledOrders              Int?        @default(0) @map("canceled_orders")
+  cardRevenue                 Decimal?    @default(0) @map("card_revenue") @db.Decimal
+  cashRevenue                 Decimal?    @default(0) @map("cash_revenue") @db.Decimal
+  clientsChangePercent        Decimal?    @default(0) @map("clients_change_percent") @db.Decimal
+  clientsTrend                String?     @default("stable") @map("clients_trend")
+  completedOrders             Int?        @default(0) @map("completed_orders")
+  createdAt                   DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
+  dailyRating                 Decimal?    @default(0) @map("daily_rating") @db.Decimal
+  date                        DateTime    @db.Date
+  efficiencyChangePercent     Decimal?    @default(0) @map("efficiency_change_percent") @db.Decimal
+  efficiencyRate              Decimal?    @default(0) @map("efficiency_rate") @db.Decimal
+  efficiencyTrend             String?     @default("stable") @map("efficiency_trend")
+  firstOrderTime              DateTime?   @map("first_order_time") @db.Time(6)
+  id                          String      @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  lastOrderTime               DateTime?   @map("last_order_time") @db.Time(6)
+  monthToDateOrders           Int?        @default(0) @map("month_to_date_orders")
+  monthToDateRevenue          Decimal?    @default(0) @map("month_to_date_revenue") @db.Decimal
+  newClients                  Int?        @default(0) @map("new_clients")
+  offPeakOrders               Int?        @default(0) @map("off_peak_orders")
+  ordersChangePercent         Decimal?    @default(0) @map("orders_change_percent") @db.Decimal
+  ordersCount                 Int?        @default(0) @map("orders_count")
+  ordersTrend                 String?     @default("stable") @map("orders_trend")
+  overtimeHours               Decimal?    @default(0) @map("overtime_hours") @db.Decimal
+  peakHoursOrders             Int?        @default(0) @map("peak_hours_orders")
+  performanceScore            Decimal?    @default(0) @map("performance_score") @db.Decimal
+  prevMonthOrders             Int?        @default(0) @map("prev_month_orders")
+  prevMonthRevenue            Decimal?    @default(0) @map("prev_month_revenue") @db.Decimal
+  ratingChangePercent         Decimal?    @default(0) @map("rating_change_percent") @db.Decimal
+  ratingTrend                 String?     @default("stable") @map("rating_trend")
+  ratingsCount                Int?        @default(0) @map("ratings_count")
+  repeatClients               Int?        @default(0) @map("repeat_clients")
+  revenue                     Decimal?    @default(0) @db.Decimal
+  revenueChangePercent        Decimal?    @default(0) @map("revenue_change_percent") @db.Decimal
+  revenueTrend                String?     @default("stable") @map("revenue_trend")
+  salons                      Salon       @relation(fields: [salon_id], references: [id])
+  salon_id                    String
+  scheduledHours              Decimal?    @default(0) @map("scheduled_hours") @db.Decimal
+  servicesCount               Int?        @default(0) @map("services_count")
+  totalBreaksTime             Int?        @default(0) @map("total_breaks_time")
+  totalClients                Int?        @default(0) @map("total_clients")
+  totalIdleTime               Int?        @default(0) @map("total_idle_time")
+  totalWorkedHours            Decimal?    @default(0) @map("total_worked_hours") @db.Decimal
+  updatedAt                   DateTime?   @default(now()) @map("updated_at") @db.Timestamptz(6)
+  userProfiles                UserProfile @relation(fields: [employee_id], references: [id])
+  employee_id                 String
+  workTime                    Int?        @default(0) @map("work_time")
+  worstServiceTime            DateTime?   @map("worst_service_time") @db.Time(6)
+
+  @@unique([employee_id, salon_id, date], map: "unique_employee_salon_date")
+  @@map("employee_daily_stats")
+  @@schema("public")
+}
+
+model EmployeeStat {
+  averageOrderAmount        Decimal?    @default(0) @map("average_order_amount") @db.Decimal
+  averageOrderDuration      Int?        @default(0) @map("average_order_duration")
+  averageRating             Decimal?    @default(0) @map("average_rating") @db.Decimal
+  averageServiceTime        Int?        @default(0) @map("average_service_time")
+  canceledOrdersCount       Decimal?    @default(0) @map("canceled_orders_count") @db.Decimal
+  cardPaymentsAmount        Decimal?    @default(0) @map("card_payments_amount") @db.Decimal
+  cashPaymentsAmount        Decimal?    @default(0) @map("cash_payments_amount") @db.Decimal
+  consistencyScore          Decimal?    @default(0) @map("consistency_score") @db.Decimal
+  conversionRate            Decimal?    @default(0) @map("conversion_rate") @db.Decimal(5, 2)
+  createdAt                 DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
+  currentMonthOrders        Int?        @default(0) @map("current_month_orders")
+  currentMonthRevenue       Decimal?    @default(0) @map("current_month_revenue") @db.Decimal
+  efficiencyChangePercent   Decimal?    @default(0) @map("efficiency_change_percent") @db.Decimal
+  efficiencyRate            Decimal?    @default(0) @map("efficiency_rate") @db.Decimal
+  efficiencyScore           Decimal?    @default(0) @map("efficiency_score") @db.Decimal
+  efficiencyTrend           String?     @default("stable") @map("efficiency_trend")
+  executionRate             Decimal?    @default(0) @map("execution_rate") @db.Decimal
+  fillRate                  Decimal?    @default(0) @map("fill_rate") @db.Decimal
+  id                        String      @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  lastOrderAt               DateTime?   @map("last_order_at") @db.Timestamptz(6)
+  negativeReviews           Int?        @default(0) @map("negative_reviews")
+  ordersChangePercent       Decimal?    @default(0) @map("orders_change_percent") @db.Decimal
+  ordersGrowthRate          Decimal?    @default(0) @map("orders_growth_rate") @db.Decimal
+  ordersPerDay              Decimal?    @default(0) @map("orders_per_day") @db.Decimal
+  ordersTrend               String?     @default("stable") @map("orders_trend")
+  overtimeCount             Int?        @default(0) @map("overtime_count")
+  peakHoursOrders           Int?        @default(0) @map("peak_hours_orders")
+  peakPerformanceRate       Decimal?    @default(0) @map("peak_performance_rate") @db.Decimal
+  performanceChangePercent  Decimal?    @default(0) @map("performance_change_percent") @db.Decimal
+  performanceScore          Decimal?    @default(0) @map("performance_score") @db.Decimal(5, 2)
+  performanceTrend          String?     @default("stable") @map("performance_trend")
+  positiveReviews           Int?        @default(0) @map("positive_reviews")
+  prevMonthEfficiencyRate   Decimal?    @default(0) @map("prev_month_efficiency_rate") @db.Decimal
+  prevMonthPerformanceScore Decimal?    @default(0) @map("prev_month_performance_score") @db.Decimal
+  prevMonthTotalOrders      Int?        @default(0) @map("prev_month_total_orders")
+  prevMonthTotalRevenue     Decimal?    @default(0) @map("prev_month_total_revenue") @db.Decimal
+  previousMonthOrders       Int?        @default(0) @map("previous_month_orders")
+  previousMonthRevenue      Decimal?    @default(0) @map("previous_month_revenue") @db.Decimal
+  qualityScore              Decimal?    @default(0) @map("quality_score") @db.Decimal
+  rating                    Decimal?    @default(0) @db.Decimal
+  ratingChangePercent       Decimal?    @default(0) @map("rating_change_percent") @db.Decimal
+  ratingTrend               String?     @default("stable") @map("rating_trend")
+  revenueChangePercent      Decimal?    @default(0) @map("revenue_change_percent") @db.Decimal
+  revenueGrowthRate         Decimal?    @default(0) @map("revenue_growth_rate") @db.Decimal
+  revenuePerHour            Decimal?    @default(0) @map("revenue_per_hour") @db.Decimal
+  revenueTrend              String?     @default("stable") @map("revenue_trend")
+  salons                    Salon       @relation(fields: [salon_id], references: [id])
+  salon_id                  String
+  servicesChangePercent     Decimal?    @default(0) @map("services_change_percent") @db.Decimal
+  servicesGrowthRate        Decimal?    @default(0) @map("services_growth_rate") @db.Decimal
+  servicesPerHour           Decimal?    @default(0) @map("services_per_hour") @db.Decimal
+  servicesTrend             String?     @default("stable") @map("services_trend")
+  totalDowntimeHours        Decimal?    @default(0) @map("total_downtime_hours") @db.Decimal
+  totalExecutionTime        Decimal?    @default(0) @map("total_execution_time") @db.Decimal
+  totalIdleTime             Decimal?    @default(0) @map("total_idle_time") @db.Decimal
+  totalOrders               Int?        @default(0) @map("total_orders")
+  totalRatings              Int?        @default(0) @map("total_ratings")
+  totalRevenue              Decimal?    @default(0) @map("total_revenue") @db.Decimal
+  totalServices             Int?        @default(0) @map("total_services")
+  totalWorkTime             Int?        @default(0) @map("total_work_time")
+  totalWorkedHours          Decimal?    @default(0) @map("total_worked_hours") @db.Decimal
+  updatedAt                 DateTime?   @default(now()) @map("updated_at") @db.Timestamptz(6)
+  userProfiles              UserProfile @relation(fields: [employee_id], references: [id])
+  employee_id               String
+  utilizationRate           Decimal?    @default(0) @map("utilization_rate") @db.Decimal
+  workloadPercentage        Decimal?    @default(0) @map("workload_percentage") @db.Decimal
+  yearToDateOrders          Int?        @default(0) @map("year_to_date_orders")
+  yearToDateRevenue         Decimal?    @default(0) @map("year_to_date_revenue") @db.Decimal
+  yearToDateServices        Int?        @default(0) @map("year_to_date_services")
+
+  @@unique([employee_id, salon_id], map: "unique_employee_salon")
+  @@map("employee_stats")
+  @@schema("public")
+}
+
+model EmployeeTask {
+  actualDuration     Int?                       @map("actual_duration")
+  actualStartTime    DateTime?                  @map("actual_start_time") @db.Timestamptz(6)
+  appointments       Appointment?               @relation(fields: [appointment_id], references: [id])
+  appointment_id     String?
+  completedAt        DateTime?                  @map("completed_at") @db.Timestamptz(6)
+  createdAt          DateTime?                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  estimatedDuration  Int                        @map("estimated_duration")
+  id                 String                     @id @default(dbgenerated("gen_random_uuid()")) @map("task_id") @db.Uuid
+  notes              String?
+  order_type         EnumEmployeeTaskOrderType
+  orders             Order                      @relation(fields: [order_id], references: [id])
+  order_id           String
+  queues             Queue?                     @relation(fields: [queue_id], references: [id])
+  queue_id           String?
+  salons             Salon                      @relation(fields: [salon_id], references: [id])
+  salon_id           String
+  scheduledStartTime DateTime                   @map("scheduled_start_time") @db.Timestamptz(6)
+  task_status        EnumEmployeeTaskTaskStatus @default(dbgenerated("Не начата"))
+  updatedAt          DateTime?                  @map("updated_at") @db.Timestamptz(6)
+  userProfiles       UserProfile                @relation(fields: [employee_id], references: [id])
+  employee_id        String
+
+  @@index([scheduledStartTime], map: "idx_employee_tasks_date")
+  @@index([employee_id], map: "idx_employee_tasks_employee")
+  @@index([order_id], map: "idx_employee_tasks_order")
+  @@index([salon_id], map: "idx_employee_tasks_salon")
+  @@index([task_status], map: "idx_employee_tasks_status")
+  @@map("employee_tasks")
+  @@schema("public")
+}
+
+model EmployeeWorkSchedule {
+  breakEnd     DateTime                          @map("break_end") @db.Time(6)
+  breakStart   DateTime                          @map("break_start") @db.Time(6)
+  day_of_week  EnumEmployeeWorkScheduleDayOfWeek
+  id           String                            @id(map: "work_schedules_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  salons       Salon                             @relation(fields: [salon_id], references: [id])
+  salon_id     String
+  shiftEnd     DateTime                          @map("shift_end") @db.Time(6)
+  shiftStart   DateTime                          @map("shift_start") @db.Time(6)
+  userProfiles UserProfile                       @relation(fields: [employee_id], references: [id])
+  employee_id  String
+
+  @@unique([employee_id, salon_id, day_of_week], map: "unique_employee_salon_day")
+  @@map("employee_work_schedules")
+  @@schema("public")
+}
+
+model LoyaltyProgram {
+  createdAt              DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  description            String?
+  id                     String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  minPointsForRedemption Int?      @map("min_points_for_redemption")
+  name                   String
+  pointsPerCurrency      Decimal   @map("points_per_currency") @db.Decimal
+  redemptionRate         Decimal?  @map("redemption_rate") @db.Decimal
+  updatedAt              DateTime? @map("updated_at") @db.Timestamptz(6)
+
+  @@map("loyalty_programs")
+  @@schema("public")
+}
+
+model LoyaltyTransaction {
+  createdAt       DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
+  description     String?
+  id              String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  orders          Order?       @relation(fields: [order_id], references: [id])
+  order_id        String?
+  pointsEarned    Int?         @map("points_earned")
+  pointsSpent     Int?         @map("points_spent")
+  transactionType String       @map("transaction_type")
+  userProfiles    UserProfile? @relation(fields: [user_id], references: [id])
+  user_id         String?
+
+  @@index([order_id], map: "idx_loyalty_transactions_order")
+  @@map("loyalty_transactions")
+  @@schema("public")
+}
+
+model Metric {
+  duration  Int
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  metadata  Json?
+  success   Boolean
+  timestamp DateTime @default(now()) @db.Timestamptz(6)
+  typeField String   @map("type") @db.VarChar(50)
+
+  @@index([timestamp], map: "idx_metrics_timestamp")
+  @@map("metrics")
+  @@schema("public")
+}
+
+model MobilePaymentProvider {
+  apiKey    String?   @map("api_key")
+  apiSecret String?   @map("api_secret")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  id        String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  isActive  Boolean?  @default(true) @map("is_active")
+  name      String
+  payments  Payment[]
+  updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
+
+  @@map("mobile_payment_providers")
+  @@schema("public")
+}
+
+model Notification {
+  body         String
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  imageUrl     String?     @map("image_url") @db.VarChar
+  title        String
+  userProfiles UserProfile @relation(fields: [user_id], references: [id])
+  user_id      String
+
+  @@map("notifications")
+  @@schema("public")
+}
+
+model OrderImage {
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  imageUrl  String   @map("image_url") @db.VarChar
+  orders    Order    @relation(fields: [order_id], references: [id])
+  order_id  String
+
+  @@map("order_images")
+  @@schema("public")
+}
+
+model Order {
+  amount                                        Decimal?             @db.Decimal
+  appointmentsAppointmentsOrderIdToorders       Appointment[]        @relation(name: "appointmentsAppointmentsOrderIdToorders")
+  appointmentsOrdersAppointmentIdToappointments Appointment?         @relation(name: "appointmentsOrdersAppointmentIdToappointments", fields: [appointment_id], references: [id])
+  appointment_id                                String?
+  canceled                                      Boolean?             @default(false)
+  canceledReason                                String?              @map("canceled_reason")
+  completed                                     Boolean?             @default(false)
+  completedAt                                   DateTime?            @map("completed_at") @db.Timestamptz(6)
+  createdAt                                     DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  depositAmount                                 Decimal?             @default(0) @map("deposit_amount") @db.Decimal
+  deposits                                      Deposit[]
+  discount                                      Decimal?             @db.Decimal
+  discountAmount                                Decimal?             @default(0) @map("discount_amount") @db.Decimal
+  discounts                                     Discount?            @relation(fields: [discount_id], references: [id])
+  discount_id                                   String?
+  employeeTasks                                 EmployeeTask[]
+  id                                            String               @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  loyaltyPointsEarned                           Int?                 @default(0) @map("loyalty_points_earned")
+  loyaltyPointsUsed                             Int?                 @default(0) @map("loyalty_points_used")
+  loyaltyTransactions                           LoyaltyTransaction[]
+  orderImageId                                  String               @map("order_image_id") @db.Uuid
+  orderImages                                   OrderImage[]
+  orderNumber                                   String?              @default(dbgenerated("generate_unique_order_number()")) @map("order_number")
+  order_type                                    EnumOrderOrderType?
+  payments                                      Payment?             @relation(fields: [payment_id], references: [id])
+  payment_id                                    String?
+  promocodes                                    Promocode?           @relation(fields: [promocode_id], references: [id])
+  promocode_id                                  String?
+  queuesOrdersQueueIdToqueues                   Queue?               @relation(name: "ordersOrdersQueueIdToqueues", fields: [queue_id], references: [id])
+  queue_id                                      String?
+  queuesQueuesOrderIdToorders                   Queue[]              @relation(name: "ordersQueuesOrderIdToorders")
+  salons                                        Salon                @relation(fields: [salon_id], references: [id])
+  salon_id                                      String
+  services                                      String               @db.Uuid
+  started                                       Boolean?             @default(false)
+  startedAt                                     DateTime?            @map("started_at") @db.Timestamptz(6)
+  status                                        EnumOrderStatus?     @default(dbgenerated("Создан"))
+  totalAmount                                   Decimal              @default(0) @map("total_amount") @db.Decimal
+  transactions                                  Transaction[]
+  updatedAt                                     DateTime?            @map("updated_at") @db.Timestamptz(6)
+  userProfilesOrdersEmployeeIdTouserProfiles    UserProfile          @relation(name: "ordersOrdersEmployeeIdTouserProfiles", fields: [employee_id], references: [id])
+  employee_id                                   String
+  userProfilesOrdersUserIdTouserProfiles        UserProfile          @relation(name: "ordersOrdersUserIdTouserProfiles", fields: [user_id], references: [id])
+  user_id                                       String
+  userRatings                                   UserRating[]
+
+  @@index([employee_id, completed, createdAt], map: "idx_orders_employee_completed_created")
+  @@index([id], map: "idx_orders_id")
+  @@map("orders")
+  @@schema("public")
+}
+
+model Payment {
+  amount                     Decimal                   @db.Decimal
+  amountByCard               Decimal?                  @map("amount_by_card") @db.Decimal
+  amountByCash               Decimal?                  @map("amount_by_cash") @db.Decimal
+  completed                  Boolean?
+  completedAt                DateTime?                 @map("completed_at") @db.Timestamptz(6)
+  createdAt                  DateTime?                 @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  deposits                   Deposit[]
+  discountAmount             Decimal?                  @map("discount_amount") @db.Decimal
+  id                         String                    @id(map: "paymentTransactions_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  isPartial                  Boolean?                  @default(false) @map("is_partial")
+  mobilePaymentProviders     MobilePaymentProvider?    @relation(fields: [mobile_payment_provider_id], references: [id])
+  mobile_payment_provider_id String?
+  name                       String?
+  orderId                    String                    @map("order_id") @db.Uuid
+  orders                     Order[]
+  payment_method             EnumPaymentPaymentMethod?
+  status                     EnumPaymentStatus?        @default(Pending)
+  tax                        Decimal?                  @db.Decimal
+  transactions               Transaction[]
+  updatedAt                  DateTime?                 @map("updated_at") @db.Timestamptz(6)
+
+  @@map("payments")
+  @@schema("public")
+}
+
+model Payroll {
+  amount       Decimal     @db.Decimal
+  createdAt    DateTime    @map("created_at") @db.Timestamp(6)
+  id           String      @id @default(cuid()) @db.Uuid
+  userProfiles UserProfile @relation(fields: [employee_id], references: [id])
+  employee_id  String
+
+  @@map("payroll")
+  @@schema("public")
+}
+
+model Promocode {
+  code        String    @unique
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  discounts   Discount? @relation(fields: [discount_id], references: [id])
+  discount_id String?
+  endDate     DateTime? @map("end_date") @db.Timestamptz(6)
+  id          String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  isActive    Boolean?  @default(true) @map("is_active")
+  orders      Order[]
+  startDate   DateTime? @map("start_date") @db.Timestamptz(6)
+  updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
+  usageLimit  Int?      @map("usage_limit")
+  usedCount   Int?      @default(0) @map("used_count")
+  userLimit   Int?      @map("user_limit")
+
+  @@map("promocodes")
+  @@schema("public")
+}
+
+model Queue {
+  completed                                  Boolean?
+  completedAt                                DateTime?      @map("completed_at") @db.Timestamptz(6)
+  createdAt                                  DateTime?      @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  employeeTasks                              EmployeeTask[]
+  estimatedWaitTime                          Int?           @map("estimated_wait_time")
+  id                                         String         @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  ordersOrdersQueueIdToqueues                Order[]        @relation(name: "ordersOrdersQueueIdToqueues")
+  ordersQueuesOrderIdToorders                Order?         @relation(name: "ordersQueuesOrderIdToorders", fields: [order_id], references: [id])
+  order_id                                   String?
+  queueNumber                                Int?           @map("queue_number") @db.SmallInt
+  salons                                     Salon?         @relation(fields: [salon_id], references: [id])
+  salon_id                                   String?
+  updatedAt                                  DateTime?      @map("updated_at") @db.Timestamptz(6)
+  userProfilesQueuesEmployeeIdTouserProfiles UserProfile?   @relation(name: "queuesQueuesEmployeeIdTouserProfiles", fields: [employee_id], references: [id])
+  employee_id                                String?
+  userProfilesQueuesUserIdTouserProfiles     UserProfile?   @relation(name: "queuesQueuesUserIdTouserProfiles", fields: [user_id], references: [id])
+  user_id                                    String?
+
+  @@index([completed, salon_id], map: "idx_queues_completed_salon")
+  @@index([employee_id, completed, createdAt], map: "idx_queues_employee_completed_created")
+  @@index([employee_id, queueNumber], map: "idx_queues_employee_queue_number")
+  @@index([order_id], map: "idx_queues_order_id")
+  @@map("queues")
+  @@schema("public")
+}
+
+model SalonAccount {
+  balance      Decimal?     @db.Decimal
+  createdAt    DateTime?    @map("created_at") @db.Timestamp(6)
+  id           String       @id(map: "accounts_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name         String?
+  numberField  Decimal?     @map("number") @db.Decimal
+  salons       Salon?       @relation(fields: [salon_id], references: [id])
+  salon_id     String?
+  typeField    String?      @map("type")
+  updatedAt    DateTime?    @map("updated_at") @db.Timestamp(6)
+  userProfiles UserProfile? @relation(fields: [user_id], references: [id])
+  user_id      String?
+
+  @@map("salon_accounts")
+  @@schema("public")
+}
+
+model SalonCategory {
+  id   String  @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name String?
+
+  @@map("salon_categories")
+  @@schema("public")
+}
+
+model SalonRatingLike {
+  createdAt                                         DateTime?    @default(now()) @map("created_at") @db.Timestamp(6)
+  id                                                String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  review                                            String?
+  salonRatings                                      SalonRating? @relation(fields: [salon_rating_id], references: [id])
+  salon_rating_id                                   String?
+  salons                                            Salon        @relation(fields: [salon_id], references: [id])
+  salon_id                                          String
+  userProfilesSalonRatingLikesUserIdTouserProfiles  UserProfile? @relation(name: "salonRatingLikesSalonRatingLikesUserIdTouserProfiles", fields: [user_id], references: [id])
+  user_id                                           String?
+  userProfilesSalonRatingLikesVoterIdTouserProfiles UserProfile? @relation(name: "salonRatingLikesSalonRatingLikesVoterIdTouserProfiles", fields: [voter_id], references: [id])
+  voter_id                                          String?
+
+  @@map("salon_rating_likes")
+  @@schema("public")
+}
+
+model SalonRating {
+  createdAt                                     DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
+  id                                            String            @id(map: "salonRatings_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  rating                                        Decimal           @db.Decimal
+  review                                        String?
+  salonRatingLikes                              SalonRatingLike[]
+  salons                                        Salon             @relation(fields: [salon_id], references: [id])
+  salon_id                                      String
+  userProfilesSalonRatingsUserIdTouserProfiles  UserProfile?      @relation(name: "salonRatingsSalonRatingsUserIdTouserProfiles", fields: [user_id], references: [id])
+  user_id                                       String?
+  userProfilesSalonRatingsVoterIdTouserProfiles UserProfile?      @relation(name: "salonRatingsSalonRatingsVoterIdTouserProfiles", fields: [voter_id], references: [id])
+  voter_id                                      String?
+
+  @@map("salon_ratings")
+  @@schema("public")
+}
+
+model SalonServiceCategory {
+  id            String         @id(map: "categories_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name          String?
+  salonServices SalonService[]
+
+  @@map("salon_service_categories")
+  @@schema("public")
+}
+
+model SalonService {
+  description            String?
+  duration               Int?
+  id                     String                @id(map: "services_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  img                    String?
+  name                   String?
+  price                  Decimal?              @db.Decimal
+  salonServiceCategories SalonServiceCategory? @relation(fields: [category_id], references: [id])
+  category_id            String?
+  salons                 Salon?                @relation(fields: [salon_id], references: [id])
+  salon_id               String?
+
+  @@map("salon_services")
+  @@schema("public")
+}
+
+model Salon {
+  active                                       Boolean?
+  address                                      String?
+  attendances                                  Attendance[]
+  barbers                                      String?                @db.Uuid
+  categories                                   Json                   @db.Json
+  closeTime                                    DateTime?              @map("close_time") @db.Timetz(6)
+  createdAt                                    DateTime?              @default(now()) @map("created_at") @db.Timestamp(6)
+  description                                  String?
+  email                                        String?
+  employeeDailyStats                           EmployeeDailyStat[]
+  employeeStats                                EmployeeStat[]
+  employeeTasks                                EmployeeTask[]
+  employeeWorkSchedules                        EmployeeWorkSchedule[]
+  id                                           String                 @id @unique @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  images                                       String
+  img                                          String?
+  latLng                                       Json?                  @map("lat_lng")
+  location                                     Json?                  @db.JsonB
+  logo                                         String?
+  name                                         String
+  open                                         Boolean?
+  openTime                                     DateTime?              @map("open_time") @db.Timetz(6)
+  orders                                       Order[]
+  phone                                        String
+  queues                                       Queue[]
+  salonAccounts                                SalonAccount[]
+  salonRatingLikes                             SalonRatingLike[]
+  salonRatings                                 SalonRating[]
+  salonServices                                SalonService[]
+  timeSlots                                    TimeSlot[]
+  timezone                                     String
+  updatedAt                                    DateTime?              @map("updated_at") @db.Timestamp(6)
+  userAccounts                                 UserAccount[]
+  userFavoriteSalons                           UserFavoriteSalon[]
+  userProfilesSalonsSalonAdminIdTouserProfiles UserProfile?           @relation(name: "salonsSalonsSalonAdminIdTouserProfiles", fields: [salon_admin_id], references: [id])
+  salon_admin_id                               String?
+  userProfilesUserProfilesSalonIdTosalons      UserProfile[]          @relation(name: "salonsUserProfilesSalonIdTosalons")
+  website                                      String?
+
+  @@index([timezone], map: "idx_salons_timezone")
+  @@map("salons")
+  @@schema("public")
+}
+
+model Schedule {
+  appointmentDate                            DateTime    @map("appointment_date") @db.Date
+  appointmentTime                            DateTime    @map("appointment_time") @db.Time(6)
+  id                                         Int         @id @default(autoincrement()) @map("schedule_id")
+  userProfilesScheduleBarberIdTouserProfiles UserProfile @relation(name: "scheduleScheduleBarberIdTouserProfiles", fields: [barber_id], references: [id])
+  barber_id                                  String
+  userProfilesScheduleUserIdTouserProfiles   UserProfile @relation(name: "scheduleScheduleUserIdTouserProfiles", fields: [user_id], references: [id])
+  user_id                                    String
+
+  @@unique([barber_id, appointmentDate, appointmentTime], map: "unique_appointment")
+  @@map("schedule")
+  @@schema("public")
+}
+
+model TimeSlot {
+  appointments Appointment[]
+  createdAt    DateTime?     @default(now()) @map("created_at") @db.Timestamptz(6)
+  endTime      DateTime?     @map("end_time") @db.Time(6)
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @map("slot_id") @db.Uuid
+  isAvailable  Boolean?      @default(true) @map("is_available")
+  salons       Salon?        @relation(fields: [salon_id], references: [id])
+  salon_id     String?
+  slotDate     DateTime?     @map("slot_date") @db.Date
+  slotTime     DateTime      @map("slot_time") @db.Time(6)
+  startTime    DateTime?     @map("start_time") @db.Time(6)
+  updatedAt    DateTime?     @default(now()) @map("updated_at") @db.Timestamptz(6)
+  userProfiles UserProfile?  @relation(fields: [employee_id], references: [id])
+  employee_id  String?
+
+  @@unique([employee_id, salon_id, slotDate, slotTime], map: "time_slots_unique_slot")
+  @@index([employee_id, slotDate], map: "idx_time_slots_employee_date")
+  @@index([salon_id, slotDate], map: "idx_time_slots_salon_date")
+  @@map("time_slots")
+  @@schema("public")
+}
+
+model Transaction {
+  amount          Decimal   @default(0) @db.Decimal
+  createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  errorMessage    String?   @map("error_message")
+  id              String    @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  orders          Order?    @relation(fields: [order_id], references: [id])
+  order_id        String?
+  payments        Payment?  @relation(fields: [payment_id], references: [id])
+  payment_id      String?
+  status          String?   @default("pending")
+  transactionType String    @default("payment") @map("transaction_type")
+
+  @@index([payment_id], map: "idx_transactions_payment")
+  @@map("transactions")
+  @@schema("public")
+}
+
+model UserAccount {
+  balance      Decimal?     @db.Decimal
+  createdAt    DateTime?    @map("created_at") @db.Timestamp(6)
+  id           String       @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  name         String?
+  numberField  Decimal?     @map("number") @db.Decimal
+  salons       Salon?       @relation(fields: [salon_id], references: [id])
+  salon_id     String?
+  typeField    String?      @map("type")
+  updatedAt    DateTime?    @map("updated_at") @db.Timestamp(6)
+  userProfiles UserProfile? @relation(fields: [user_id], references: [id])
+  user_id      String?
+
+  @@map("user_accounts")
+  @@schema("public")
+}
+
+model UserActivity {
+  activityDescription String?  @map("activity_description")
+  activityName        String?  @map("activity_name")
+  activitySubText     String?  @map("activity_sub_text")
+  activityTime        String?  @map("activity_time")
+  activityType        String?  @map("activity_type")
+  id                  String   @id(map: "activity_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  otherUser           String?  @map("other_user")
+  projectRef          String?  @map("project_ref")
+  readState           Boolean? @map("read_state")
+  targetUserRef       String?  @map("target_user_ref")
+  taskRef             String?  @map("task_ref")
+  unreadByUser        String?  @map("unread_by_user")
+
+  @@map("user_activity")
+  @@schema("public")
+}
+
+model UserAddress {
+  createdAt    DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  description  String?
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lat          Float?
+  lng          Float?
+  name         String?
+  updatedAt    DateTime?   @map("updated_at") @db.Timestamptz(6)
+  userProfiles UserProfile @relation(fields: [user_id], references: [id])
+  user_id      String
+
+  @@map("user_addresses")
+  @@schema("public")
+}
+
+model UserBankCard {
+  createdAt    DateTime?    @default(now()) @map("created_at") @db.Timestamp(6)
+  cvv          Decimal?     @db.Decimal
+  expDate      DateTime?    @map("exp_date") @db.Date
+  favorite     Boolean?
+  id           String       @id(map: "cards_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  main         Boolean?
+  name         String?
+  numberField  String?      @map("number")
+  token        String?
+  updatedAt    DateTime?    @map("updated_at") @db.Timestamp(6)
+  userProfiles UserProfile? @relation(fields: [user_id], references: [id])
+  user_id      String?
+
+  @@map("user_bank_cards")
+  @@schema("public")
+}
+
+model UserFavoriteMaster {
+  createdAt                                             DateTime     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  favorite                                              Boolean?     @default(true)
+  id                                                    String       @id(map: "user_favorite_barbers_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  userProfilesUserFavoriteMastersMasterIdTouserProfiles UserProfile  @relation(name: "userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles", fields: [master_id], references: [id])
+  master_id                                             String
+  userProfilesUserFavoriteMastersUserIdTouserProfiles   UserProfile? @relation(name: "userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles", fields: [user_id], references: [id])
+  user_id                                               String?
+
+  @@map("user_favorite_masters")
+  @@schema("public")
+}
+
+model UserFavoriteSalon {
+  createdAt    DateTime     @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  favorite     Boolean?     @default(true)
+  id           String       @id(map: "favoriteSalons_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  salons       Salon        @relation(fields: [salon_id], references: [id])
+  salon_id     String
+  userProfiles UserProfile? @relation(fields: [user_id], references: [id])
+  user_id      String?
+
+  @@map("user_favorite_salons")
+  @@schema("public")
+}
+
+model UserGender {
+  gender       String
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userProfiles UserProfile[]
+
+  @@map("user_genders")
+  @@schema("public")
+}
+
+model UserNotificationSetting {
+  appointmentReminders     Boolean     @default(true) @map("appointment_reminders")
+  createdAt                DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  emailEnabled             Boolean     @default(true) @map("email_enabled")
+  id                       String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  promotionalNotifications Boolean     @default(false) @map("promotional_notifications")
+  pushEnabled              Boolean     @default(true) @map("push_enabled")
+  smsEnabled               Boolean     @default(true) @map("sms_enabled")
+  statusUpdates            Boolean     @default(true) @map("status_updates")
+  updatedAt                DateTime?   @map("updated_at") @db.Timestamptz(6)
+  userProfiles             UserProfile @relation(fields: [user_id], references: [id])
+  user_id                  String      @unique
+
+  @@index([user_id], map: "idx_user_notification_settings_user_id")
+  @@map("user_notification_settings")
+  @@schema("public")
+}
+
+model UserProfile {
+  appointments                                                 Appointment[]
+  attendances                                                  Attendance[]
+  avatarUrl                                                    String?                  @map("avatar_url")
+  bio                                                          String?
+  chatMessages                                                 ChatMessage[]
+  chatsChatsUserATouserProfiles                                Chat[]                   @relation(name: "chatsChatsUserATouserProfiles")
+  chatsChatsUserBTouserProfiles                                Chat[]                   @relation(name: "chatsChatsUserBTouserProfiles")
+  chatsChatsUsersTouserProfiles                                Chat[]                   @relation(name: "chatsChatsUsersTouserProfiles")
+  createdAt                                                    DateTime?                @default(dbgenerated("(now() AT TIME ZONE 'utc'::text)")) @map("created_at") @db.Timestamptz(6)
+  dateOfBirth                                                  DateTime?                @map("date_of_birth") @db.Timestamptz(6)
+  deletedAt                                                    DateTime?                @map("deleted_at") @db.Timestamptz(6)
+  email                                                        String?
+  employeeDailyStats                                           EmployeeDailyStat[]
+  employeeDismissalAt                                          DateTime?                @map("employee_dismissal_at") @db.Timestamptz(6)
+  employeeEmploymentAt                                         DateTime?                @map("employee_employment_at") @db.Timestamptz(6)
+  employeeStats                                                EmployeeStat[]
+  employeeTasks                                                EmployeeTask[]
+  employeeWorkSchedules                                        EmployeeWorkSchedule[]
+  firstName                                                    String?                  @map("first_name")
+  fullName                                                     String?                  @map("full_name")
+  fullRegistered                                               Boolean?                 @default(true) @map("full_registered")
+  hiredDate                                                    DateTime?                @map("hired_date") @db.Timestamptz(6)
+  id                                                           String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  isAdmin                                                      Boolean?                 @default(false) @map("is_admin")
+  isBarber                                                     Boolean?                 @default(false) @map("is_barber")
+  isEmployee                                                   Boolean?                 @default(false) @map("is_employee")
+  jobTitle                                                     String?                  @map("job_title")
+  lastName                                                     String?                  @map("last_name")
+  location                                                     String?
+  loyaltyPoints                                                Int?                     @default(0) @map("loyalty_points")
+  loyaltyTransactions                                          LoyaltyTransaction[]
+  notifications                                                Notification[]
+  ordersOrdersEmployeeIdTouserProfiles                         Order[]                  @relation(name: "ordersOrdersEmployeeIdTouserProfiles")
+  ordersOrdersUserIdTouserProfiles                             Order[]                  @relation(name: "ordersOrdersUserIdTouserProfiles")
+  payroll                                                      Payroll[]
+  phone                                                        String?
+  queuesQueuesEmployeeIdTouserProfiles                         Queue[]                  @relation(name: "queuesQueuesEmployeeIdTouserProfiles")
+  queuesQueuesUserIdTouserProfiles                             Queue[]                  @relation(name: "queuesQueuesUserIdTouserProfiles")
+  salonAccounts                                                SalonAccount[]
+  salonRatingLikesSalonRatingLikesUserIdTouserProfiles         SalonRatingLike[]        @relation(name: "salonRatingLikesSalonRatingLikesUserIdTouserProfiles")
+  salonRatingLikesSalonRatingLikesVoterIdTouserProfiles        SalonRatingLike[]        @relation(name: "salonRatingLikesSalonRatingLikesVoterIdTouserProfiles")
+  salonRatingsSalonRatingsUserIdTouserProfiles                 SalonRating[]            @relation(name: "salonRatingsSalonRatingsUserIdTouserProfiles")
+  salonRatingsSalonRatingsVoterIdTouserProfiles                SalonRating[]            @relation(name: "salonRatingsSalonRatingsVoterIdTouserProfiles")
+  salonsSalonsSalonAdminIdTouserProfiles                       Salon[]                  @relation(name: "salonsSalonsSalonAdminIdTouserProfiles")
+  salonsUserProfilesSalonIdTosalons                            Salon?                   @relation(name: "salonsUserProfilesSalonIdTosalons", fields: [salon_id], references: [id])
+  salon_id                                                     String?
+  scheduleScheduleBarberIdTouserProfiles                       Schedule[]               @relation(name: "scheduleScheduleBarberIdTouserProfiles")
+  scheduleScheduleUserIdTouserProfiles                         Schedule[]               @relation(name: "scheduleScheduleUserIdTouserProfiles")
+  timeSlots                                                    TimeSlot[]
+  updatedAt                                                    DateTime?                @map("updated_at") @db.Timestamptz(6)
+  user                                                         User?
+  userAccounts                                                 UserAccount[]
+  userAddresses                                                UserAddress[]
+  userBankCards                                                UserBankCard[]
+  userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles UserFavoriteMaster[]     @relation(name: "userFavoriteMastersUserFavoriteMastersMasterIdTouserProfiles")
+  userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles   UserFavoriteMaster[]     @relation(name: "userFavoriteMastersUserFavoriteMastersUserIdTouserProfiles")
+  userFavoriteSalons                                           UserFavoriteSalon[]
+  userGenders                                                  UserGender?              @relation(fields: [gender], references: [id])
+  gender                                                       String?
+  userNotificationSettings                                     UserNotificationSetting?
+  userRatingsUserRatingsOwnerTouserProfiles                    UserRating[]             @relation(name: "userProfilesUserRatingsOwnerTouserProfiles")
+  userRatingsUserRatingsUserIdTouserProfiles                   UserRating[]             @relation(name: "userProfilesUserRatingsUserIdTouserProfiles")
+  website                                                      String?
+
+  @@map("user_profiles")
+  @@schema("public")
+}
+
+model UserRating {
+  createdAt                                   DateTime    @default(now()) @map("created_at") @db.Timestamp(6)
+  id                                          String      @id(map: "userRatings_pkey") @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  orders                                      Order?      @relation(fields: [order_id], references: [id])
+  order_id                                    String?
+  rating                                      Decimal     @db.Decimal
+  review                                      String?
+  userProfilesUserRatingsOwnerTouserProfiles  UserProfile @relation(name: "userProfilesUserRatingsOwnerTouserProfiles", fields: [owner], references: [id])
+  owner                                       String
+  userProfilesUserRatingsUserIdTouserProfiles UserProfile @relation(name: "userProfilesUserRatingsUserIdTouserProfiles", fields: [user_id], references: [id])
+  user_id                                     String
+
+  @@map("user_ratings")
+  @@schema("public")
+}
+
+model VerificationCode {
+  attempts          Int                                  @default(0)
+  code              String                               @db.VarChar(10)
+  createdAt         DateTime?                            @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt         DateTime                             @map("expires_at") @db.Timestamptz(6)
+  id                String                               @id @default(dbgenerated("extensions.uuid_generate_v4()")) @db.Uuid
+  maxAttempts       Int                                  @default(3) @map("max_attempts")
+  messageId         String?                              @map("message_id") @db.VarChar(100)
+  metadata          Json?                                @default("{}")
+  phone             String                               @db.VarChar(20)
+  providerId        String                               @map("provider_id") @db.VarChar(50)
+  status            EnumVerificationCodeStatus
+  updatedAt         DateTime?                            @default(now()) @map("updated_at") @db.Timestamptz(6)
+  verification_type EnumVerificationCodeVerificationType
+  verifiedAt        DateTime?                            @map("verified_at") @db.Timestamptz(6)
+
+  @@index([expiresAt], map: "idx_verification_codes_expires_at")
+  @@index([messageId], map: "idx_verification_codes_message_id")
+  @@index([phone], map: "idx_verification_codes_phone")
+  @@map("verification_codes")
+  @@schema("public")
+}
+
+model Webhook {
+  createdAt       DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  events          EnumWebhookEvents[]
+  failureCount    Int                 @default(0) @map("failure_count")
+  id              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  isActive        Boolean             @default(true) @map("is_active")
+  lastSuccess     DateTime?           @map("last_success") @db.Timestamptz(6)
+  lastTriggeredAt DateTime?           @map("last_triggered_at") @db.Timestamptz(6)
+  metadata        Json?
+  secret          String
+  updatedAt       DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
+  url             String
+
+  @@map("webhooks")
+  @@schema("public")
+}
+
+model User {
+  createdAt      DateTime     @default(now())
+  email          String?      @unique
+  firstName      String?
+  id             String       @id @default(cuid())
+  lastName       String?
+  password       String
+  roles          Json
+  updatedAt      DateTime     @updatedAt
+  userProfiles   UserProfile? @relation(fields: [userProfilesId], references: [id])
+  userProfilesId String?      @unique
+  username       String       @unique
+}
+
+enum EnumAttendanceAction {
+  clock_in
+  clock_out
+  break_start
+  break_end
+  working
+}
+
+enum EnumEmployeeTaskOrderType {
+  appointment
+  queue
+}
+
+enum EnumEmployeeTaskTaskStatus {
+  NOT_STARTED
+  WITH_MASTER
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum EnumEmployeeWorkScheduleDayOfWeek {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+}
+
+enum EnumOrderOrderType {
+  appointment
+  queue
+}
+
+enum EnumOrderStatus {
+  CREATED
+  IN_TRANSIT
+  IN_QUEUE
+  APPOINTMENT
+  WAITING_FOR_MASTER
+  WITH_MASTER
+  CANCELLED_BY_USER
+  CANCELLED_BY_MASTER
+  IN_PROGRESS
+  IN_PAYMENT
+  PAID
+  COMPLETED
+}
+
+enum EnumPaymentPaymentMethod {
+  cash
+  card
+}
+
+enum EnumPaymentStatus {
+  Pending
+  Completed
+  PartiallyPaid
+  Failed
+  Cancelled
+  Refunded
+}
+
+enum EnumVerificationCodeStatus {
+  pending
+  verified
+  expired
+  failed
+}
+
+enum EnumVerificationCodeVerificationType {
+  sms
+  call
+}
+
+enum EnumWebhookEvents {
+  verification_sent
+  verification_verified
+  verification_failed
+  call_started
+  call_completed
+  call_failed
+  sms_sent
+  sms_delivered
+  sms_failed
+}

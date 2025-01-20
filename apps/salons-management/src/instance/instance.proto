@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+                 package instance;
+service InstanceService {
+ rpc createInstance (InstanceCreateInput) returns (Instance) {}
+rpc instances (findManyParams) returns (stream Instance) {}
+rpc instance (InstanceWhereUniqueInput) returns (Instance) {}
+rpc updateInstance (InstanceUpdateInput) returns (Instance) {}
+rpc deleteInstance (InstanceWhereUniqueInput) returns (Instance) {} 
+ }
+message InstanceCreateInput {
+string createdAt = 1;
+string id = 2;
+string rawBaseConfig = 3;
+string updatedAt = 4;
+string uuid = 5;
+};
+message Instance {
+string createdAt = 1;
+string id = 2;
+string rawBaseConfig = 3;
+string updatedAt = 4;
+string uuid = 5;
+};
+message InstanceWhereUniqueInput {
+string createdAt = 1;
+string id = 2;
+string rawBaseConfig = 3;
+string updatedAt = 4;
+string uuid = 5;
+};
+message InstanceUpdateInput {
+string createdAt = 1;
+string id = 2;
+string rawBaseConfig = 3;
+string updatedAt = 4;
+string uuid = 5;
+};
+message findManyParams {
+
+};

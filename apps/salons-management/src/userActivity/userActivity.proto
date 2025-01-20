@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+                 package userActivity;
+service UserActivityService {
+ rpc createUserActivity (UserActivityCreateInput) returns (UserActivity) {}
+rpc userActivities (findManyParams) returns (stream UserActivity) {}
+rpc userActivity (UserActivityWhereUniqueInput) returns (UserActivity) {}
+rpc updateUserActivity (UserActivityUpdateInput) returns (UserActivity) {}
+rpc deleteUserActivity (UserActivityWhereUniqueInput) returns (UserActivity) {} 
+ }
+message UserActivityCreateInput {
+string activityDescription = 1;
+string activityName = 2;
+string activitySubText = 3;
+string activityTime = 4;
+string activityType = 5;
+string id = 6;
+string otherUser = 7;
+string projectRef = 8;
+bool readState = 9;
+string targetUserRef = 10;
+string taskRef = 11;
+string unreadByUser = 12;
+};
+message UserActivity {
+string activityDescription = 1;
+string activityName = 2;
+string activitySubText = 3;
+string activityTime = 4;
+string activityType = 5;
+string id = 6;
+string otherUser = 7;
+string projectRef = 8;
+bool readState = 9;
+string targetUserRef = 10;
+string taskRef = 11;
+string unreadByUser = 12;
+};
+message UserActivityWhereUniqueInput {
+string activityDescription = 1;
+string activityName = 2;
+string activitySubText = 3;
+string activityTime = 4;
+string activityType = 5;
+string id = 6;
+string otherUser = 7;
+string projectRef = 8;
+bool readState = 9;
+string targetUserRef = 10;
+string taskRef = 11;
+string unreadByUser = 12;
+};
+message UserActivityUpdateInput {
+string activityDescription = 1;
+string activityName = 2;
+string activitySubText = 3;
+string activityTime = 4;
+string activityType = 5;
+string id = 6;
+string otherUser = 7;
+string projectRef = 8;
+bool readState = 9;
+string targetUserRef = 10;
+string taskRef = 11;
+string unreadByUser = 12;
+};
+message findManyParams {
+
+};

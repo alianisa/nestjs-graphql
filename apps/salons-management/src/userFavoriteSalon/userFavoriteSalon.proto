@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+                 package userFavoriteSalon;
+service UserFavoriteSalonService {
+ rpc createUserFavoriteSalon (UserFavoriteSalonCreateInput) returns (UserFavoriteSalon) {}
+rpc userFavoriteSalons (findManyParams) returns (stream UserFavoriteSalon) {}
+rpc userFavoriteSalon (UserFavoriteSalonWhereUniqueInput) returns (UserFavoriteSalon) {}
+rpc updateUserFavoriteSalon (UserFavoriteSalonUpdateInput) returns (UserFavoriteSalon) {}
+rpc deleteUserFavoriteSalon (UserFavoriteSalonWhereUniqueInput) returns (UserFavoriteSalon) {} 
+ }
+message UserFavoriteSalonCreateInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteSalon {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteSalonWhereUniqueInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message UserFavoriteSalonUpdateInput {
+string createdAt = 1;
+bool favorite = 2;
+string id = 3;
+};
+message findManyParams {
+
+};

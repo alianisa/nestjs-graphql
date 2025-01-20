@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+                 package employeeWorkSchedule;
+service EmployeeWorkScheduleService {
+ rpc createEmployeeWorkSchedule (EmployeeWorkScheduleCreateInput) returns (EmployeeWorkSchedule) {}
+rpc employeeWorkSchedules (findManyParams) returns (stream EmployeeWorkSchedule) {}
+rpc employeeWorkSchedule (EmployeeWorkScheduleWhereUniqueInput) returns (EmployeeWorkSchedule) {}
+rpc updateEmployeeWorkSchedule (EmployeeWorkScheduleUpdateInput) returns (EmployeeWorkSchedule) {}
+rpc deleteEmployeeWorkSchedule (EmployeeWorkScheduleWhereUniqueInput) returns (EmployeeWorkSchedule) {} 
+ }
+message EmployeeWorkScheduleCreateInput {
+string breakEnd = 1;
+string breakStart = 2;
+repeated string day_of_week = 3;
+string id = 4;
+string shiftEnd = 5;
+string shiftStart = 6;
+};
+message EmployeeWorkSchedule {
+string breakEnd = 1;
+string breakStart = 2;
+repeated string day_of_week = 3;
+string id = 4;
+string shiftEnd = 5;
+string shiftStart = 6;
+};
+message EmployeeWorkScheduleWhereUniqueInput {
+string breakEnd = 1;
+string breakStart = 2;
+repeated string day_of_week = 3;
+string id = 4;
+string shiftEnd = 5;
+string shiftStart = 6;
+};
+message EmployeeWorkScheduleUpdateInput {
+string breakEnd = 1;
+string breakStart = 2;
+repeated string day_of_week = 3;
+string id = 4;
+string shiftEnd = 5;
+string shiftStart = 6;
+};
+message findManyParams {
+
+};

@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+                 package flowState;
+service FlowStateService {
+ rpc createFlowState (FlowStateCreateInput) returns (FlowState) {}
+rpc flowStates (findManyParams) returns (stream FlowState) {}
+rpc flowState (FlowStateWhereUniqueInput) returns (FlowState) {}
+rpc updateFlowState (FlowStateUpdateInput) returns (FlowState) {}
+rpc deleteFlowState (FlowStateWhereUniqueInput) returns (FlowState) {}
+rpc findManyFlowState (FlowStateWhereUniqueInput) returns (stream SamlRelayState) {}
+rpc updateFlowState (SamlRelayStateParams) returns (stream SamlRelayState) {}
+rpc connectFlowState (SamlRelayStateParams) returns (SamlRelayState) {}
+rpc disconnectFlowState (SamlRelayStateParams) returns (SamlRelayState) {} 
+ }
+message FlowStateCreateInput {
+string authCode = 1;
+string authCodeIssuedAt = 2;
+string authenticationMethod = 3;
+string codeChallenge = 4;
+repeated string code_challenge_method = 5;
+string createdAt = 6;
+string id = 7;
+string providerAccessToken = 8;
+string providerRefreshToken = 9;
+string providerType = 10;
+repeated SamlRelayState samlRelayStates = 11;
+string updatedAt = 12;
+string userId = 13;
+};
+message FlowState {
+string authCode = 1;
+string authCodeIssuedAt = 2;
+string authenticationMethod = 3;
+string codeChallenge = 4;
+repeated string code_challenge_method = 5;
+string createdAt = 6;
+string id = 7;
+string providerAccessToken = 8;
+string providerRefreshToken = 9;
+string providerType = 10;
+repeated SamlRelayState samlRelayStates = 11;
+string updatedAt = 12;
+string userId = 13;
+};
+message FlowStateWhereUniqueInput {
+string authCode = 1;
+string authCodeIssuedAt = 2;
+string authenticationMethod = 3;
+string codeChallenge = 4;
+repeated string code_challenge_method = 5;
+string createdAt = 6;
+string id = 7;
+string providerAccessToken = 8;
+string providerRefreshToken = 9;
+string providerType = 10;
+repeated SamlRelayState samlRelayStates = 11;
+string updatedAt = 12;
+string userId = 13;
+};
+message FlowStateUpdateInput {
+string authCode = 1;
+string authCodeIssuedAt = 2;
+string authenticationMethod = 3;
+string codeChallenge = 4;
+repeated string code_challenge_method = 5;
+string createdAt = 6;
+string id = 7;
+string providerAccessToken = 8;
+string providerRefreshToken = 9;
+string providerType = 10;
+repeated SamlRelayState samlRelayStates = 11;
+string updatedAt = 12;
+string userId = 13;
+};
+message findManyParams {
+
+};
+message SamlRelayState {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message SamlRelayStateWhereUniqueInput {
+string createdAt = 1;
+string forEmail = 2;
+string id = 3;
+string redirectTo = 4;
+string requestId = 5;
+string updatedAt = 6;
+};
+message SamlRelayStateParams {
+FlowStateWhereUniqueInput flowStateWhereUniqueInput = 1;
+SamlRelayStateWhereUniqueInput samlrelaystateWhereUniqueInput = 2;
+};
